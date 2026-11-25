@@ -98,6 +98,10 @@ def main():
     env = gym.make(TASK_ID, cfg=app.cfg).unwrapped
     writer = None
     try:
+        # Always evaluate recorded videos on full 180 deg SO(3) goals, never curriculum-bounded goals.
+        eval_command = env.command_manager.get_term('object_pose')
+        if hasattr(eval_command, 'set_curriculum_max_angle'):
+            eval_command.set_curriculum_max_angle(float(np.pi))
         clean, _ = env.reset()
         adapter = Adapter(env, noise, cfg.history, policy_cfg=cfg)
         assert adapter.identified_hand_audit == payload["metadata"]["identified_hand"]
