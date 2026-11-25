@@ -1,0 +1,14 @@
+{
+  "actor": true,
+  "critic": true,
+  "target_critic": true,
+  "temperature": true,
+  "encoder": true,
+  "collection_state": true,
+  "algorithm_diff": {
+    "actor_noise_zeta_max": [
+      16,
+      1
+    ]
+  }
+}

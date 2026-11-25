@@ -1,0 +1,209 @@
+{
+  "time_unix": 1792736431.2376754,
+  "protocol": "64environments,600steps,seed53,30Hz; no training updates",
+  "evaluations": {
+    "student_full_noise": {
+      "mode": "student_eval",
+      "steps": 600,
+      "num_envs": 64,
+      "noise_enabled": true,
+      "completed_episodes": 84,
+      "joint_noise_enabled": true,
+      "teacher_observation_protocol": "shared_noisy_joints_canonical_world_quaternions_v2",
+      "teacher_used": false,
+      "teacher_proprio_noise_enabled": false,
+      "teacher_visual_noise": false,
+      "teacher_privileged_noise": false,
+      "observed_success_increments": 767,
+      "mean_completed_episode_successes": 6.642857142857143,
+      "mean_step_reward": 0.19347397156593313,
+      "mean_orientation_error_rad": 1.3022646763920784,
+      "termination_counts": {
+        "time_out": 26,
+        "max_consecutive_success": 0,
+        "object_out_of_reach": 58
+      },
+      "checkpoint": "/home/zhangke/viserDex_revo3/logs/distillation/revo3_v3/student_compact4096_30hz_minibatch256_canonical_v2_20261022/student_1000.pt"
+    },
+    "student_clean_pose": {
+      "mode": "student_eval",
+      "steps": 600,
+      "num_envs": 64,
+      "noise_enabled": false,
+      "completed_episodes": 80,
+      "joint_noise_enabled": true,
+      "teacher_observation_protocol": "shared_noisy_joints_canonical_world_quaternions_v2",
+      "teacher_used": false,
+      "teacher_proprio_noise_enabled": false,
+      "teacher_visual_noise": false,
+      "teacher_privileged_noise": false,
+      "observed_success_increments": 922,
+      "mean_completed_episode_successes": 9.3,
+      "mean_step_reward": 0.22691643472916137,
+      "mean_orientation_error_rad": 1.3135352114836374,
+      "termination_counts": {
+        "time_out": 32,
+        "max_consecutive_success": 0,
+        "object_out_of_reach": 48
+      },
+      "checkpoint": "/home/zhangke/viserDex_revo3/logs/distillation/revo3_v3/student_compact4096_30hz_minibatch256_canonical_v2_20261022/student_1000.pt"
+    },
+    "student_clean_all": {
+      "mode": "student_eval",
+      "steps": 600,
+      "num_envs": 64,
+      "noise_enabled": false,
+      "completed_episodes": 72,
+      "joint_noise_enabled": false,
+      "teacher_observation_protocol": "shared_noisy_joints_canonical_world_quaternions_v2",
+      "teacher_used": false,
+      "teacher_proprio_noise_enabled": false,
+      "teacher_visual_noise": false,
+      "teacher_privileged_noise": false,
+      "observed_success_increments": 1012,
+      "mean_completed_episode_successes": 12.13888888888889,
+      "mean_step_reward": 0.24259615195022585,
+      "mean_orientation_error_rad": 1.3148357337713241,
+      "termination_counts": {
+        "time_out": 44,
+        "max_consecutive_success": 0,
+        "object_out_of_reach": 28
+      },
+      "checkpoint": "/home/zhangke/viserDex_revo3/logs/distillation/revo3_v3/student_compact4096_30hz_minibatch256_canonical_v2_20261022/student_1000.pt"
+    },
+    "teacher_joint_noise": {
+      "mode": "teacher_eval",
+      "steps": 600,
+      "num_envs": 64,
+      "noise_enabled": true,
+      "completed_episodes": 64,
+      "joint_noise_enabled": true,
+      "teacher_observation_protocol": "shared_noisy_joints_canonical_world_quaternions_v2",
+      "teacher_used": true,
+      "teacher_proprio_noise_enabled": true,
+      "teacher_visual_noise": false,
+      "teacher_privileged_noise": false,
+      "observed_success_increments": 1123,
+      "mean_completed_episode_successes": 17.28125,
+      "mean_step_reward": 0.27137410496521625,
+      "mean_orientation_error_rad": 1.2626556839545569,
+      "termination_counts": {
+        "time_out": 57,
+        "max_consecutive_success": 0,
+        "object_out_of_reach": 7
+      },
+      "checkpoint": "/home/zhangke/viserDex_revo3/outputs/student_dagger_start_20261022/frozen_teacher/model_4800.pt"
+    },
+    "teacher_clean_all": {
+      "mode": "teacher_eval",
+      "steps": 600,
+      "num_envs": 64,
+      "noise_enabled": false,
+      "completed_episodes": 64,
+      "joint_noise_enabled": false,
+      "teacher_observation_protocol": "shared_noisy_joints_canonical_world_quaternions_v2",
+      "teacher_used": true,
+      "teacher_proprio_noise_enabled": false,
+      "teacher_visual_noise": false,
+      "teacher_privileged_noise": false,
+      "observed_success_increments": 1217,
+      "mean_completed_episode_successes": 18.234375,
+      "mean_step_reward": 0.2895183829253074,
+      "mean_orientation_error_rad": 1.2465063216288885,
+      "termination_counts": {
+        "time_out": 57,
+        "max_consecutive_success": 0,
+        "object_out_of_reach": 7
+      },
+      "checkpoint": "/home/zhangke/viserDex_revo3/outputs/student_dagger_start_20261022/frozen_teacher/model_4800.pt"
+    }
+  },
+  "shadow_probe": {
+    "samples": 38400,
+    "calls": 600,
+    "checkpoint": "/home/zhangke/viserDex_revo3/logs/distillation/revo3_v3/student_compact4096_30hz_minibatch256_canonical_v2_20261022/student_1000.pt",
+    "no_training_or_action_changes": true,
+    "teacher_initialization_rng_restored": true,
+    "action_rmse_raw_policy_units": 0.8486541155330243,
+    "action_r2_vs_per_joint_mean": 0.8682934109064742,
+    "input_position_vector_rmse_mm": 79.16372832860579,
+    "decoded_position_vector_rmse_mm": 11.372278033092698,
+    "input_orientation_mean_deg": 24.59753247057103,
+    "decoded_orientation_mean_deg": 11.680326991842653,
+    "decoder_groups": {
+      "position": {
+        "normalized_mse": 0.13160671148043646,
+        "r2_vs_per_dimension_constant": 0.8354531046889908
+      },
+      "orientation": {
+        "normalized_mse": 0.12506636350265196,
+        "r2_vs_per_dimension_constant": 0.875102212230165
+      },
+      "goal_difference": {
+        "normalized_mse": 0.12348327612836756,
+        "r2_vs_per_dimension_constant": 0.8758408999299466
+      },
+      "joint_velocity": {
+        "normalized_mse": 0.07846718651860057,
+        "r2_vs_per_dimension_constant": 0.9210947976448596
+      },
+      "object_linear_velocity": {
+        "normalized_mse": 0.3738545672418686,
+        "r2_vs_per_dimension_constant": 0.5961719997954802
+      },
+      "object_angular_velocity": {
+        "normalized_mse": 0.4429358505736527,
+        "r2_vs_per_dimension_constant": 0.5456182976080025
+      }
+    },
+    "large_observation_error_fraction": 0.31963541666666667,
+    "large_error_action_rmse": 1.0435719307921392,
+    "other_action_rmse": 0.7395526172351118,
+    "large_error_definition": "input position vector error>50mm OR input orientation error>30deg"
+  },
+  "instrumented_rollout_result": {
+    "mode": "student_eval",
+    "steps": 600,
+    "num_envs": 64,
+    "noise_enabled": true,
+    "completed_episodes": 82,
+    "joint_noise_enabled": true,
+    "teacher_observation_protocol": "shared_noisy_joints_canonical_world_quaternions_v2",
+    "teacher_used": false,
+    "teacher_proprio_noise_enabled": false,
+    "teacher_visual_noise": false,
+    "teacher_privileged_noise": false,
+    "observed_success_increments": 786,
+    "mean_completed_episode_successes": 7.365853658536586,
+    "mean_step_reward": 0.1974545126752734,
+    "mean_orientation_error_rad": 1.2974545005957285,
+    "termination_counts": {
+      "time_out": 36,
+      "max_consecutive_success": 0,
+      "object_out_of_reach": 46
+    },
+    "checkpoint": "/home/zhangke/viserDex_revo3/logs/distillation/revo3_v3/student_compact4096_30hz_minibatch256_canonical_v2_20261022/student_1000.pt"
+  },
+  "source_files_unchanged": {
+    "scripts/rsl_rl/distill.py": "fd7dff428bdb7ddb4e4479ea2a81a24d8f24dc18975982ae3901284d97877098",
+    "source/viserdex/viserdex/distillation/model.py": "e57a8540f27155c965c3954b27137669f8f2b66b05a039f2459c0c5f402b269a",
+    "source/viserdex/viserdex/distillation/noise.py": "94663262de3ef1e390166de61fd056920e8133c6e101021d3e13dfd5d3b5f1a7",
+    "source/viserdex/viserdex/distillation/trainer.py": "2a9b16518565a4e504d7edab75ecea66106a9a4b195da0725bd2070a5f3216e4",
+    "source/viserdex/viserdex/distillation/observations.py": "41c4b48ce0578454cf1b06c09a440a08ad8d959ffed52b98ec8a8a6af5c505f0"
+  },
+  "confirmed_findings": [
+    "Removing simulated pose noise improves student goal count767->922; removing joint noise as well gives1012.",
+    "Even with clean observations student has1012goals/28out-of-reach versus clean teacher1217goals/7out-of-reach; noise is not the only gap.",
+    "Auxiliary decoder improves noisy position vector RMSE79.16mm->11.37mm and mean angle24.60deg->11.68deg, but residual errors remain.",
+    "Object linear/angular velocity decoder R2=.596/.546 is weaker than joint velocity R2=.921.",
+    "Teacher is deterministic by default (stochastic_output=False); no evidence of sampled teacher labels in this path.",
+    "The image pose CNN is not connected to these student evaluations."
+  ],
+  "limits": [
+    "Single-seed evaluations; no formal statistical attribution of performance contributions.",
+    "Shadow rollout returned original student actions, but achieved786/46 rather than uninstrumented767/58. Its reconstruction/action metrics are separate observational evidence, not an identical trajectory comparison.",
+    "Decoder is an auxiliary state-readout head; actor uses fused latent features. Reconstruction error alone does not prove a unique causal bug.",
+    "No engine/migration defect or uniquely faulty training line has been established by these tests."
+  ],
+  "proposed_next_scope": "Investigate noisy state inference and residual action imitation before changing architecture or collecting new RGB data; do not treat merely reaching1000iterations as matching teacher performance."
+}

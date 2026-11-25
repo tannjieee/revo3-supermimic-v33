@@ -1,0 +1,368 @@
+{
+  "usd": "/home/zhangke/viserDex_revo3/outputs/revo3_compact_20261021/round0/converted/revo3_right_compact_v4/revo3_right_compact_v4.usda",
+  "source_urdf": "/home/zhangke/viserDex_revo3/outputs/revo3_compact_20261021/round0/asset/urdf/revo3_right_compact_v4.urdf",
+  "colliders": 116,
+  "collision_approximation": "convexHull",
+  "max_hull_vertices": "selected=-1; others=64",
+  "exact_hull_prefixes": [
+    "palm_visual_",
+    "root_trim_"
+  ],
+  "sdf": false,
+  "joint_names": [
+    "right_index_DIP_joint",
+    "right_index_MCP_joint",
+    "right_index_MPR_joint",
+    "right_index_PIP_joint",
+    "right_little_DIP_joint",
+    "right_little_MCP_joint",
+    "right_little_MPR_joint",
+    "right_little_PIP_joint",
+    "right_middle_DIP_joint",
+    "right_middle_MCP_joint",
+    "right_middle_MPR_joint",
+    "right_middle_PIP_joint",
+    "right_ring_DIP_joint",
+    "right_ring_MCP_joint",
+    "right_ring_MPR_joint",
+    "right_ring_PIP_joint",
+    "right_thumb_CMP_joint",
+    "right_thumb_CMR_joint",
+    "right_thumb_DIP_joint",
+    "right_thumb_MCP_joint",
+    "right_thumb_PIP_joint"
+  ],
+  "bodies": [
+    {
+      "name": "world",
+      "path": "/revo3_single/Geometry/world",
+      "mass": 0.4620000123977661,
+      "com": [
+        -0.0034573599696159363,
+        0.0005433799815364182,
+        0.039834678173065186
+      ],
+      "diagonal_inertia": [
+        0.0004032618016935885,
+        0.0006115298019722104,
+        0.0008143684244714677
+      ]
+    },
+    {
+      "name": "right_middle_MPR_link",
+      "path": "/revo3_single/Geometry/world/right_middle_MPR_link",
+      "mass": 0.013000000268220901,
+      "com": [
+        -0.0003435610269661993,
+        0.0003764623834285885,
+        0.005439175292849541
+      ],
+      "diagonal_inertia": [
+        4.199999921183917e-07,
+        4.199999921183917e-07,
+        4.199999921183917e-07
+      ]
+    },
+    {
+      "name": "right_middle_MCP_link",
+      "path": "/revo3_single/Geometry/world/right_middle_MPR_link/right_middle_MCP_link",
+      "mass": 0.0658000037074089,
+      "com": [
+        -5.2094812417635694e-05,
+        0.00047087305574677885,
+        0.022947032004594803
+      ],
+      "diagonal_inertia": [
+        3.7374152270786e-06,
+        1.1669013474602252e-05,
+        1.1923571946681477e-05
+      ]
+    },
+    {
+      "name": "right_middle_PIP_link",
+      "path": "/revo3_single/Geometry/world/right_middle_MPR_link/right_middle_MCP_link/right_middle_PIP_link",
+      "mass": 0.03319999948143959,
+      "com": [
+        0.0006952754338271916,
+        0.0003072094405069947,
+        0.01827356591820717
+      ],
+      "diagonal_inertia": [
+        1.8286981458004448e-06,
+        2.3299999156733975e-06,
+        2.521301894375938e-06
+      ]
+    },
+    {
+      "name": "right_middle_DIP_link",
+      "path": "/revo3_single/Geometry/world/right_middle_MPR_link/right_middle_MCP_link/right_middle_PIP_link/right_middle_DIP_link",
+      "mass": 0.010999999940395355,
+      "com": [
+        0.0018216887256130576,
+        0.0002488663012627512,
+        0.015042707324028015
+      ],
+      "diagonal_inertia": [
+        5.1573141490735e-07,
+        6.699028745060787e-07,
+        7.05392324107379e-07
+      ]
+    },
+    {
+      "name": "right_thumb_CMP_link",
+      "path": "/revo3_single/Geometry/world/right_thumb_CMP_link",
+      "mass": 0.026000000536441803,
+      "com": [
+        2.1632990865327884e-06,
+        -3.5871926229447126e-05,
+        -3.4973654692294076e-05
+      ],
+      "diagonal_inertia": [
+        2.029999905062141e-06,
+        2.2199999420990935e-06,
+        2.2900001113157487e-06
+      ]
+    },
+    {
+      "name": "right_thumb_CMR_link",
+      "path": "/revo3_single/Geometry/world/right_thumb_CMP_link/right_thumb_CMR_link",
+      "mass": 0.012000000104308128,
+      "com": [
+        -0.0012842162977904081,
+        0.006015710532665253,
+        -4.05561786465114e-06
+      ],
+      "diagonal_inertia": [
+        5.6999999742402e-07,
+        9.176393405141425e-07,
+        9.623606729292078e-07
+      ]
+    },
+    {
+      "name": "right_thumb_MCP_link",
+      "path": "/revo3_single/Geometry/world/right_thumb_CMP_link/right_thumb_CMR_link/right_thumb_MCP_link",
+      "mass": 0.06700000166893005,
+      "com": [
+        -0.0023355758748948574,
+        0.022508839145302773,
+        -1.7592847143532708e-05
+      ],
+      "diagonal_inertia": [
+        6.5168674154847395e-06,
+        1.4303069292509463e-05,
+        1.4600062968384009e-05
+      ]
+    },
+    {
+      "name": "right_thumb_PIP_link",
+      "path": "/revo3_single/Geometry/world/right_thumb_CMP_link/right_thumb_CMR_link/right_thumb_MCP_link/right_thumb_PIP_link",
+      "mass": 0.03500000014901161,
+      "com": [
+        -0.00232345936819911,
+        0.019641803577542305,
+        -0.00013213008060120046
+      ],
+      "diagonal_inertia": [
+        2.6879019969783258e-06,
+        3.3114454254246084e-06,
+        4.070652266818797e-06
+      ]
+    },
+    {
+      "name": "right_thumb_DIP_link",
+      "path": "/revo3_single/Geometry/world/right_thumb_CMP_link/right_thumb_CMR_link/right_thumb_MCP_link/right_thumb_PIP_link/right_thumb_DIP_link",
+      "mass": 0.010999999940395355,
+      "com": [
+        -0.002927485853433609,
+        0.014830240979790688,
+        -0.0002477745001669973
+      ],
+      "diagonal_inertia": [
+        1.0163339538848959e-06,
+        1.6289218365272973e-06,
+        1.6433232303825207e-06
+      ]
+    },
+    {
+      "name": "right_index_MPR_link",
+      "path": "/revo3_single/Geometry/world/right_index_MPR_link",
+      "mass": 0.013000000268220901,
+      "com": [
+        -0.0003804974548984319,
+        0.0006141929188743234,
+        0.005427556578069925
+      ],
+      "diagonal_inertia": [
+        4.199999921183917e-07,
+        4.199999921183917e-07,
+        4.199999921183917e-07
+      ]
+    },
+    {
+      "name": "right_index_MCP_link",
+      "path": "/revo3_single/Geometry/world/right_index_MPR_link/right_index_MCP_link",
+      "mass": 0.0658000037074089,
+      "com": [
+        2.5779299903661013e-05,
+        0.00140674680005759,
+        0.022909045219421387
+      ],
+      "diagonal_inertia": [
+        3.7296472328307573e-06,
+        1.1669953892123885e-05,
+        1.1920398719666991e-05
+      ]
+    },
+    {
+      "name": "right_index_PIP_link",
+      "path": "/revo3_single/Geometry/world/right_index_MPR_link/right_index_MCP_link/right_index_PIP_link",
+      "mass": 0.03319999948143959,
+      "com": [
+        0.0009440624853596091,
+        0.0010133562609553337,
+        0.0182453915476799
+      ],
+      "diagonal_inertia": [
+        1.8368034488958074e-06,
+        2.331480573047884e-06,
+        2.52171594183892e-06
+      ]
+    },
+    {
+      "name": "right_index_DIP_link",
+      "path": "/revo3_single/Geometry/world/right_index_MPR_link/right_index_MCP_link/right_index_PIP_link/right_index_DIP_link",
+      "mass": 0.010999999940395355,
+      "com": [
+        0.002176581881940365,
+        0.0008106078603304923,
+        0.015019480139017105
+      ],
+      "diagonal_inertia": [
+        5.154679456609301e-07,
+        6.688387657050043e-07,
+        7.048637939988112e-07
+      ]
+    },
+    {
+      "name": "right_ring_MPR_link",
+      "path": "/revo3_single/Geometry/world/right_ring_MPR_link",
+      "mass": 0.013000000268220901,
+      "com": [
+        -0.00038031136500649154,
+        0.00013977894559502602,
+        0.005450714845210314
+      ],
+      "diagonal_inertia": [
+        4.199999921183917e-07,
+        4.199999921183917e-07,
+        4.199999921183917e-07
+      ]
+    },
+    {
+      "name": "right_ring_MCP_link",
+      "path": "/revo3_single/Geometry/world/right_ring_MPR_link/right_ring_MCP_link",
+      "mass": 0.0658000037074089,
+      "com": [
+        -5.2124833018751815e-05,
+        -0.00046919609303586185,
+        0.022944942116737366
+      ],
+      "diagonal_inertia": [
+        3.7366589822340757e-06,
+        1.1663229997793678e-05,
+        1.1920111319341231e-05
+      ]
+    },
+    {
+      "name": "right_ring_PIP_link",
+      "path": "/revo3_single/Geometry/world/right_ring_MPR_link/right_ring_MCP_link/right_ring_PIP_link",
+      "mass": 0.03319999948143959,
+      "com": [
+        0.0007762321620248258,
+        -0.00041165819857269526,
+        0.018268918618559837
+      ],
+      "diagonal_inertia": [
+        1.8286981458004448e-06,
+        2.3299999156733975e-06,
+        2.521301894375938e-06
+      ]
+    },
+    {
+      "name": "right_ring_DIP_link",
+      "path": "/revo3_single/Geometry/world/right_ring_MPR_link/right_ring_MCP_link/right_ring_PIP_link/right_ring_DIP_link",
+      "mass": 0.010999999940395355,
+      "com": [
+        0.0019509473349899054,
+        -0.0003022908349521458,
+        0.015039214864373207
+      ],
+      "diagonal_inertia": [
+        5.156960014573997e-07,
+        6.698980996588944e-07,
+        7.052668138385343e-07
+      ]
+    },
+    {
+      "name": "right_little_MPR_link",
+      "path": "/revo3_single/Geometry/world/right_little_MPR_link",
+      "mass": 0.013000000268220901,
+      "com": [
+        -0.00045819414663128555,
+        -0.00010334125545341522,
+        0.0054645054042339325
+      ],
+      "diagonal_inertia": [
+        4.199999921183917e-07,
+        4.199999921183917e-07,
+        4.199999921183917e-07
+      ]
+    },
+    {
+      "name": "right_little_MCP_link",
+      "path": "/revo3_single/Geometry/world/right_little_MPR_link/right_little_MCP_link",
+      "mass": 0.0658000037074089,
+      "com": [
+        2.5850366000668146e-05,
+        -0.0014062817208468914,
+        0.02290906384587288
+      ],
+      "diagonal_inertia": [
+        3.7296472328307573e-06,
+        1.1669953892123885e-05,
+        1.1920398719666991e-05
+      ]
+    },
+    {
+      "name": "right_little_PIP_link",
+      "path": "/revo3_single/Geometry/world/right_little_MPR_link/right_little_MCP_link/right_little_PIP_link",
+      "mass": 0.03319999948143959,
+      "com": [
+        0.001092163729481399,
+        -0.0011120745912194252,
+        0.018238849937915802
+      ],
+      "diagonal_inertia": [
+        1.8368034488958074e-06,
+        2.331480573047884e-06,
+        2.52171594183892e-06
+      ]
+    },
+    {
+      "name": "right_little_DIP_link",
+      "path": "/revo3_single/Geometry/world/right_little_MPR_link/right_little_MCP_link/right_little_PIP_link/right_little_DIP_link",
+      "mass": 0.010999999940395355,
+      "com": [
+        0.0024099338334053755,
+        -0.0009028264321386814,
+        0.015017109923064709
+      ],
+      "diagonal_inertia": [
+        5.153783604328055e-07,
+        6.688144367217319e-07,
+        7.045476309031073e-07
+      ]
+    }
+  ],
+  "missing_dependencies": []
+}

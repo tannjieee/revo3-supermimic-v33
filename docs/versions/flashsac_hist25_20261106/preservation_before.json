@@ -1,0 +1,14 @@
+{
+  "docs/newton_migration.md": "8da89a1a42cfc2a2a40d9bc9e6dd908e4692e43ed8443fe8cfbdf1edaa92343d",
+  "docs/revo3_network_v30_zh.md": "c2fb068fce11a8a79f8b8a5878be6b5ec109c0ebcd39063eff885a0ad856c6ef",
+  "scripts/supermimic/train.py": "6f405763049adc7ba78655869d510a51f65a1dd3e4aab5bf28a3a85679876e9f",
+  "source/viserdex/viserdex/supermimic/core.py": "e737fbbcad00eb1aa957afc186afaca13c42ee9c37e715000dec941b43430167",
+  "source/viserdex/viserdex/supermimic/inference.py": "abcff292ebe5a497b923d1027ffa1234e90d28c94db0a087b839c19dd689cb72",
+  "source/viserdex/viserdex/supermimic/networks.py": "f7c2b6c9d0fbdfe0eb196d7d50aac05c80a7a4d527ff84813fdc7d5e64cbbf40",
+  "source/viserdex/viserdex/supermimic/stable_values.py": "ba047ed0fc211ad787aa08ef5d69f71038be3c6d1406e0f5136b7129d9c01456",
+  "source/viserdex/viserdex/supermimic/trainer.py": "9c634e7bb2b6d6109c70e0e906bde961bee97afaccd5a800836a7653aeeab89b",
+  "docs/flashsac_migration_20261106_zh.md": "70ed92510b3e6f14dcce63b0293b57ea03a3f9f7bab53c6253c11372e16cf6a3",
+  "docs/paper_critic.md": "60f07f01d4fb1dbe1e35bb87687a540381a21315fcbde99735c0b222c69d6406",
+  "source/viserdex/viserdex/supermimic/console_log.py": "535c119401253b5997e91870a70eab6aa51f18a6aaf3287d8193acf581ce139a",
+  "tests/test_paper_critic.py": "31132f3f6a6b40bd5a7f84231f78ea56f04d21751234e19d65612cb4c052c55c"
+}

@@ -1,0 +1,114 @@
+{
+  "object": "rounded_die",
+  "source": "User supplied die_camera_assets_v2.zip",
+  "source_metadata": {
+    "id": "rounded_die",
+    "name": "黄色黑点圆角骰子",
+    "source_filename": "wooden_rounded-edge_die.glb",
+    "source_sha256": "ba4012e12c1a3ebc48fa89c43ecf5383e921f17a1b524bba58b0123bfcac2634",
+    "source_url": "https://sketchfab.com/3d-models/none-03c7f64e5fdd4786862b4828b9dbe9e8",
+    "author": "Glowbox 3D",
+    "license": "CC Attribution",
+    "selected_nodes": [
+      "Sphere__0"
+    ],
+    "notes": [
+      "Appearance-only variant of v5 rounded_die. Original vertices, triangles, collision shape and physical settings retained.",
+      "Two matte nonmetal materials replace the original baked wood texture. Colors are approximations from user photographs, without calibrated lighting.",
+      "Photographed print seams and stringing are not reproduced. This asset is for simulation/visualization, not a new print-ready fabrication design.",
+      "Face numbering audited from the original mesh; previous +X=1 documentation was incorrect. Geometry and numbering are not rotated or reassigned."
+    ],
+    "dimensions_m": [
+      0.06999995758395161,
+      0.06999999999999999,
+      0.06999996211110898
+    ],
+    "mass_kg": 0.06,
+    "scale_after_axis_correction": 0.031846912186106816,
+    "center_before_recentering_m": [
+      -0.27041581363837414,
+      0.14345582448824065,
+      0.0794606051817389
+    ],
+    "inertia_kg_m2": [
+      [
+        4.5331146049743964e-05,
+        5.405583239019677e-10,
+        1.4423418865600103e-09
+      ],
+      [
+        5.405583239019677e-10,
+        4.5339255422624336e-05,
+        -2.0597928502826493e-09
+      ],
+      [
+        1.4423418865600103e-09,
+        -2.0597928502826493e-09,
+        4.5344625188628364e-05
+      ]
+    ],
+    "collision_method": "outer convex hull: 102 supporting planes, <=200 vertices",
+    "collision_vertices": 200,
+    "collision_faces": 396,
+    "visual_faces": 11206,
+    "units": "m",
+    "up_axis": "Z",
+    "materials": {
+      "yellow_body": {
+        "base_color_srgb_hex": "#CAB000",
+        "roughness": 0.72,
+        "metallic": 0
+      },
+      "black_pips": {
+        "base_color_srgb_hex": "#141414",
+        "roughness": 0.78,
+        "metallic": 0
+      }
+    },
+    "policy_validation": "not tested; requires new-object training/adaptation",
+    "variant": "yellow_black_print_v3",
+    "face_values_by_normal": {
+      "-X": 1,
+      "+X": 6,
+      "-Y": 4,
+      "+Y": 3,
+      "-Z": 2,
+      "+Z": 5
+    },
+    "reference_images": [
+      "codex-clipboard-1c3eca2d-1184-4bd5-9d97-76b6d0b1bc59.jpg",
+      "codex-clipboard-3e01f9d2-2a1f-4e47-8c28-788ac3938df0.jpg",
+      "codex-clipboard-97ef0b68-eec1-42b4-9783-6ea4fd109642.jpg",
+      "codex-clipboard-8e6e8916-62c2-4005-be4e-a7df10e89b1e.jpg"
+    ]
+  },
+  "original_glb_sha256": "e533bdf2153fb0d6e14446fa04ad4dbd8e7c800a1f0f6ea94fd270cd1eaaf8c5",
+  "original_usd_sha256": "26f7714a6a80e7296f0ce8ba3845566b5703d9559fbb7dcf3d11c6c49c4e3481",
+  "units": "metres",
+  "up_axis": "Z",
+  "metric_bounds": [
+    [
+      -0.035022106021642685,
+      -0.0349370613694191,
+      -0.03494808450341225
+    ],
+    [
+      0.03497784957289696,
+      0.035062938928604126,
+      0.03505187854170799
+    ]
+  ],
+  "submeshes": 2,
+  "vertices": 16276,
+  "triangles": 11206,
+  "renderer": "pyrender PBR, original base colors, ambient .25 + three fixed world directional lights (2.2, 1.0, .6); no floor",
+  "train_views": 150,
+  "test_views": 30,
+  "resolution": [
+    512,
+    512
+  ],
+  "initial_gaussians": 50000,
+  "seed": 42,
+  "data_origin": "Synthetic renders of supplied textured mesh; no real photographs used."
+}

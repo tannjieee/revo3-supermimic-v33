@@ -1,0 +1,34 @@
+# Encoder command bounds; all angles here are degrees. Mechanical limits stay in the asset.
+schema: revo3_ema_soft_limits_v33
+ema_alpha: 0.51
+zero_bias_deg: [-1.0, 1.0]
+# Fixed CMP geometry/encoder +1 degree compensation is disabled.
+fixed_encoder_bias_deg: 0.0
+history: 3
+contact_loss_weight: 0.1
+# Independent bounded pulses, held for one 40 ms policy step, at object CoM in hand base.
+wrench_probability: 0.02
+wrench_force_max_N: 0.1
+wrench_torque_max_Nm: 0.001
+soft_limits_deg:
+  right_thumb_CMP_joint: [4, 106]
+  right_thumb_CMR_joint: [4, 100]
+  right_thumb_MCP_joint: [4, 71]
+  right_thumb_PIP_joint: [0, 85]
+  right_thumb_DIP_joint: [0, 85]
+  right_index_MPR_joint: [-9, 29]
+  right_index_MCP_joint: [0, 85]
+  right_index_PIP_joint: [0, 85]
+  right_index_DIP_joint: [0, 85]
+  right_middle_MPR_joint: [-19, 24]
+  right_middle_MCP_joint: [0, 85]
+  right_middle_PIP_joint: [0, 85]
+  right_middle_DIP_joint: [0, 85]
+  right_ring_MPR_joint: [-24, 19]
+  right_ring_MCP_joint: [0, 85]
+  right_ring_PIP_joint: [0, 85]
+  right_ring_DIP_joint: [0, 85]
+  right_little_MPR_joint: [-29, 9]
+  right_little_MCP_joint: [0, 85]
+  right_little_PIP_joint: [0, 85]
+  right_little_DIP_joint: [0, 85]

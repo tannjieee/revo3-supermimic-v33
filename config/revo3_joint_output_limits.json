@@ -1,0 +1,11 @@
+{
+  "schema": "revo3_uniform_joint_output_limits_v1",
+  "source": "User instruction, 2026-11-05: all joints 100 rpm and 1.28 N m",
+  "coordinate": "joint_output_after_transmission",
+  "joint_count": 21,
+  "velocity_limit_rpm": 100.0,
+  "effort_limit_Nm": 1.28,
+  "velocity_enforcement": "declared_limit_only; Newton 1.6.1 SolverMuJoCo does not enforce joint_velocity_limit",
+  "effort_enforcement": "DelayedPD actuator torque clipping; constraint reaction forces are not clipped",
+  "hardware_rating_verified": false
+}

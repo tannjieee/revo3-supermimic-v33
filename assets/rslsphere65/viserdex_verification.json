@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "installed_viserdex_source": "/home/zhangke/viserDex_revo3/source/viserdex/viserdex/renderer/gaussian_splat_camera.py",
+  "source_sha256": "c19ecbbafeaa5bf4e1f1e4cf72587f6151df1134899fae19264d8a422f8a4747",
+  "actual_loader_method": "_load_gaussian_splat_model",
+  "loader_parameter_max_difference": {
+    "means": 0.0,
+    "quats": 0.0,
+    "log_scales": 0.0,
+    "opacity_logits": 0.0,
+    "sh": 0.0
+  },
+  "actual_loader_render_finite": true,
+  "max_alpha": 0.9998999834060669,
+  "ply_sha256": "39c1e2c801bfa38eda4d2cba5027709a56acf6e01f47a1cab8cda3a36a93b6da",
+  "npz_keys": [
+    "means",
+    "scales",
+    "quaternions_wxyz",
+    "opacities",
+    "sh_coefficients",
+    "log_scales",
+    "opacity_logits"
+  ],
+  "npz_shapes": {
+    "means": [
+      50000,
+      3
+    ],
+    "scales": [
+      50000,
+      3
+    ],
+    "quaternions_wxyz": [
+      50000,
+      4
+    ],
+    "opacities": [
+      50000
+    ],
+    "sh_coefficients": [
+      50000,
+      16,
+      3
+    ],
+    "log_scales": [
+      50000,
+      3
+    ],
+    "opacity_logits": [
+      50000
+    ]
+  },
+  "scope": "Real installed loader method executed through AST extraction; standalone gsplat rendering. Full Isaac Lab camera/environment integration not tested."
+}

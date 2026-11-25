@@ -1,0 +1,51 @@
+{
+  "validated_at": "2026-11-05T16:26:31.077683+08:00",
+  "run": "/home/brainco/reorientation/training/runs/orientation_costs_epa64_1024_10000_20261105_162115",
+  "job": "/home/brainco/reorientation/training/jobs/orientation_costs_epa64_1024_10000_20261105_162115",
+  "status_snapshot": "training",
+  "iteration": 919,
+  "phase": "joint",
+  "optimizer_steps": {
+    "wm": 9190,
+    "actor": 419,
+    "critic": 8380
+  },
+  "losses": {
+    "wm_loss": 0.4290217161178589,
+    "actor_loss": 24.282407760620117,
+    "critic_loss": 2.330423539876938
+  },
+  "all_checkpoint_tensors_finite": true,
+  "checkpoint": "/home/brainco/reorientation/training/runs/orientation_costs_epa64_1024_10000_20261105_162115/model_900.pt",
+  "checkpoint_iteration": 900,
+  "checkpoint_size_bytes": 127192459,
+  "physics_failure_present": false,
+  "capacity_patch": {
+    "schema": "mjwarp_epa_horizon_capacity_v1",
+    "field": "MJ_MAX_EPAHORIZON",
+    "previous": 24,
+    "current": 64,
+    "original_sha256": "a49625a8994db0d3b52dd34f98adac7f70882d473108c4e4793e4830e81ea71c",
+    "patched_sha256": "12e16a7157dee7dbb561d23e69f0468ec694e0b0e968aec7f138391b747f3d23",
+    "scope": "EPA horizon scratch storage only; contact geometry/forces/thresholds unchanged",
+    "reason": "world34 EPA_HORIZON failure at iteration107, 2026-11-05"
+  },
+  "tensorboard": {
+    "url": "http://127.0.0.1:6009",
+    "exported_iteration": 915,
+    "scalar_count": 223
+  },
+  "throughput_window": {
+    "first_iteration": 820,
+    "last_iteration": 919,
+    "seconds_per_iteration": 0.3878368949793947,
+    "real_transitions_per_second": 6587.378137306967
+  },
+  "task_snapshot": {
+    "task_mean_angle_rad": 2.214430332183838,
+    "task_stable_fraction": 0.0,
+    "successes": 0,
+    "drops": 3
+  },
+  "scope": "Startup and joint update validation only; not convergence or 10000-iteration stability proof."
+}

@@ -1,0 +1,30 @@
+# Python & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# Training runs, logs & checkpoints
+runs/
+outputs/
+logs/
+*.pt
+*.pth
+*.ckpt
+*.log
+*.mp4
+*.avi
+*.mkv
+events.out.tfevents.*
+
+# OS / IDE / temp
+.DS_Store
+.vscode/
+.idea/
+*.tmp
+*.swp

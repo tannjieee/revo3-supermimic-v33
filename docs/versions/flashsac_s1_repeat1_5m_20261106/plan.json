@@ -1,0 +1,21 @@
+{
+  "authorization": "用户明确要求扩大训练，覆盖此前暂停扩量的建议",
+  "run": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106",
+  "seed": 42,
+  "num_envs": 1024,
+  "vector_steps": 4883,
+  "transitions": 5000192,
+  "warmup_steps": 98,
+  "q_updates": 9570,
+  "actor_updates": 4785,
+  "replay_capacity": 1000000,
+  "noise_repeat_max": 1,
+  "wall_seconds": 7200,
+  "initialization": "fresh; full-budget learning-rate schedule; no approximate simulator resume",
+  "evaluation_seeds": [
+    166,
+    167
+  ],
+  "evaluation_envs": 64,
+  "automatic_restart": false
+}

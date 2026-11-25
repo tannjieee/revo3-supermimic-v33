@@ -1,0 +1,270 @@
+{
+  "config": {
+    "observation_protocol": "revo3_manual_convex_single_pose_encoder_rot6d_no_clock_v5",
+    "state_protocol": "single_pose_last_action_delayed_pd_no_clock_v2",
+    "encoder_bias_rad": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.017453292519943295,
+      0.0
+    ],
+    "joint_velocity_scale": 0.1,
+    "include_object_position": true,
+    "goal_mode": "single_dense_hold",
+    "track_object_position": false,
+    "goal_evaluation_s": 10.0,
+    "stability_reward_scale": 0.0,
+    "stability_angle_sigma_rad": 0.2617993877991494,
+    "stability_position_sigma_m": 0.02,
+    "stability_angular_speed_scale": 0.5,
+    "stability_linear_speed_scale": 0.05,
+    "position_reward_scale": 1.0,
+    "position_tolerance_m": 0.01,
+    "position_sigma_m": 0.05,
+    "hold_position_threshold_m": 0.02,
+    "hold_linear_speed_threshold_m_s": 0.05,
+    "orientation_reward_scale": 10.0,
+    "orientation_coarse_sigma_rad": 1.5707963267948966,
+    "orientation_fine_sigma_rad": 0.17453292519943295,
+    "orientation_coarse_fraction": 0.3,
+    "geometry_enabled": false,
+    "compile_geometry": false,
+    "geometry_loss_weight": 0.0,
+    "grouped_physical_loss": true,
+    "control_dt": 0.04,
+    "ema_alpha": 1.0,
+    "action_mode": "direct_limits",
+    "action_home": [
+      0.0,
+      0.55,
+      0.85,
+      0.475,
+      0.0,
+      0.55,
+      0.85,
+      0.475,
+      0.0,
+      0.55,
+      0.85,
+      0.475,
+      0.0,
+      0.55,
+      0.85,
+      0.475,
+      0.325,
+      0.325,
+      0.2375,
+      1.0,
+      0.65
+    ],
+    "action_offset_scale": 0.5,
+    "action_warmup_s": 0.0,
+    "success_bonus": 0.0,
+    "action_rate_weight": 0.0,
+    "joint_vel_weight": 0.0,
+    "action_l2_weight": 0.0,
+    "action_second_diff_weight": 0.0,
+    "hand_pose_weight": 0.0,
+    "hold_angle_threshold": 0.1,
+    "hold_speed_threshold": 0.5,
+    "hold_duration": 0.52,
+    "actor_lr_scale": 0.25,
+    "history": 10,
+    "wm_window": 8,
+    "horizon": 8,
+    "wm_updates": 10,
+    "wm_batch": 2048,
+    "actor_batch": 4096,
+    "critic_epochs": 5,
+    "critic_minibatches": 4,
+    "microbatch": 128,
+    "wm_microbatch": 2048,
+    "actor_microbatch": 4096,
+    "critic_microbatch": 8192,
+    "amp": "none",
+    "buffer_steps": 1000,
+    "warmup_steps": 64,
+    "adaptive_replay": true,
+    "adaptive_grasps": false,
+    "event_capacity": 4096,
+    "event_fraction": 0.25,
+    "actor_ramp_iters": 1000,
+    "wm_only_iters": 1000,
+    "utd": 0.4,
+    "learning_rate": 0.0002,
+    "lr_decay_iters": 250000,
+    "gamma": 0.99,
+    "lam": 0.9259454627568515,
+    "exploration": 0.1,
+    "wm_hidden": [
+      2048,
+      2048,
+      2048
+    ],
+    "actor_hidden": [
+      1024,
+      512,
+      256
+    ],
+    "critic_hidden": [
+      512,
+      256,
+      128
+    ],
+    "survival_width": 0.01,
+    "wm_task_losses": true,
+    "wm_reward_loss_weight": 1.0,
+    "wm_observation_loss_weight": 1.0,
+    "wm_termination_loss_weight": 1.0,
+    "wm_cost_loss_weight": 1.0,
+    "network_revision": "hardware_center25_v3",
+    "network_joint_limits": [
+      [
+        -0.5235987755982988,
+        0.17453292519943295
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.4363323129985824,
+        0.3490658503988659
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        0.4363323129985824
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        0.5235987755982988
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        0.0,
+        1.3089969389957472
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.017453292519943295,
+        1.9024088846738192
+      ],
+      [
+        0.0,
+        1.8500490071139892
+      ]
+    ],
+    "include_delay_ready": true,
+    "hand_center_base_m": [
+      0.055,
+      -0.01,
+      0.1
+    ],
+    "drop_radius_m": 0.3,
+    "constraints_enabled": true,
+    "object_hold_costs_enabled": true,
+    "cost_object_hold_angle_sigma_rad": 0.2617993877991494,
+    "cost_velocity_limit_rad_s": 1.5707963267948966,
+    "cost_target_rate_limit_rad_s": 2.0943951023931953,
+    "cost_penalty": 0.05,
+    "stable_value_learning": true,
+    "paper_critic": true,
+    "critic_target_tau": 0.02,
+    "critic_td_steps": 1,
+    "input_joint_velocity_std_floor_rad_s": 1.5707963267948966,
+    "absolute_policy_optimization": true,
+    "exploration_position_std_rad": 0.008726646259971648,
+    "exploration_correlation_s": 0.2,
+    "warmup_joint_amplitude_rad": 0.03490658503988659,
+    "warmup_joint_segment_steps": 30,
+    "actor_logit_threshold": 2.0,
+    "actor_logit_penalty": 0.05,
+    "actor_gradient_audit_interval": 50,
+    "input_position_scale": 10.0,
+    "input_linear_velocity_scale": 2.0,
+    "input_angular_velocity_scale": 0.1
+  },
+  "noise_config": {
+    "enabled": true,
+    "joint_enabled": true,
+    "joint_noise_std": 0.005,
+    "joint_bias_std": 0.01,
+    "joint_delay_max_steps": 0,
+    "max_period": 3,
+    "jitter_probability": 0.1,
+    "failure_probability": 0.3,
+    "position_noise": 0.012,
+    "position_bias": 0.012,
+    "rotation_noise_deg": 1.0,
+    "rotation_bias_deg": 0.1,
+    "failure_position_extent": 0.15
+  },
+  "source": "/home/brainco/reorientation/training/runs/die50_47g_papercritic_v32_20261106_032925"
+}

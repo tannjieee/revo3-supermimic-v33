@@ -1,0 +1,70 @@
+{
+  "max_errors": {
+    "reward": 2.9802322387695312e-08,
+    "ema": 0.0,
+    "clean_student_observation": 0.0,
+    "convex_vertices_m": 0.0,
+    "convex_inertia_kg_m2": 1.4551915228366852e-11,
+    "fk_position_m": 3.91155481338501e-06,
+    "fk_linear_velocity_m_s": 1.4398247003555298e-06,
+    "fk_angular_velocity_rad_s": 5.364418029785156e-07,
+    "fk_quaternion": 6.556510925292969e-07,
+    "hand_convex_vertices_m": 2.0862224711135525e-10,
+    "direct_observation": 4.76837158203125e-07,
+    "hand_pose": 4.656612873077393e-10,
+    "position_frame": 5.103647708892822e-07,
+    "hold_counter": 0.0,
+    "orientation_frame": 1.430511474609375e-06,
+    "success_boundary_disagreements": 0,
+    "terminal_reset_state_separation": 0.43447914719581604
+  },
+  "contact_peaks": {
+    "candidates": 47330,
+    "contacts": 4973,
+    "constraints": 69
+  },
+  "resets": 92,
+  "optimizer_steps": {
+    "wm": 30,
+    "actor": 3,
+    "critic": 60
+  },
+  "replay_size": 66,
+  "adaptive_replay": true,
+  "event_archive_size": 0,
+  "grasp_sampling": null,
+  "object_support_reset": {
+    "protocol": "world_xyzw_v2",
+    "meshes": {
+      "shapes": 144,
+      "max_vertex_error_m": 2.6234192031784355e-09,
+      "max_support_error_m": 2.384232297703015e-09,
+      "object_vertex_error_m": 1.421754851063103e-15,
+      "object_support_error_m": 9.124645483638005e-16
+    },
+    "reset_count": 1116,
+    "max_gap_m": 2.2450919294223244e-06,
+    "min_gap_m": 1.9864743041427817e-06,
+    "last": [
+      {
+        "gap_m": 2.050690008727442e-06,
+        "height_shift_m": -0.01415505641391044,
+        "query_iterations": 4,
+        "support_geom": 18,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9947198643669252,
+        "env_id": 842,
+        "position_w": [
+          -20.98593521118164,
+          -11.005311012268066,
+          0.5508449673652649
+        ],
+        "cast_gap_m": 2.001851454457597e-06
+      }
+    ]
+  },
+  "seconds": 5.033246087958105,
+  "model_sync_digest": "5c9672b016a140b7cd974e0994953b9730fb8c35d827d2f1b01a2b2cd8b36087",
+  "rank": 0,
+  "world_size": 1
+}

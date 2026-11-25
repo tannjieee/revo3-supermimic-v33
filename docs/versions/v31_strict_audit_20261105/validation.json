@@ -1,0 +1,147 @@
+{
+  "recorded_at": "2026-11-05T23:38:23.504908+08:00",
+  "checkpoint_version": 31,
+  "base_commit": "bb46cb17308add0e3805da2ed3e8d4f9e1a51ae0",
+  "status": "four_confirmed_diagnostic_or_configuration_defects_fixed",
+  "fixes": [
+    "true pre-exploration tanh slope telemetry",
+    "warmup covers critic TD window",
+    "correct sum/max/global-denominator distributed metrics",
+    "explicit transition/displayed reset-frame recording schema"
+  ],
+  "tests": {
+    "merged_passed": 174,
+    "merged_skipped": 0,
+    "log": "/home/brainco/reorientation/training/diagnostics/strict_audit_20261105/root/regression.log",
+    "includes_real_two_rank_cpu_gloo": true,
+    "includes_cuda_graph_eager": true,
+    "previous_v31_passed": 237,
+    "counts_overlap_not_additive": true
+  },
+  "physical_contract_changed": false,
+  "algorithm_objective_changed": false,
+  "exploration_or_replay_changed": false,
+  "full_preflight": {
+    "passed": true,
+    "training_exit_code": 0,
+    "checkpoint_version": 31,
+    "optimizer_steps": {
+      "wm": 20,
+      "actor": 0,
+      "critic": 40
+    },
+    "recording": {
+      "frames": 500,
+      "fps": 25.0,
+      "size": [
+        1280,
+        960
+      ],
+      "drops": 0,
+      "timeouts": 1,
+      "reset_steps": [
+        500
+      ]
+    },
+    "max_display_pose_residual_deg": 8.639526347521859e-06,
+    "reset_pre_vs_post_rotation_deg": [
+      142.06465089856803
+    ],
+    "max_transition_error_residual_deg": 3.962444898775175e-05,
+    "max_display_error_residual_deg": 3.7742421739039855e-05,
+    "expected_home_actor_tanh_slope": 0.9229676127433777,
+    "training_tanh_slope": [
+      0.9229676723480225,
+      0.9229676723480225
+    ],
+    "stream_tanh_slope": [
+      0.9229677319526672
+    ],
+    "stream_tanh_valid_samples": [
+      2048
+    ],
+    "trajectory_fields": [
+      "actions",
+      "raw_actions",
+      "physical",
+      "target_quaternions_xyzw",
+      "current_quaternions_xyzw",
+      "done",
+      "terminated",
+      "post_step_physical",
+      "transition_goal_quaternion_xyzw_base",
+      "base_quaternion_xyzw_world"
+    ],
+    "support_reset": {
+      "protocol": "world_xyzw_v2",
+      "meshes": {
+        "shapes": 144,
+        "max_vertex_error_m": 2.6234178596822688e-09,
+        "max_support_error_m": 2.3842312568689294e-09,
+        "object_vertex_error_m": 1.421754851063103e-15,
+        "object_support_error_m": 9.124645483638005e-16
+      },
+      "reset_count": 2,
+      "max_gap_m": 2.0233653202546147e-06,
+      "min_gap_m": 1.9942768358256136e-06,
+      "last": [
+        {
+          "gap_m": 1.9942768358256136e-06,
+          "height_shift_m": -0.009690080882890952,
+          "query_iterations": 3,
+          "support_geom": 65,
+          "support_body": "query_right_ring_MCP_link",
+          "normal_up_dot": 0.8535348146287519,
+          "env_id": 0,
+          "position_w": [
+            0.0018205121159553528,
+            -0.0043558236211538315,
+            0.5553098917007446
+          ],
+          "cast_gap_m": 2.0000000000041576e-06
+        }
+      ]
+    }
+  },
+  "geometry": {
+    "world_euler_samples": 4096,
+    "failures": 0,
+    "seed": 106,
+    "lp_independent_samples": 32,
+    "report": "/home/brainco/reorientation/training/diagnostics/strict_audit_20261105/geometry/geometry_world_euler_summary.json",
+    "palm_nearest_hull_fraction": 0.61767578125,
+    "dip_nearest_hull_fraction": 0.15625,
+    "lifted_over_20mm_fraction": 0.12744140625,
+    "single_contact_vertical_force_infeasible_at_mu_07_fraction": 0.23095703125,
+    "single_contact_vertical_force_infeasible_at_mu_15_fraction": 0.1396484375,
+    "is_dynamic_drop_rate": false
+  },
+  "remaining": [
+    "stable placement inside palm is not guaranteed",
+    "WM physical action-response reliability unresolved",
+    "bootstrap dominance and shared failure-risk gradients unresolved",
+    "real multistep TD remains off-policy without correction",
+    "Critic omits complete noisy Actor history/exploration memory"
+  ],
+  "formal_training_started": false,
+  "hardware_used": false,
+  "evidence_root": "/home/brainco/reorientation/training/diagnostics/strict_audit_20261105",
+  "source_sha256": {
+    "scripts/supermimic/train.py": "d0519406411621307401225d81cab1ffbfbad7c1476e3f4810a0c43354832088",
+    "scripts/supermimic/record_manual.py": "8e13d8b54bb31696dce80226b60305ef2abb210161eca2060418eb5cd592d0bd",
+    "source/viserdex/viserdex/supermimic/core.py": "39752931d1ae2c25e0bf9baeb1bc5176ba1232aa54e6afba21a400d088536220",
+    "source/viserdex/viserdex/supermimic/distributed.py": "e19966e732deba1e86ff9a4b381af6cbb3b26abf862abbd9a1a8135c224bd342",
+    "source/viserdex/viserdex/supermimic/stream_audit.py": "89661d034c3a200baa0da216943da7cdfb3e4f9a840338da65c3760c32241954",
+    "source/viserdex/viserdex/supermimic/recording_trajectory.py": "3362c1ab15dc0e2c6e3b0a190e7e8c632ff04281384788139929e02bcbbb0d1f",
+    "source/viserdex/viserdex/supermimic/console_log.py": "535c119401253b5997e91870a70eab6aa51f18a6aaf3287d8193acf581ce139a",
+    "source/viserdex/viserdex/supermimic/support_placement.py": "d1de180203a4b88ef85c0fa16fa1ba04120623292287d85ea170def35bdc9539",
+    "source/viserdex/viserdex/supermimic/absolute_policy.py": "2afcac6874cd739f1868ee4105350a425f64e1f0085db4fc727e72ca3f538647",
+    "source/viserdex/viserdex/supermimic/trainer.py": "2722a4c355742f4901e13a891dbabe082e47ec2972f168314da203bbe77edaa8",
+    "tests/test_multistep_values.py": "4d0c213a3c611f4a523b7323a03d66856e8fda8356d1fac9b76c04e663fbfd67",
+    "tests/test_supermimic_readiness.py": "6010ee8e123c07a2e275cb1f8107ea9dbbd81bc752b991ec7d02106f73dbf375",
+    "tests/test_recording_trajectory.py": "a7503ab46d8fe4e5d986a228a85c45df8f77ccbcfa6f3302f2a4cfb8e4592619",
+    "tests/test_supermimic_distributed.py": "a5faaf61719f8a111acea0384e31fbee4725855c1b8f6a4d44eca5aaa7feff02"
+  },
+  "source_scope": "Current working files, including preserved independent console presentation edits; only audit-owned hunks are committed",
+  "independent_review": "Geometry agent independently reviewed final patch: no added deterministic state/RNG/Replay or recording mismatch found"
+}

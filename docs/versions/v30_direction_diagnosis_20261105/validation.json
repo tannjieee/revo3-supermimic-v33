@@ -1,0 +1,36 @@
+{
+  "status": "diagnostics_completed",
+  "algorithm_modified": false,
+  "baseline_commit": "efadc6559330c5407324b0da9b30179e17c7590b",
+  "checkpoint": "/home/brainco/reorientation/training/runs/absolute_v30_floor_pilot_20261105/model_1000.pt",
+  "checkpoint_sha256": "47d606215b69f8d2254b850e79b2d30f967e7b496c47bd068e1d1ad5c7bb7733",
+  "formal_training_started": false,
+  "hardware_connected": false,
+  "tests": {
+    "command": "PYTHONPATH=source/viserdex /home/brainco/reorientation/runtime/policy/bin/python -m pytest -q tests/test_absolute_policy.py tests/test_stable_values.py tests/test_orientation_reward.py",
+    "passed": 53,
+    "seconds": 3.99,
+    "diagnostic_scripts_compile": true,
+    "cross_process_mismatched_prefix_rejected": true
+  },
+  "source_sha256": {
+    "scripts/supermimic/analyze_v30_response.py": "703e6a625e13cbf534b5061f27f6a45de95c625fab031cfa543b8943741204c1",
+    "scripts/supermimic/diagnose_v30_gradients.py": "f481d415bf6f2179caf820cbb01f9de6ee0b52572d9d6963052fb9f02b9a1fcf",
+    "scripts/supermimic/diagnose_v30_response.py": "61490600fc32f366ad94b8d82fe8df5a73515f72e0ff87d0d86fcf742f88bc46",
+    "scripts/supermimic/diagnose_v30_snapshot.py": "c2d498b9fe3bc3c08f04ea35e7fb2cf0020baa9027763f32b1782b6676e8d89d",
+    "scripts/supermimic/diagnose_v30_values.py": "9c22c73fd14e1a868144716a97aa98e8aca1e80e42e69df7449bf2bbc0224b0a"
+  },
+  "outputs": "/home/brainco/reorientation/training/diagnostics/v30_direction_20261105",
+  "limitations": [
+    "One training checkpoint/seed; two 64-world evaluation snapshots only.",
+    "Finite perturbations with empirical repeat-noise filtering, not a complete Jacobian or confidence interval.",
+    "No training-replay snapshot; off-policy bias is not causally quantified.",
+    "No proposed optimization has been trained or proven to converge."
+  ],
+  "evidence": [
+    "gradient.json",
+    "values.json",
+    "response_seed44.json",
+    "response_seed45.json"
+  ]
+}

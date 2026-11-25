@@ -1,0 +1,56 @@
+[
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_000500/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_001000/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_001500/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_002000/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_002500/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_003000/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_003500/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_004000/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/videos/step_004500/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "duration": 20.0
+  }
+]

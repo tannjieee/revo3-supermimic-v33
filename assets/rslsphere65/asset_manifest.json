@@ -1,0 +1,60 @@
+{
+  "source": "User supplied RSLSphere65.zip",
+  "original_texture_source_as_recorded_in_input": "leggedrobotics/ViserDexSplats",
+  "license_as_recorded_in_input": "CC BY-NC 4.0",
+  "original_sha256": "32318829419a97770424eb1327607d40cfbd1d40d2b99a2674fd12bb913b9377",
+  "original_to_gaussian_transform": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "units": "metres",
+  "up_axis": "Z",
+  "metric_bounds": [
+    [
+      -0.032499998807907104,
+      -0.032499998807907104,
+      -0.032499998807907104
+    ],
+    [
+      0.032499998807907104,
+      0.032499998807907104,
+      0.032499998807907104
+    ]
+  ],
+  "diameter_m": 0.065,
+  "submeshes": 6,
+  "vertices": 25350,
+  "triangles": 49152,
+  "renderer": "pyrender FLAT: six separate texture/base-color materials, no photometric lighting",
+  "train_views": 150,
+  "test_views": 30,
+  "resolution": [
+    512,
+    512
+  ],
+  "initial_gaussians": 50000,
+  "seed": 42,
+  "data_origin": "Synthetic renders of supplied textured mesh; no real photographs used."
+}

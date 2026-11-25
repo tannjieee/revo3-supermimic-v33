@@ -1,0 +1,70 @@
+{
+  "checkpoint": "/home/zhangke/viserDex_supermimic_yellow_die_20261101/repository/validation/appearance_transfer/actor_preview.pt",
+  "iteration": 32100,
+  "checkpoint_sha256": "b9b2f53510c8e9d59ca35bed1b87b7f81a19de11309cc9c6808c29fef38a7108",
+  "environment": {
+    "source_environment": "/home/zhangke/viserDex_supermimic_yellow_die_20261101/repository/configs/yellow_die_handpose/env.yaml",
+    "source_environment_sha256": "5811393478264c40260661421c221e2a9340175230f0ac0d42d4445ad3561d93",
+    "contract_sha256": "87c4f21505fea039e5205f1e16c5b28199d311634251daee56c935acfbb1d3fa",
+    "assets": {
+      "robot": {
+        "path": "/home/zhangke/viserDex_supermimic_yellow_die_20261101/repository/source/viserdex/viserdex/assets/generated/revo3_compact_visual_palm/revo3_right_compact_v4/revo3_right_compact_v4.usda",
+        "sha256": "a13e3f0ac0482d88c57a9050b4095fde62cc01e9db5dd6053d6dd19ce8f0c650"
+      },
+      "object": {
+        "path": "/home/zhangke/viserDex_supermimic_yellow_die_20261101/repository/assets/rounded_die/object_newton.usda",
+        "sha256": "74f0a4e668c37d05475a5dff64be5f4537f945162d560304651fe0ba8ec62784"
+      }
+    },
+    "physics": "isaaclab_newton.physics.mjwarp_manager:NewtonMJWarpManager",
+    "step_dt": 0.05,
+    "nconmax": 2048,
+    "njmax": 512
+  },
+  "geometry_digest": "012f803542d59e3d205f01aefda4ef66f514cece269ffeb8b51957337c275778",
+  "noise_config": {
+    "enabled": true,
+    "joint_enabled": true,
+    "joint_noise_std": 0.005,
+    "joint_bias_std": 0.01,
+    "joint_delay_max_steps": 1,
+    "max_period": 3,
+    "jitter_probability": 0.1,
+    "failure_probability": 0.3,
+    "position_noise": 0.012,
+    "position_bias": 0.012,
+    "rotation_noise_deg": 1.0,
+    "rotation_bias_deg": 0.1,
+    "failure_position_extent": 0.15
+  },
+  "seed": 42,
+  "steps": 400,
+  "fps": 20.0,
+  "policy_hz": 20.0,
+  "policy_input": "10 x 124 noisy observations",
+  "actor_amp": "bf16",
+  "exploration_action_noise": false,
+  "camera_eye": [
+    -0.22,
+    -0.24,
+    0.78
+  ],
+  "camera_target": [
+    0.02,
+    0.0,
+    0.565
+  ],
+  "continuous": true,
+  "selected_environment": 0,
+  "hold_protocol": {
+    "angle_rad": 0.1,
+    "angular_speed_rad_s": 0.5,
+    "duration_s": 0.5
+  },
+  "target_visualization": "authored yellow-body and black-pips subsets, two coincident visual-only markers, world goal quaternion, scale 1",
+  "target_marker_position": [
+    0.1599999964237213,
+    -0.15000000596046448,
+    0.574999988079071
+  ]
+}

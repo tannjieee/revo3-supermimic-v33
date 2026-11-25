@@ -1,0 +1,4 @@
+{
+  "preset": "viserdex_default",
+  "cluster_dir": "generated/rgbd_capture/yellow_die_viserdex_clusters_v1/indices"
+}

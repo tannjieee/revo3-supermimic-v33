@@ -1,0 +1,30 @@
+#usda 1.0
+(
+    defaultPrim = "revo3_single"
+    metersPerUnit = 1
+    upAxis = "Z"
+    doc = "Isaac Sim collision-cooking compatibility overrides; upstream asset remains unchanged."
+    subLayers = [
+        @brainco/revo3_system/usd/revo3_right.usd@
+    ]
+)
+
+over "revo3_single"
+{
+    over "world"
+    {
+        over "collisions"
+        {
+            over "right_plam_backtrim_v2"
+            {
+                over "World"
+                {
+                    # PhysX supports 8-64 vertices. Upstream authors 128.
+                    int physxConvexDecompositionCollision:hullVertexLimit = 64
+                    # Avoid float32 rounding below the minimum accepted 0.01 percent.
+                    float physxConvexDecompositionCollision:errorPercentage = 0.02
+                }
+            }
+        }
+    }
+}

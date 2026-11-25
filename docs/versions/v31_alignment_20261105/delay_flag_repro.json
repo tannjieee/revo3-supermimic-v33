@@ -1,0 +1,12 @@
+{
+  "critic_inputs_identical": true,
+  "wm_inputs_identical": true,
+  "target_rate_ratio": [
+    7.114780373740359e-07,
+    8.913439750671387
+  ],
+  "target_rate_raw_cost": [
+    0.0,
+    62.622528076171875
+  ]
+}

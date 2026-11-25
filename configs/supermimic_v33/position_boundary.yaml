@@ -1,0 +1,22 @@
+# User-selected 58 mm die boundary, fixed on 2026-11-07.
+# Fresh 58 mm hand-center runs use this as the hard termination boundary.
+# Existing saved runs retain their serialized boundary; no silent resume change.
+# rho(p) = sqrt(sum(((p_COM_base - center_m) / semi_axes_m)^2)).
+# If the observation is the object root, first use p_COM = p_root + R * com_local.
+schema: revo3_object_com_ellipsoid_v1
+behavior: hard_termination
+object_variant: die58
+shape: ellipsoid
+coordinate_frame: hand_base
+position_reference: object_center_of_mass
+units: m
+axis_alignment: hand_base_xyz
+center_m:
+  - 0.0337
+  - 0.009358916334299222
+  - 0.10065586490765209
+semi_axes_m:
+  - 0.1061
+  - 0.112
+  - 0.1521
+threshold_rho: 1.0

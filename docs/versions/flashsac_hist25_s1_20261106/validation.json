@@ -1,0 +1,509 @@
+{
+  "smoke": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s1_smoke_20261106_01",
+    "result": {
+      "status": "complete",
+      "vector_steps": 1024,
+      "transitions": 65536,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 132,
+      "successes": 0,
+      "drops": 52,
+      "timeouts": 80,
+      "violation_fractions": [
+        0.0152130126953125,
+        0.0,
+        0.16082763671875,
+        0.0199737548828125,
+        0.00079345703125
+      ],
+      "rotation_error_rad": 2.184064045548439,
+      "audit_errors": {
+        "reward": 1.1175870895385742e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 1.0207295417785645e-06,
+        "fk_linear_velocity_m_s": 8.419156074523926e-07,
+        "fk_angular_velocity_rad_s": 1.6987323760986328e-06,
+        "fk_quaternion": 5.960464477539062e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 1.1920928955078125e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 8.414432525634766
+      },
+      "contact_peaks": {
+        "candidates": 5826,
+        "contacts": 1030,
+        "constraints": 147
+      },
+      "boundary_audits": [
+        {
+          "step": 3,
+          "kind": "truncated",
+          "terminal_history_differs": true,
+          "old_goal_preserved": true
+        },
+        {
+          "step": 5,
+          "kind": "terminated",
+          "terminal_history_differs": true,
+          "old_goal_preserved": true
+        }
+      ],
+      "source_checkpoint_unchanged": null,
+      "frames": 0,
+      "elapsed_s": 131.04599893902196
+    },
+    "last_metrics": {
+      "vector_steps": 1024,
+      "transitions": 65536,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "successes": 0,
+      "drops": 52,
+      "timeouts": 80,
+      "rotation_error_rad": 2.184064045548439,
+      "reward": 0.026264381313012564,
+      "violation_fractions": [
+        0.0152130126953125,
+        0.0,
+        0.16082763671875,
+        0.0199737548828125,
+        0.00079345703125
+      ],
+      "command": {
+        "max_delta_deg": 2.392734794565942,
+        "limit_deg": 2.4,
+        "env_id": 58,
+        "joint_id": 7
+      },
+      "elapsed_s": 130.99400547001278,
+      "transitions_s": 500.29770266855866,
+      "peak_torch_memory_bytes": 1459504640,
+      "critic/loss": 4.076748371124268,
+      "critic/max_entropy_bonus": -0.09378835558891296,
+      "diagnostic/target_outside_support_mass": 0.1289510428905487,
+      "diagnostic/target_edge_probability": 0.12888848781585693,
+      "diagnostic/twin_q_gap": 0.01630055159330368,
+      "diagnostic/alpha_logpi_abs_mean": 0.10879570245742798,
+      "diagnostic/reward_denominator": 7.964504718780518,
+      "diagnostic/velocity_bn_abs_p99": 2.332374095916748
+    },
+    "logged_peak_torch_memory_bytes": 1459504640,
+    "maximum_logged_command_delta_deg": 2.3955676155242047
+  },
+  "1m": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s1_1m_20261106_01",
+    "result": {
+      "status": "complete",
+      "vector_steps": 1024,
+      "transitions": 1048576,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 2107,
+      "successes": 1,
+      "drops": 784,
+      "timeouts": 1325,
+      "violation_fractions": [
+        0.015316009521484375,
+        0.0,
+        0.16742324829101562,
+        0.019330978393554688,
+        0.0007476806640625
+      ],
+      "rotation_error_rad": 2.222224920289591,
+      "audit_errors": {
+        "reward": 7.450580596923828e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 4.440892098500626e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 3.4421682357788086e-06,
+        "fk_linear_velocity_m_s": 3.037974238395691e-06,
+        "fk_angular_velocity_rad_s": 1.9669532775878906e-06,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862224711135525e-10,
+        "direct_observation": 3.5762786865234375e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.909272193908691e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.6689300537109375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 4.925774574279785
+      },
+      "contact_peaks": {
+        "candidates": 88623,
+        "contacts": 15721,
+        "constraints": 171
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": null,
+      "frames": 0,
+      "elapsed_s": 170.68351190601243
+    },
+    "last_metrics": {
+      "vector_steps": 1024,
+      "transitions": 1048576,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "successes": 1,
+      "drops": 784,
+      "timeouts": 1325,
+      "rotation_error_rad": 2.222224920289591,
+      "reward": 0.025116320211964194,
+      "violation_fractions": [
+        0.015316009521484375,
+        0.0,
+        0.16742324829101562,
+        0.019330978393554688,
+        0.0007476806640625
+      ],
+      "command": {
+        "max_delta_deg": 2.3993805686283642,
+        "limit_deg": 2.4,
+        "env_id": 101,
+        "joint_id": 17
+      },
+      "elapsed_s": 170.63100180402398,
+      "transitions_s": 6145.284203420011,
+      "peak_torch_memory_bytes": 8550819840,
+      "critic/loss": 4.095674514770508,
+      "critic/max_entropy_bonus": -0.09315692633390427,
+      "diagnostic/target_outside_support_mass": 0.12271230667829514,
+      "diagnostic/target_edge_probability": 0.12268059700727463,
+      "diagnostic/twin_q_gap": 0.014829831197857857,
+      "diagnostic/alpha_logpi_abs_mean": 0.10885055363178253,
+      "diagnostic/reward_denominator": 12.189101219177246,
+      "diagnostic/velocity_bn_abs_p99": 2.3352713584899902
+    },
+    "logged_peak_torch_memory_bytes": 8550819840,
+    "maximum_logged_command_delta_deg": 2.3994386252363094
+  },
+  "home166": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s1_home166_20261106_01",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 0,
+      "actor_updates": 0,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_error_rad": 2.3000593771934508,
+      "audit_errors": {
+        "reward": 1.4901161193847656e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 9.834766387939453e-07,
+        "fk_linear_velocity_m_s": 4.423782229423523e-08,
+        "fk_angular_velocity_rad_s": 4.470348358154297e-08,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 5.820766091346741e-11,
+        "position_frame": 4.636240191757679e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 0.013261377811431885
+      },
+      "contact_peaks": {
+        "candidates": 2688,
+        "contacts": 448,
+        "constraints": 30
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 21.322239677014295
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 0,
+      "actor_updates": 0,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.300061058998108,
+      "reward": 0.021998456978083898,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.0,
+        "limit_deg": 2.4,
+        "env_id": 0,
+        "joint_id": 0
+      },
+      "elapsed_s": 20.10467502695974,
+      "transitions_s": 1528.0028132165996,
+      "peak_torch_memory_bytes": 59890688
+    },
+    "logged_peak_torch_memory_bytes": 59890688,
+    "maximum_logged_command_delta_deg": 1.7075472925031877e-06
+  },
+  "home167": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s1_home167_20261106_01",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 0,
+      "actor_updates": 0,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_error_rad": 2.1315233178138735,
+      "audit_errors": {
+        "reward": 1.4901161193847656e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 9.350478649139404e-07,
+        "fk_linear_velocity_m_s": 6.658956408500671e-08,
+        "fk_angular_velocity_rad_s": 4.470348358154297e-08,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 5.820766091346741e-11,
+        "position_frame": 5.098991096019745e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.6689300537109375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 0.012838959693908691
+      },
+      "contact_peaks": {
+        "candidates": 2688,
+        "contacts": 448,
+        "constraints": 30
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 26.106487023993395
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 0,
+      "actor_updates": 0,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.1315227900942166,
+      "reward": 0.02914165568848451,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.0,
+        "limit_deg": 2.4,
+        "env_id": 0,
+        "joint_id": 0
+      },
+      "elapsed_s": 24.841151760017965,
+      "transitions_s": 1236.6576355547286,
+      "peak_torch_memory_bytes": 59890688
+    },
+    "logged_peak_torch_memory_bytes": 59890688,
+    "maximum_logged_command_delta_deg": 1.7075472925031877e-06
+  },
+  "eval166": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s1_eval166_20261106_01",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.002250000135973096,
+        0.00015625001105945557,
+        0.0
+      ],
+      "rotation_error_rad": 2.2992106709480287,
+      "audit_errors": {
+        "reward": 1.4901161193847656e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 8.046627044677734e-07,
+        "fk_linear_velocity_m_s": 2.4400651454925537e-07,
+        "fk_angular_velocity_rad_s": 1.7881393432617188e-07,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.685754776000977e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 0.985040009021759
+      },
+      "contact_peaks": {
+        "candidates": 6635,
+        "contacts": 1574,
+        "constraints": 90
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 27.567303308984265
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.299684157470862,
+      "reward": 0.021602857885106155,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0023437500931322575,
+        0.00016276042151730508,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.10947597956425688,
+        "limit_deg": 2.4,
+        "env_id": 42,
+        "joint_id": 14
+      },
+      "elapsed_s": 26.411272673984058,
+      "transitions_s": 1163.139708532871,
+      "peak_torch_memory_bytes": 84435456
+    },
+    "logged_peak_torch_memory_bytes": 84435456,
+    "maximum_logged_command_delta_deg": 0.6701397415475698
+  },
+  "eval167": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s1_eval167_20261106_01",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.001875000074505806,
+        0.0,
+        0.0
+      ],
+      "rotation_error_rad": 2.1448357658386232,
+      "audit_errors": {
+        "reward": 2.2351741790771484e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 9.08970832824707e-07,
+        "fk_linear_velocity_m_s": 2.5890767574310303e-07,
+        "fk_angular_velocity_rad_s": 1.6391277313232422e-07,
+        "fk_quaternion": 7.152557373046875e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.499490261077881e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 0.9850588440895081
+      },
+      "contact_peaks": {
+        "candidates": 6643,
+        "contacts": 1584,
+        "constraints": 87
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 27.552512014983222
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.1444366907080012,
+      "reward": 0.02872254924926286,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.001953125,
+        0.0,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.10905592293030109,
+        "limit_deg": 2.4,
+        "env_id": 42,
+        "joint_id": 14
+      },
+      "elapsed_s": 26.336732944007963,
+      "transitions_s": 1166.431693153091,
+      "peak_torch_memory_bytes": 84435456
+    },
+    "logged_peak_torch_memory_bytes": 84435456,
+    "maximum_logged_command_delta_deg": 0.669834944355858
+  },
+  "training_process_exit_code": 143,
+  "training_exit_note": "Full budget and final checkpoint/result written before exit; termination cause unconfirmed. Independent reload evaluations and hashes passed.",
+  "validation_scope": "simulation only, no hardware commands",
+  "next_stage": "not started: independent success 0/128, no consistent improvement over HOME"
+}

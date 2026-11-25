@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-23",
+  "branch": "codex/newton-revo3-checkpoints-20261023",
+  "checks": {
+    "cpu_pytest": {
+      "passed": 138,
+      "skipped": 5,
+      "skips": [
+        "3 historical SDF assets not generated",
+        "CUDA TF32 regression not run in CPU suite",
+        "optional pycolmap unavailable"
+      ]
+    },
+    "ruff": "passed",
+    "python_compile": "passed",
+    "git_diff_check": "passed; generated USD whitespace preserved with file attributes",
+    "original_release_manifest_files": 43,
+    "all_original_checksums_verified": true,
+    "student_tensors_unchanged_after_path_preparation": true,
+    "student_optimizer_tensors_unchanged_after_path_preparation": true,
+    "torchscript_export_and_reload": "passed",
+    "shell_syntax": "passed",
+    "model_strict_load_and_asset_dependencies": "passed; see release_models_validation.json"
+  },
+  "scope": "Packaging verification; no retraining or claim of new policy performance."
+}

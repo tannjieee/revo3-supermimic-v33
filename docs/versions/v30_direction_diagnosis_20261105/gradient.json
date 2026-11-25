@@ -1,0 +1,500 @@
+{
+  "checkpoint": "/home/brainco/reorientation/training/runs/absolute_v30_floor_pilot_20261105/model_1000.pt",
+  "seed": 44048,
+  "scope": "64 fresh evaluation worlds, seed 43; no optimizer or normalization updates; not the live training replay batch",
+  "cost_names": [
+    "joint_speed",
+    "target_rate",
+    "object_angular_speed",
+    "object_linear_speed",
+    "drop"
+  ],
+  "gradients": [
+    {
+      "seed": 41,
+      "batch_size": 128,
+      "exact_objective_error": 5.587935447692871e-09,
+      "components": {
+        "reward_rollout": {
+          "value": -0.004515348933637142,
+          "parameter_gradient_norm": 0.010101779364049435,
+          "first_action_gradient_norm": 5.513967698789202e-05,
+          "first_logit_gradient_norm": 3.890403240802698e-05,
+          "cosine_with_total_gradient": 0.5377997756004333,
+          "projection_fraction_of_total": 0.0018952939426526427
+        },
+        "reward_bootstrap": {
+          "value": -0.044116005301475525,
+          "parameter_gradient_norm": 1.1412333250045776,
+          "first_action_gradient_norm": 0.0007796681020408869,
+          "first_logit_gradient_norm": 0.000575488549657166,
+          "cosine_with_total_gradient": 0.8919240236282349,
+          "projection_fraction_of_total": 0.3551079332828522
+        },
+        "running_joint_speed": {
+          "value": 1.0972798008879181e-05,
+          "parameter_gradient_norm": 0.001287022139877081,
+          "first_action_gradient_norm": 9.169551049126312e-06,
+          "first_logit_gradient_norm": 7.0911396505835e-06,
+          "cosine_with_total_gradient": -0.10812784731388092,
+          "projection_fraction_of_total": -4.854915459873155e-05
+        },
+        "running_target_rate": {
+          "value": 2.603620851004962e-05,
+          "parameter_gradient_norm": 0.0024406288284808397,
+          "first_action_gradient_norm": 8.889249147614464e-05,
+          "first_logit_gradient_norm": 6.621493957936764e-05,
+          "cosine_with_total_gradient": -0.10558368265628815,
+          "projection_fraction_of_total": -8.98993675946258e-05
+        },
+        "running_object_angular_speed": {
+          "value": 3.906023948729853e-08,
+          "parameter_gradient_norm": 9.627644612919539e-05,
+          "first_action_gradient_norm": 2.016138580529514e-07,
+          "first_logit_gradient_norm": 1.788307883998641e-07,
+          "cosine_with_total_gradient": 0.9246544241905212,
+          "projection_fraction_of_total": 3.1056861189426854e-05
+        },
+        "running_object_linear_speed": {
+          "value": 2.213531268002722e-11,
+          "parameter_gradient_norm": 3.481326587007061e-07,
+          "first_action_gradient_norm": 8.907308224337385e-10,
+          "first_logit_gradient_norm": 7.512757083105726e-10,
+          "cosine_with_total_gradient": 0.8704007267951965,
+          "projection_fraction_of_total": 1.0571147157634186e-07
+        },
+        "running_drop": {
+          "value": 0.0,
+          "parameter_gradient_norm": 0.0,
+          "first_action_gradient_norm": 0.0,
+          "first_logit_gradient_norm": 0.0,
+          "cosine_with_total_gradient": 0.0,
+          "projection_fraction_of_total": 0.0
+        },
+        "bootstrap_joint_speed": {
+          "value": 0.0032124884892255068,
+          "parameter_gradient_norm": 0.3804696202278137,
+          "first_action_gradient_norm": 0.0002897940867114812,
+          "first_logit_gradient_norm": 0.0002125881874235347,
+          "cosine_with_total_gradient": 0.9597873687744141,
+          "projection_fraction_of_total": 0.12739521265029907
+        },
+        "bootstrap_target_rate": {
+          "value": 0.0032290031667798758,
+          "parameter_gradient_norm": 0.3819446563720703,
+          "first_action_gradient_norm": 0.0002875391801353544,
+          "first_logit_gradient_norm": 0.00021127787476871163,
+          "cosine_with_total_gradient": 0.9618734121322632,
+          "projection_fraction_of_total": 0.128167062997818
+        },
+        "bootstrap_object_angular_speed": {
+          "value": 0.0032143727876245975,
+          "parameter_gradient_norm": 0.3789331614971161,
+          "first_action_gradient_norm": 0.00029033355531282723,
+          "first_logit_gradient_norm": 0.00021280180953908712,
+          "cosine_with_total_gradient": 0.9586355686187744,
+          "projection_fraction_of_total": 0.12672848999500275
+        },
+        "bootstrap_object_linear_speed": {
+          "value": 0.00320783001370728,
+          "parameter_gradient_norm": 0.3796537518501282,
+          "first_action_gradient_norm": 0.0002908807946369052,
+          "first_logit_gradient_norm": 0.000213218096178025,
+          "cosine_with_total_gradient": 0.9586398005485535,
+          "projection_fraction_of_total": 0.12697003781795502
+        },
+        "bootstrap_drop": {
+          "value": 0.0032066279090940952,
+          "parameter_gradient_norm": 0.37969735264778137,
+          "first_action_gradient_norm": 0.0002908266324084252,
+          "first_logit_gradient_norm": 0.00021318435028661042,
+          "cosine_with_total_gradient": 0.958646297454834,
+          "projection_fraction_of_total": 0.12698547542095184
+        },
+        "terminal_all": {
+          "value": 0.00185805419459939,
+          "parameter_gradient_norm": 0.0014233026886358857,
+          "first_action_gradient_norm": 7.736549378023483e-06,
+          "first_logit_gradient_norm": 4.174620244157268e-06,
+          "cosine_with_total_gradient": 0.16627201437950134,
+          "projection_fraction_of_total": 8.256092405645177e-05
+        },
+        "reward_total": {
+          "value": -0.04863135516643524,
+          "parameter_gradient_norm": 1.1468647718429565,
+          "first_action_gradient_norm": 0.0008007753058336675,
+          "first_logit_gradient_norm": 0.0005889399908483028,
+          "cosine_with_total_gradient": 0.8922814130783081,
+          "projection_fraction_of_total": 0.35700324177742004
+        },
+        "regularizer": {
+          "value": 0.001504046842455864,
+          "parameter_gradient_norm": 0.26087304949760437,
+          "first_action_gradient_norm": 0,
+          "first_logit_gradient_norm": 0.00033452690695412457,
+          "cosine_with_total_gradient": 0.07444526255130768,
+          "projection_fraction_of_total": 0.006775234825909138
+        },
+        "cost_total": {
+          "value": 0.01796543039381504,
+          "parameter_gradient_norm": 1.9007642269134521,
+          "first_action_gradient_norm": 0.0014534946531057358,
+          "first_logit_gradient_norm": 0.0010660710977390409,
+          "cosine_with_total_gradient": 0.9594493508338928,
+          "projection_fraction_of_total": 0.6362215280532837
+        },
+        "total": {
+          "value": -0.029161877930164337,
+          "parameter_gradient_norm": 2.866433620452881,
+          "first_action_gradient_norm": 0.0018988122465088964,
+          "first_logit_gradient_norm": 0.0014353228034451604,
+          "cosine_with_total_gradient": 1.0,
+          "projection_fraction_of_total": 1.0
+        }
+      },
+      "cost_to_reward_parameter_gradient_ratio": 1.657356858253479,
+      "reward_cost_gradient_cosine": 0.7442834973335266,
+      "max_running_raw_cost": [
+        1.290677785873413,
+        161.18177795410156,
+        0.00614025816321373,
+        6.1215346249809954e-06,
+        0.04281461611390114
+      ]
+    },
+    {
+      "seed": 42,
+      "batch_size": 128,
+      "exact_objective_error": 1.1175870895385742e-08,
+      "components": {
+        "reward_rollout": {
+          "value": -0.005319364834576845,
+          "parameter_gradient_norm": 0.016463464125990868,
+          "first_action_gradient_norm": 4.9785408918978646e-05,
+          "first_logit_gradient_norm": 3.5487475543050095e-05,
+          "cosine_with_total_gradient": 0.2609911561012268,
+          "projection_fraction_of_total": 0.0016044017393141985
+        },
+        "reward_bootstrap": {
+          "value": -0.04542139172554016,
+          "parameter_gradient_norm": 1.178579568862915,
+          "first_action_gradient_norm": 0.001176859950646758,
+          "first_logit_gradient_norm": 0.0009248918504454195,
+          "cosine_with_total_gradient": 0.9139542579650879,
+          "projection_fraction_of_total": 0.4022068977355957
+        },
+        "running_joint_speed": {
+          "value": 1.6452320778626017e-05,
+          "parameter_gradient_norm": 0.0008069772738963366,
+          "first_action_gradient_norm": 5.824615527671995e-06,
+          "first_logit_gradient_norm": 3.318621338621597e-06,
+          "cosine_with_total_gradient": 0.2506844103336334,
+          "projection_fraction_of_total": 7.553613977506757e-05
+        },
+        "running_target_rate": {
+          "value": 1.8869553969125263e-05,
+          "parameter_gradient_norm": 0.002185579389333725,
+          "first_action_gradient_norm": 8.71711818035692e-05,
+          "first_logit_gradient_norm": 5.718743341276422e-05,
+          "cosine_with_total_gradient": -0.11642535030841827,
+          "projection_fraction_of_total": -9.501240128884092e-05
+        },
+        "running_object_angular_speed": {
+          "value": 3.305970892597543e-07,
+          "parameter_gradient_norm": 0.0008172811358235776,
+          "first_action_gradient_norm": 1.3104724985169014e-06,
+          "first_logit_gradient_norm": 1.1639881449809764e-06,
+          "cosine_with_total_gradient": 0.8484932780265808,
+          "projection_fraction_of_total": 0.0002589321811683476
+        },
+        "running_object_linear_speed": {
+          "value": 3.327745190517817e-09,
+          "parameter_gradient_norm": 1.61035295604961e-05,
+          "first_action_gradient_norm": 3.281193272641758e-08,
+          "first_logit_gradient_norm": 2.8732321410984696e-08,
+          "cosine_with_total_gradient": 0.8192328214645386,
+          "projection_fraction_of_total": 4.926001565763727e-06
+        },
+        "running_drop": {
+          "value": 0.0,
+          "parameter_gradient_norm": 0.0,
+          "first_action_gradient_norm": 0.0,
+          "first_logit_gradient_norm": 0.0,
+          "cosine_with_total_gradient": 0.0,
+          "projection_fraction_of_total": 0.0
+        },
+        "bootstrap_joint_speed": {
+          "value": 0.0033803426194936037,
+          "parameter_gradient_norm": 0.33008864521980286,
+          "first_action_gradient_norm": 0.00035223772283643484,
+          "first_logit_gradient_norm": 0.0002813008613884449,
+          "cosine_with_total_gradient": 0.9534294605255127,
+          "projection_fraction_of_total": 0.11751282960176468
+        },
+        "bootstrap_target_rate": {
+          "value": 0.0034087446983903646,
+          "parameter_gradient_norm": 0.3317679166793823,
+          "first_action_gradient_norm": 0.0003509746165946126,
+          "first_logit_gradient_norm": 0.0002804971591103822,
+          "cosine_with_total_gradient": 0.9572263956069946,
+          "projection_fraction_of_total": 0.11858101934194565
+        },
+        "bootstrap_object_angular_speed": {
+          "value": 0.0033836897928267717,
+          "parameter_gradient_norm": 0.32922467589378357,
+          "first_action_gradient_norm": 0.0003526081272866577,
+          "first_logit_gradient_norm": 0.0002815144252963364,
+          "cosine_with_total_gradient": 0.9512374401092529,
+          "projection_fraction_of_total": 0.11693578958511353
+        },
+        "bootstrap_object_linear_speed": {
+          "value": 0.0033729204442352057,
+          "parameter_gradient_norm": 0.3293130099773407,
+          "first_action_gradient_norm": 0.0003530369431246072,
+          "first_logit_gradient_norm": 0.00028184233815409243,
+          "cosine_with_total_gradient": 0.9513581991195679,
+          "projection_fraction_of_total": 0.11698202043771744
+        },
+        "bootstrap_drop": {
+          "value": 0.0033705984242260456,
+          "parameter_gradient_norm": 0.3290964663028717,
+          "first_action_gradient_norm": 0.0003527610970195383,
+          "first_logit_gradient_norm": 0.0002816205960698426,
+          "cosine_with_total_gradient": 0.9512993097305298,
+          "projection_fraction_of_total": 0.11689785122871399
+        },
+        "terminal_all": {
+          "value": 4.457828239878836e-08,
+          "parameter_gradient_norm": 7.40340183256194e-05,
+          "first_action_gradient_norm": 6.82488234815537e-08,
+          "first_logit_gradient_norm": 4.592303426420585e-08,
+          "cosine_with_total_gradient": 0.388546884059906,
+          "projection_fraction_of_total": 1.0740905963757541e-05
+        },
+        "reward_total": {
+          "value": -0.05074075609445572,
+          "parameter_gradient_norm": 1.1850717067718506,
+          "first_action_gradient_norm": 0.0011890999739989638,
+          "first_logit_gradient_norm": 0.0009298460790887475,
+          "cosine_with_total_gradient": 0.9125732779502869,
+          "projection_fraction_of_total": 0.40381136536598206
+        },
+        "regularizer": {
+          "value": 0.0016228083986788988,
+          "parameter_gradient_norm": 0.2737562358379364,
+          "first_action_gradient_norm": 0,
+          "first_logit_gradient_norm": 0.0003474833501968533,
+          "cosine_with_total_gradient": 0.08828258514404297,
+          "projection_fraction_of_total": 0.009024126455187798
+        },
+        "cost_total": {
+          "value": 0.01695198379456997,
+          "parameter_gradient_norm": 1.6500378847122192,
+          "first_action_gradient_norm": 0.0017645708285272121,
+          "first_logit_gradient_norm": 0.0014088248135522008,
+          "cosine_with_total_gradient": 0.953015148639679,
+          "projection_fraction_of_total": 0.587164580821991
+        },
+        "total": {
+          "value": -0.03216596320271492,
+          "parameter_gradient_norm": 2.6781435012817383,
+          "first_action_gradient_norm": 0.002799875568598509,
+          "first_logit_gradient_norm": 0.0022669124882668257,
+          "cosine_with_total_gradient": 1.0000001192092896,
+          "projection_fraction_of_total": 1.0
+        }
+      },
+      "cost_to_reward_parameter_gradient_ratio": 1.392352819442749,
+      "reward_cost_gradient_cosine": 0.7647808790206909,
+      "max_running_raw_cost": [
+        7.240586757659912,
+        7.390738010406494,
+        0.02840919978916645,
+        0.0005591088556684554,
+        0.0
+      ]
+    },
+    {
+      "seed": 43,
+      "batch_size": 128,
+      "exact_objective_error": 1.1175870895385742e-08,
+      "components": {
+        "reward_rollout": {
+          "value": -0.005156635772436857,
+          "parameter_gradient_norm": 0.029239250347018242,
+          "first_action_gradient_norm": 8.299363253172487e-05,
+          "first_logit_gradient_norm": 6.362054409692064e-05,
+          "cosine_with_total_gradient": 0.7989192605018616,
+          "projection_fraction_of_total": 0.007581060752272606
+        },
+        "reward_bootstrap": {
+          "value": -0.04512754827737808,
+          "parameter_gradient_norm": 1.3582528829574585,
+          "first_action_gradient_norm": 0.0009822475258260965,
+          "first_logit_gradient_norm": 0.0007389109232462943,
+          "cosine_with_total_gradient": 0.8845376372337341,
+          "projection_fraction_of_total": 0.3899041414260864
+        },
+        "running_joint_speed": {
+          "value": 8.421648999501485e-06,
+          "parameter_gradient_norm": 0.0010274735977873206,
+          "first_action_gradient_norm": 8.293781320389826e-06,
+          "first_logit_gradient_norm": 7.014034054009244e-06,
+          "cosine_with_total_gradient": -0.12225314974784851,
+          "projection_fraction_of_total": -4.0765389712760225e-05
+        },
+        "running_target_rate": {
+          "value": 2.3248609068104997e-05,
+          "parameter_gradient_norm": 0.0015762671828269958,
+          "first_action_gradient_norm": 3.084193667746149e-05,
+          "first_logit_gradient_norm": 2.9482711397577077e-05,
+          "cosine_with_total_gradient": -0.11368761211633682,
+          "projection_fraction_of_total": -5.815724944113754e-05
+        },
+        "running_object_angular_speed": {
+          "value": 3.8396282775465806e-07,
+          "parameter_gradient_norm": 0.0008314451551996171,
+          "first_action_gradient_norm": 4.299863121559611e-06,
+          "first_logit_gradient_norm": 2.87690249933803e-06,
+          "cosine_with_total_gradient": 0.7544053196907043,
+          "projection_fraction_of_total": 0.00020356317691039294
+        },
+        "running_object_linear_speed": {
+          "value": 9.548575125029046e-11,
+          "parameter_gradient_norm": 1.2687269190791994e-06,
+          "first_action_gradient_norm": 2.441019164578506e-09,
+          "first_logit_gradient_norm": 2.1081891787844143e-09,
+          "cosine_with_total_gradient": 0.885692298412323,
+          "projection_fraction_of_total": 3.646799768830533e-07
+        },
+        "running_drop": {
+          "value": 0.0,
+          "parameter_gradient_norm": 0.0,
+          "first_action_gradient_norm": 0.0,
+          "first_logit_gradient_norm": 0.0,
+          "cosine_with_total_gradient": 0.0,
+          "projection_fraction_of_total": 0.0
+        },
+        "bootstrap_joint_speed": {
+          "value": 0.002937632380053401,
+          "parameter_gradient_norm": 0.38955020904541016,
+          "first_action_gradient_norm": 0.0003429392527323216,
+          "first_logit_gradient_norm": 0.00026870847796089947,
+          "cosine_with_total_gradient": 0.9428028464317322,
+          "projection_fraction_of_total": 0.119191475212574
+        },
+        "bootstrap_target_rate": {
+          "value": 0.002958612982183695,
+          "parameter_gradient_norm": 0.3914608955383301,
+          "first_action_gradient_norm": 0.0003417004190851003,
+          "first_logit_gradient_norm": 0.0002680393517948687,
+          "cosine_with_total_gradient": 0.9462811350822449,
+          "projection_fraction_of_total": 0.12021798640489578
+        },
+        "bootstrap_object_angular_speed": {
+          "value": 0.002938056131824851,
+          "parameter_gradient_norm": 0.38886234164237976,
+          "first_action_gradient_norm": 0.0003440118452999741,
+          "first_logit_gradient_norm": 0.00026950519531965256,
+          "cosine_with_total_gradient": 0.9413949251174927,
+          "projection_fraction_of_total": 0.11880332976579666
+        },
+        "bootstrap_object_linear_speed": {
+          "value": 0.0029316521249711514,
+          "parameter_gradient_norm": 0.38873788714408875,
+          "first_action_gradient_norm": 0.0003437132982071489,
+          "first_logit_gradient_norm": 0.00026919550145976245,
+          "cosine_with_total_gradient": 0.9410431385040283,
+          "projection_fraction_of_total": 0.11872092634439468
+        },
+        "bootstrap_drop": {
+          "value": 0.002930167829617858,
+          "parameter_gradient_norm": 0.3887104094028473,
+          "first_action_gradient_norm": 0.00034359810524620116,
+          "first_logit_gradient_norm": 0.00026911465101875365,
+          "cosine_with_total_gradient": 0.9410415887832642,
+          "projection_fraction_of_total": 0.11871233582496643
+        },
+        "terminal_all": {
+          "value": 4.7576591555298364e-08,
+          "parameter_gradient_norm": 6.517515430459753e-05,
+          "first_action_gradient_norm": 7.493797937740965e-08,
+          "first_logit_gradient_norm": 5.71380525116183e-08,
+          "cosine_with_total_gradient": 0.2807759642601013,
+          "projection_fraction_of_total": 5.938857157161692e-06
+        },
+        "reward_total": {
+          "value": -0.05028418451547623,
+          "parameter_gradient_norm": 1.3814793825149536,
+          "first_action_gradient_norm": 0.0009953496046364307,
+          "first_logit_gradient_norm": 0.0007427472737617791,
+          "cosine_with_total_gradient": 0.8865754008293152,
+          "projection_fraction_of_total": 0.3974851965904236
+        },
+        "regularizer": {
+          "value": 0.0016522950027137995,
+          "parameter_gradient_norm": 0.2773571014404297,
+          "first_action_gradient_norm": 0,
+          "first_logit_gradient_norm": 0.0003506260400172323,
+          "cosine_with_total_gradient": 0.07507645338773727,
+          "projection_fraction_of_total": 0.006757778115570545
+        },
+        "cost_total": {
+          "value": 0.014728235080838203,
+          "parameter_gradient_norm": 1.9477099180221558,
+          "first_action_gradient_norm": 0.0017164911841973662,
+          "first_logit_gradient_norm": 0.001345146563835442,
+          "cosine_with_total_gradient": 0.9425058364868164,
+          "projection_fraction_of_total": 0.5957570672035217
+        },
+        "total": {
+          "value": -0.03390365466475487,
+          "parameter_gradient_norm": 3.081336259841919,
+          "first_action_gradient_norm": 0.0024133562110364437,
+          "first_logit_gradient_norm": 0.0019245583098381758,
+          "cosine_with_total_gradient": 1.0000001192092896,
+          "projection_fraction_of_total": 1.0
+        }
+      },
+      "cost_to_reward_parameter_gradient_ratio": 1.4098726511001587,
+      "reward_cost_gradient_cosine": 0.6951994299888611,
+      "max_running_raw_cost": [
+        1.6705833673477173,
+        151.55247497558594,
+        0.030227111652493477,
+        1.3482298527378589e-05,
+        0.0
+      ]
+    }
+  ],
+  "bootstrap_path_scope": "Survival weight held constant only for path decomposition; main gradient probes use unchanged full objective.",
+  "bootstrap_paths": [
+    {
+      "seed": 41,
+      "full_norm": 2.8535332679748535,
+      "physical_path_norm": 2.1386189460754395,
+      "direct_last_action_path_norm": 1.0438462495803833,
+      "direct_projection_fraction": 0.2860602140426636,
+      "physical_projection_fraction": 0.713939905166626,
+      "additivity_relative_error": 1.198589523530738e-07
+    },
+    {
+      "seed": 42,
+      "full_norm": 2.663022041320801,
+      "physical_path_norm": 2.0732316970825195,
+      "direct_last_action_path_norm": 1.1842262744903564,
+      "direct_projection_fraction": 0.29582446813583374,
+      "physical_projection_fraction": 0.704175591468811,
+      "additivity_relative_error": 1.1995952895301292e-07
+    },
+    {
+      "seed": 43,
+      "full_norm": 3.04929518699646,
+      "physical_path_norm": 2.449605941772461,
+      "direct_last_action_path_norm": 0.8968642950057983,
+      "direct_projection_fraction": 0.22058019042015076,
+      "physical_projection_fraction": 0.7794198393821716,
+      "additivity_relative_error": 1.1485856983657324e-07
+    }
+  ]
+}

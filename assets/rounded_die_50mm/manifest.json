@@ -1,0 +1,74 @@
+{
+  "variant": "rounded_die_50mm_original_v1",
+  "uniform_scale": 0.7142857142857143,
+  "accepted_source": "/home/brainco/reorientation/assets/dice_50mm_from_original_70mm",
+  "accepted_source_validation": {
+    "source": "Current perception/asset/manifest.json source: viserDex_revo3_20261102/assets/rounded_die/meshes",
+    "source_sha256": {
+      "yellow_body.obj": "6598263726f3b1a9e830e35dbb2b0e2210478880985c88eddcdb24d53ebe1507",
+      "black_pips.obj": "581a56a7ac06acd04a7d68c71d9f06fa38eb3f5c9588d02bdb88d5fc1f8d6f71"
+    },
+    "uniform_scale": 0.7142857142857143,
+    "source_dimensions_mm": [
+      69.99996,
+      70.0,
+      69.99996
+    ],
+    "output_dimensions_mm": [
+      49.999971428571435,
+      50.00000000000001,
+      49.99997142857143
+    ],
+    "all_original_triangles_retained": true,
+    "original_triangle_count": 11206,
+    "seam_patch_triangles_added": 10,
+    "total_seam_patch_area_mm2": 0.17023294979240372,
+    "maximum_original_vertex_weld_error_mm": 0.0,
+    "watertight": true,
+    "winding_consistent": true,
+    "color_face_counts": [
+      2896,
+      8320
+    ],
+    "shape_rebuilt": false,
+    "bambu_studio_import_verified": true,
+    "bambu_roundtrip_paint_face_counts": {
+      "4": 2896,
+      "8": 8320
+    },
+    "bambu_roundtrip_filament_profiles": [
+      "Bambu PLA Basic @BBL X2D 0.4 nozzle",
+      "Bambu PLA Matte @BBL X2D 0.4 nozzle"
+    ]
+  },
+  "source_usd_sha256": "26f7714a6a80e7296f0ce8ba3845566b5703d9559fbb7dcf3d11c6c49c4e3481",
+  "source_wrapper_sha256": "74f0a4e668c37d05475a5dff64be5f4537f945162d560304651fe0ba8ec62784",
+  "usd_sha256": "0f7bbaed75d8eb6ad027a7106eee0e2c8c8bf6a547a2025c6b3d19a06d4296a0",
+  "dimensions_m": [
+    0.049999967217445374,
+    0.05000000074505806,
+    0.04999997466802597
+  ],
+  "collision_dimensions_m": [
+    0.049999967217445374,
+    0.05000000074505806,
+    0.04999997466802597
+  ],
+  "visual_faces": 11206,
+  "collision_vertices": 200,
+  "mass_kg": 0.1,
+  "mass_source": "user_supplied",
+  "inertia_scale": 0.8503401550610055,
+  "diagonal_inertia_kg_m2": [
+    3.8546702853636816e-05,
+    3.8553298509214073e-05,
+    3.855903196381405e-05
+  ],
+  "body_frame": "original body frame uniformly scaled; not print-bed coordinates",
+  "material_srgb": {
+    "yellow_body": "#F4EE2A",
+    "black_pips": "#123E35"
+  },
+  "collision_method": "original 200-vertex outer convex hull uniformly scaled; pips remain visual concavities",
+  "source_assets_modified": false
+}

@@ -1,0 +1,65 @@
+{
+  "name": "RSLSphere65",
+  "diameter_m": 0.065,
+  "mass_kg": 0.07,
+  "mass_source": "70 g explicitly selected by user; not a measured value",
+  "inertia_model": "uniform solid sphere",
+  "diagonal_inertia_kg_m2": [
+    2.9575000000000004e-05,
+    2.9575000000000004e-05,
+    2.9575000000000004e-05
+  ],
+  "background_rgb": [
+    63,
+    149,
+    157
+  ],
+  "cap_half_angle_deg": 38,
+  "triangles": 49152,
+  "regions": [
+    {
+      "axis": "posX",
+      "texture": "textures/texture1.png",
+      "letter": "E"
+    },
+    {
+      "axis": "negX",
+      "texture": "textures/texture2.png",
+      "letter": "T"
+    },
+    {
+      "axis": "posY",
+      "texture": "textures/texture3.png",
+      "letter": "H"
+    },
+    {
+      "axis": "negY",
+      "texture": "textures/texture4.png",
+      "letter": "R"
+    },
+    {
+      "axis": "posZ",
+      "texture": "textures/texture5.png",
+      "letter": "S"
+    },
+    {
+      "axis": "negZ",
+      "texture": "textures/texture6.png",
+      "letter": "L"
+    }
+  ],
+  "collision": "one analytic USD Sphere, radius 0.0325 m",
+  "contact_material": {
+    "static_friction": 0.8,
+    "dynamic_friction": 0.6,
+    "restitution": 0.0,
+    "status": "initial simulation values, not measured"
+  },
+  "coordinate_system": "USD: Z-up, right-handed, meters; GLB vertex coordinates retained",
+  "limitations": [
+    "Ideal sphere: no physical grooves or print seams modeled.",
+    "No Gaussian splat or pose network supplied.",
+    "Runtime Newton import/contact validation not performed.",
+    "GLB is a visual asset; physics is defined in USDA."
+  ]
+}

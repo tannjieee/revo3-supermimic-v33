@@ -1,0 +1,40 @@
+{
+  "max_errors": {
+    "reward": 2.2351741790771484e-08,
+    "ema": 0.0,
+    "clean_student_observation": 0.0,
+    "convex_vertices_m": 0.0,
+    "convex_inertia_kg_m2": 1.4551915228366852e-11,
+    "fk_position_m": 1.0058283805847168e-06,
+    "fk_linear_velocity_m_s": 3.1851232051849365e-07,
+    "fk_angular_velocity_rad_s": 6.631016731262207e-07,
+    "fk_quaternion": 6.556510925292969e-07,
+    "hand_convex_vertices_m": 2.0862234596310534e-10,
+    "direct_observation": 4.76837158203125e-07,
+    "hand_pose": 4.656612873077393e-10,
+    "position_frame": 2.1979212760925293e-07,
+    "hold_counter": 0.0,
+    "orientation_frame": 9.5367431640625e-07,
+    "success_boundary_disagreements": 0,
+    "terminal_reset_state_separation": 0.3676486611366272
+  },
+  "contact_peaks": {
+    "candidates": 2929,
+    "contacts": 315,
+    "constraints": 51
+  },
+  "resets": 5,
+  "optimizer_steps": {
+    "wm": 30,
+    "actor": 0,
+    "critic": 60
+  },
+  "replay_size": 66,
+  "adaptive_replay": false,
+  "event_archive_size": 22,
+  "grasp_sampling": null,
+  "seconds": 15.352202223031782,
+  "model_sync_digest": "be0b3f6afacc6278932c5211815d589a5ad226074bfbbce49ef72b03f50bd1b9",
+  "rank": 0,
+  "world_size": 1
+}

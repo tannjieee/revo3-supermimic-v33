@@ -1,0 +1,155 @@
+{
+  "checkpoint": "/home/brainco/reorientation/training/runs/absolute_v30_floor_pilot_20261105/model_1000.pt",
+  "gamma_to_horizon": 0.9227446944279201,
+  "scope": "Frozen open-loop branch objectives; finite real prefixes do NOT identify true tail values.",
+  "scaling": {
+    "wm": {
+      "physical_std_equivalent": [
+        0.09720347076654434,
+        0.03137017786502838,
+        0.02424098365008831
+      ],
+      "gain_per_m_s": [
+        10.287698745727539,
+        31.877408981323242,
+        41.2524528503418
+      ],
+      "reparameterized_output_max_abs_error": 2.5331974029541016e-07,
+      "input_gradient_max_abs_error": 3.0517578125e-05,
+      "input_gradient_relative_norm_error": 2.8815696850870154e-07,
+      "scale_2_to_1_without_weight_compensation_gain_ratio": [
+        0.9960546493530273,
+        0.9639421105384827,
+        0.9417079091072083
+      ]
+    },
+    "critic": {
+      "physical_std_equivalent": [
+        0.09720347076654434,
+        0.03137017786502838,
+        0.02424098365008831
+      ],
+      "gain_per_m_s": [
+        10.287698745727539,
+        31.877408981323242,
+        41.2524528503418
+      ],
+      "reparameterized_output_max_abs_error": 1.52587890625e-05,
+      "input_gradient_max_abs_error": 0.00244140625,
+      "input_gradient_relative_norm_error": 1.2658541947985213e-07,
+      "scale_2_to_1_without_weight_compensation_gain_ratio": [
+        0.9960546493530273,
+        0.9639421105384827,
+        0.9417079091072083
+      ]
+    }
+  },
+  "branches": {
+    "replicated_snapshot": {
+      "short_reward": {
+        "resolved_samples": 12,
+        "tail_weights": {
+          "0.0": {
+            "agreement": 0.8333333134651184,
+            "relative_error": 0.9832983613014221
+          },
+          "0.1": {
+            "agreement": 0.6666666865348816,
+            "relative_error": 2.4230246543884277
+          },
+          "1.0": {
+            "agreement": 0.5833333134651184,
+            "relative_error": 18.329914093017578
+          }
+        }
+      },
+      "short_constrained": {
+        "resolved_samples": 12,
+        "tail_weights": {
+          "0.0": {
+            "agreement": 0.8333333134651184,
+            "relative_error": 0.9832983613014221
+          },
+          "0.1": {
+            "agreement": 0.6666666865348816,
+            "relative_error": 2.4230246543884277
+          },
+          "1.0": {
+            "agreement": 0.5833333134651184,
+            "relative_error": 18.329914093017578
+          }
+        }
+      },
+      "critic_augmented": {
+        "resolved_samples": 18,
+        "tail_weights": {
+          "0.0": {
+            "agreement": 0.6666666865348816,
+            "relative_error": 1.0143544673919678
+          },
+          "0.1": {
+            "agreement": 0.6111111044883728,
+            "relative_error": 0.9258962273597717
+          },
+          "1.0": {
+            "agreement": 0.6111111044883728,
+            "relative_error": 1.5008864402770996
+          }
+        }
+      }
+    },
+    "replicated_snapshot_seed45": {
+      "short_reward": {
+        "resolved_samples": 15,
+        "tail_weights": {
+          "0.0": {
+            "agreement": 0.4000000059604645,
+            "relative_error": 1.0936578512191772
+          },
+          "0.1": {
+            "agreement": 0.46666666865348816,
+            "relative_error": 1.0742210149765015
+          },
+          "1.0": {
+            "agreement": 0.46666666865348816,
+            "relative_error": 4.364136219024658
+          }
+        }
+      },
+      "short_constrained": {
+        "resolved_samples": 15,
+        "tail_weights": {
+          "0.0": {
+            "agreement": 0.4000000059604645,
+            "relative_error": 1.0936578512191772
+          },
+          "0.1": {
+            "agreement": 0.46666666865348816,
+            "relative_error": 1.0742210149765015
+          },
+          "1.0": {
+            "agreement": 0.46666666865348816,
+            "relative_error": 4.364136219024658
+          }
+        }
+      },
+      "critic_augmented": {
+        "resolved_samples": 18,
+        "tail_weights": {
+          "0.0": {
+            "agreement": 0.2777777910232544,
+            "relative_error": 1.0043874979019165
+          },
+          "0.1": {
+            "agreement": 0.5555555820465088,
+            "relative_error": 0.9960554838180542
+          },
+          "1.0": {
+            "agreement": 0.7222222089767456,
+            "relative_error": 0.9613555669784546
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "source_bundle": "/home/brainco/PACE/exports/Revo3_PACE_parameters_20261102",
+  "source_commit": "936c813d45fca85a18ce366b6640cf1f1dceb005",
+  "model": "fit_03",
+  "sha256": {
+    "hand.json": "ee7fdae1e34d1f115276afb7b9f97366cd5c98aef1fe9db1a7e4622effd79495",
+    "best_parameters.json": "5c3ae8f00334d20941bf51e58e0cddba7d7b1efb95437e1061aa518302bc7736",
+    "selection_frozen.json": "e21b6f1e474b1e9dabfca77fd3e2af2fdcfdb3074ed5bb028012898b94ca7cd5"
+  },
+  "scope": "Effective free-space response fit; encoder thumb CMP +1 degree was fixed assumption, not calibrated. New manual-convex geometry and mounted gravity require validation."
+}

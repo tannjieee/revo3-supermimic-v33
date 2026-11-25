@@ -1,0 +1,14 @@
+........................................................................ [ 90%]
+........                                                                 [100%]
+=============================== warnings summary ===============================
+../../conda-forge/miniforge3/envs/viserdex-newton/lib/python3.12/site-packages/torch/jit/_script.py:1488: 36 warnings
+  /home/brainco/reorientation/source_home/brainco1/workspace/conda-forge/miniforge3/envs/viserdex-newton/lib/python3.12/site-packages/torch/jit/_script.py:1488: DeprecationWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/test_flashsac.py::test_s1_mapping_reset_bounds_gradients_and_update
+  /home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/source/viserdex/viserdex/flashsac/exploration.py:23: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+    report = dict(max_delta_deg=float(value)*180/torch.pi,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+80 passed, 37 warnings in 6.35s

@@ -1,0 +1,149 @@
+{
+  "status": "implemented_and_exercised_P2_stopped_by_S0_presend_guard",
+  "upstream": "87edc9061150ae9e962dd84e6544e27a1554b3ab",
+  "tests": {
+    "new": 7,
+    "total_with_regressions": 79,
+    "upstream_update_bitwise_equal": true
+  },
+  "smoke": {
+    "status": "action_rejected_before_step",
+    "vector_steps": 100,
+    "transitions": 6400,
+    "q_updates": 4,
+    "error": "Absolute command rejected before env.step: {'reason': 'target_rate', 'max_delta_deg': 2.468901649095339, 'limit_deg': 2.4, 'env_id': 2, 'joint_id': 10}",
+    "action_rejection": {
+      "reason": "target_rate",
+      "max_delta_deg": 2.468901649095339,
+      "limit_deg": 2.4,
+      "env_id": 2,
+      "joint_id": 10
+    }
+  },
+  "evaluations": {
+    "166": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 4,
+      "actor_updates": 2,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_error_rad": 2.300101806640625,
+      "audit_errors": {
+        "reward": 2.9802322387695312e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 9.760260581970215e-07,
+        "fk_linear_velocity_m_s": 6.05359673500061e-08,
+        "fk_angular_velocity_rad_s": 4.1443854570388794e-08,
+        "fk_quaternion": 7.152557373046875e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 5.820766091346741e-11,
+        "position_frame": 5.2066752687096596e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 0.018806694075465202
+      },
+      "contact_peaks": {
+        "candidates": 2688,
+        "contacts": 448,
+        "constraints": 30
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 14.627894051023759
+    },
+    "167": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 4,
+      "actor_updates": 2,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_error_rad": 2.1315640935897826,
+      "audit_errors": {
+        "reward": 2.60770320892334e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 9.201467037200928e-07,
+        "fk_linear_velocity_m_s": 6.798654794692993e-08,
+        "fk_angular_velocity_rad_s": 4.7497451305389404e-08,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 5.820766091346741e-11,
+        "position_frame": 5.538458935916424e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.1920928955078125e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 0.018876323476433754
+      },
+      "contact_peaks": {
+        "candidates": 2688,
+        "contacts": 448,
+        "constraints": 30
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 14.481125471997075
+    }
+  },
+  "video": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s0_video166_20261106_02/rollout.mp4",
+    "decoded_frames": 500,
+    "fps": 25.0,
+    "size": [
+      960,
+      720
+    ],
+    "duration_s": 20.0
+  },
+  "preserved_prior_work": {
+    "docs/newton_migration.md": "original_prefix_preserved_with_appended_validation",
+    "docs/revo3_network_v30_zh.md": "unchanged",
+    "scripts/supermimic/train.py": "unchanged",
+    "source/viserdex/viserdex/supermimic/core.py": "unchanged",
+    "source/viserdex/viserdex/supermimic/inference.py": "unchanged",
+    "source/viserdex/viserdex/supermimic/networks.py": "unchanged",
+    "source/viserdex/viserdex/supermimic/stable_values.py": "unchanged",
+    "source/viserdex/viserdex/supermimic/trainer.py": "unchanged",
+    "docs/flashsac_migration_20261106_zh.md": "unchanged",
+    "docs/paper_critic.md": "unchanged",
+    "source/viserdex/viserdex/supermimic/console_log.py": "unchanged",
+    "tests/test_paper_critic.py": "unchanged"
+  },
+  "newton_doc_original_prefix_bytes": 249257,
+  "planned_1024_step_smoke_completed": false,
+  "long_training_started": false,
+  "S1_enabled": false,
+  "exact_simulator_resume_supported": false,
+  "source_checkpoint_mutated": false
+}

@@ -1,0 +1,27 @@
+<mujoco model="rounded_die">
+  <compiler angle="radian" autolimits="true" />
+  <option timestep=".002" gravity="0 0 -9.81" integrator="implicitfast" />
+  <visual>
+    <global offwidth="900" offheight="900" />
+    <headlight ambient=".35 .35 .35" diffuse=".65 .65 .65" specular=".1 .1 .1" />
+  </visual>
+  <asset>
+    <mesh name="collision" file="collision.obj" />
+    <texture name="sky" type="skybox" builtin="gradient" rgb1=".95 .96 .97" width="512" height="3072" rgb2=".95 .96 .97" />
+    <mesh name="yellow_body" file="meshes/yellow_body.obj" inertia="shell" />
+    <material name="yellow_body" rgba="0.792156862745098 0.6901960784313725 0.0 1.0" specular=".10" shininess=".08" />
+    <mesh name="black_pips" file="meshes/black_pips.obj" inertia="shell" />
+    <material name="black_pips" rgba="0.0784313725490196 0.0784313725490196 0.0784313725490196 1.0" specular=".10" shininess=".08" />
+  </asset>
+  <worldbody>
+    <light pos=".1 -.1 .3" dir="-.2 .2 -1" diffuse=".65 .65 .65" />
+    <geom name="floor" type="plane" size="3 3 .01" rgba=".92 .94 .96 1" friction="1 .01 .001" />
+    <body name="object" pos="0 0 .12">
+      <freejoint name="object_free" />
+      <inertial pos="0 0 0" mass="0.06" fullinertia="4.5331146049743964e-05 4.5339255422624336e-05 4.5344625188628364e-05 5.405583239019677e-10 1.4423418865600103e-09 -2.0597928502826493e-09" />
+      <geom name="collision" type="mesh" mesh="collision" group="3" rgba=".2 .5 .8 .2" friction="1 .01 .001" margin=".0001" density="0" />
+      <geom name="yellow_body" type="mesh" mesh="yellow_body" material="yellow_body" contype="0" conaffinity="0" group="2" density="0" />
+      <geom name="black_pips" type="mesh" mesh="black_pips" material="black_pips" contype="0" conaffinity="0" group="2" density="0" />
+    </body>
+  </worldbody>
+</mujoco>

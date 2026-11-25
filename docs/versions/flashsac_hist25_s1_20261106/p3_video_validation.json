@@ -1,0 +1,22 @@
+[
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s1_1m_20261106_01/videos/step_000500/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "size": [
+      960,
+      720
+    ],
+    "duration": 20.0
+  },
+  {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s1_1m_20261106_01/videos/step_001000/rollout.mp4",
+    "frames": 500,
+    "fps": 25.0,
+    "size": [
+      960,
+      720
+    ],
+    "duration": 20.0
+  }
+]

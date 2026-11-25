@@ -1,0 +1,52 @@
+{
+  "iteration": 32100,
+  "seconds": 20.0,
+  "frames": 400,
+  "successes": 11,
+  "drops": 0,
+  "resets": 1,
+  "timeouts": 1,
+  "completed_episodes": [
+    {
+      "end_step": 400,
+      "goals": 11,
+      "drop": false,
+      "timeout": true
+    }
+  ],
+  "unfinished_episode_goals": 0,
+  "parity_max_errors": {
+    "reward": 9.5367431640625e-07,
+    "ema": 0.0,
+    "clean_student_observation": 5.960464477539063e-08,
+    "convex_vertices_m": 0.0,
+    "convex_inertia_kg_m2": 1.0913936421275139e-11,
+    "fk_position_m": 1.601874828338623e-07,
+    "fk_linear_velocity_m_s": 7.683411240577698e-09,
+    "fk_angular_velocity_rad_s": 7.82310962677002e-08,
+    "fk_quaternion": 7.152557373046875e-07,
+    "teacher87_reconstruction": 5.960464477539063e-08,
+    "hand_pose": 4.76837158203125e-07,
+    "action_second_diff": 0.0,
+    "hold_counter": 0.0,
+    "orientation_frame": 7.152557373046875e-07,
+    "success_boundary_disagreements": 0,
+    "terminal_reset_state_separation": 4.73996114730835
+  },
+  "contact_peaks": {
+    "candidates": 877,
+    "contacts": 605,
+    "constraints": 105
+  },
+  "live_convex_audit": {
+    "shape": "convex_mesh",
+    "live_mesh_vertex_counts": [
+      200
+    ],
+    "collider_count": 1,
+    "errors": {
+      "convex_vertices_m": 0.0,
+      "convex_inertia_kg_m2": 1.0913936421275139e-11
+    }
+  }
+}

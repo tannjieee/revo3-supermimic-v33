@@ -1,0 +1,333 @@
+{
+  "flashsac_s1_repeat1_1m_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_1m_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 1024,
+      "transitions": 1048576,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 2061,
+      "successes": 0,
+      "drops": 571,
+      "timeouts": 1492,
+      "violation_fractions": [
+        0.010271072387695312,
+        0.0,
+        0.1182708740234375,
+        0.009439468383789062,
+        0.0005445480346679688
+      ],
+      "rotation_error_rad": 2.213862990261987,
+      "audit_errors": {
+        "reward": 7.450580596923828e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 4.440892098500626e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 3.4421682357788086e-06,
+        "fk_linear_velocity_m_s": 3.21120023727417e-06,
+        "fk_angular_velocity_rad_s": 1.6689300537109375e-06,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862224711135525e-10,
+        "direct_observation": 3.5762786865234375e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.890645742416382e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.6689300537109375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 3.365840435028076
+      },
+      "contact_peaks": {
+        "candidates": 97826,
+        "contacts": 16677,
+        "constraints": 167
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": null,
+      "frames": 0,
+      "elapsed_s": 152.26769531698665
+    },
+    "last_metrics": {
+      "vector_steps": 1024,
+      "transitions": 1048576,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "successes": 0,
+      "drops": 571,
+      "timeouts": 1492,
+      "rotation_error_rad": 2.213862990261987,
+      "reward": 0.025549579222570173,
+      "violation_fractions": [
+        0.010271072387695312,
+        0.0,
+        0.1182708740234375,
+        0.009439468383789062,
+        0.0005445480346679688
+      ],
+      "command": {
+        "max_delta_deg": 2.3967850967437596,
+        "limit_deg": 2.4,
+        "env_id": 757,
+        "joint_id": 19
+      },
+      "elapsed_s": 152.21581433701795,
+      "transitions_s": 6888.7454603,
+      "peak_torch_memory_bytes": 8550833664,
+      "critic/loss": 4.084822654724121,
+      "critic/max_entropy_bonus": -0.08755828440189362,
+      "diagnostic/target_outside_support_mass": 0.12954148650169373,
+      "diagnostic/target_below_support_mass": 0.0,
+      "diagnostic/target_above_support_mass": 0.12954148650169373,
+      "diagnostic/target_lower_edge_probability": 1.7379188648192212e-06,
+      "diagnostic/target_upper_edge_probability": 0.12952318787574768,
+      "diagnostic/target_q_mean": 1.755899429321289,
+      "diagnostic/next_logpi_mean": -14.191553115844727,
+      "diagnostic/alpha": 0.007628511171787977,
+      "diagnostic/normalized_reward_mean": 0.005465871654450893,
+      "diagnostic/target_edge_probability": 0.12952491641044617,
+      "diagnostic/twin_q_gap": 0.01214839518070221,
+      "diagnostic/alpha_logpi_abs_mean": 0.10826042294502258,
+      "diagnostic/reward_denominator": 11.688995361328125,
+      "diagnostic/velocity_bn_abs_p99": 2.4328808784484863
+    },
+    "exit_code": 0,
+    "lifecycle": [
+      {
+        "stage": "writer_close_begin",
+        "pid": 2947469,
+        "time": 1793912161.5409024
+      },
+      {
+        "stage": "env_close_begin",
+        "pid": 2947469,
+        "time": 1793912161.5412562
+      },
+      {
+        "stage": "env_close_end",
+        "pid": 2947469,
+        "time": 1793912161.9144318
+      },
+      {
+        "stage": "app_close_begin",
+        "pid": 2947469,
+        "time": 1793912161.9149585
+      },
+      {
+        "stage": "app_close_end",
+        "pid": 2947469,
+        "time": 1793912161.915025
+      }
+    ]
+  },
+  "flashsac_s1_repeat1_eval166_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_eval166_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_error_rad": 2.30547602558136,
+      "audit_errors": {
+        "reward": 4.470348358154297e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 8.568167686462402e-07,
+        "fk_linear_velocity_m_s": 3.129243850708008e-07,
+        "fk_angular_velocity_rad_s": 2.384185791015625e-07,
+        "fk_quaternion": 5.960464477539062e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.330688044428825e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.280672311782837
+      },
+      "contact_peaks": {
+        "candidates": 7208,
+        "contacts": 1265,
+        "constraints": 69
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 27.25451725401217
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.305407432218393,
+      "reward": 0.021680404307941596,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.10297193192711224,
+        "limit_deg": 2.4,
+        "env_id": 17,
+        "joint_id": 5
+      },
+      "elapsed_s": 26.144399804004934,
+      "transitions_s": 1175.0126310145454,
+      "peak_torch_memory_bytes": 84682240
+    },
+    "exit_code": 0,
+    "lifecycle": [
+      {
+        "stage": "writer_close_begin",
+        "pid": 2953160,
+        "time": 1793912205.724768
+      },
+      {
+        "stage": "env_close_begin",
+        "pid": 2953160,
+        "time": 1793912205.7251675
+      },
+      {
+        "stage": "env_close_end",
+        "pid": 2953160,
+        "time": 1793912206.08651
+      },
+      {
+        "stage": "app_close_begin",
+        "pid": 2953160,
+        "time": 1793912206.0870416
+      },
+      {
+        "stage": "app_close_end",
+        "pid": 2953160,
+        "time": 1793912206.087106
+      }
+    ]
+  },
+  "flashsac_s1_repeat1_eval167_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_eval167_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotation_error_rad": 2.136303822517395,
+      "audit_errors": {
+        "reward": 2.60770320892334e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 9.648501873016357e-07,
+        "fk_linear_velocity_m_s": 3.4016557037830353e-07,
+        "fk_angular_velocity_rad_s": 2.682209014892578e-07,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.324867278337479e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.2815768718719482
+      },
+      "contact_peaks": {
+        "candidates": 7189,
+        "contacts": 1257,
+        "constraints": 69
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 27.176623447972815
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.1364058390259744,
+      "reward": 0.028981871025947233,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.10028083739412721,
+        "limit_deg": 2.4,
+        "env_id": 13,
+        "joint_id": 5
+      },
+      "elapsed_s": 25.996102842967957,
+      "transitions_s": 1181.7155896623126,
+      "peak_torch_memory_bytes": 84682240
+    },
+    "exit_code": 0,
+    "lifecycle": [
+      {
+        "stage": "writer_close_begin",
+        "pid": 2953159,
+        "time": 1793912205.6524446
+      },
+      {
+        "stage": "env_close_begin",
+        "pid": 2953159,
+        "time": 1793912205.6527886
+      },
+      {
+        "stage": "env_close_end",
+        "pid": 2953159,
+        "time": 1793912206.020527
+      },
+      {
+        "stage": "app_close_begin",
+        "pid": 2953159,
+        "time": 1793912206.0210493
+      },
+      {
+        "stage": "app_close_end",
+        "pid": 2953159,
+        "time": 1793912206.0211189
+      }
+    ]
+  }
+}

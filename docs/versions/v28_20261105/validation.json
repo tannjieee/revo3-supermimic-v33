@@ -1,0 +1,105 @@
+{
+  "recorded_at": "2026-11-05T17:09:54.892632+08:00",
+  "regression": {
+    "passed": 196,
+    "skipped": 4,
+    "skip_reason": "Separate CUDA replay opt-in tests; subsequently all 10 replay device tests passed",
+    "log": "/home/brainco/reorientation/training/validation_wm_task_v28_regression.log"
+  },
+  "gpu_replay": {
+    "passed": 10,
+    "log": "/home/brainco/reorientation/training/validation_wm_task_v28_gpu_replay.log"
+  },
+  "real_smoke": {
+    "run": "/home/brainco/reorientation/training/runs/wm_task_supervision_v28_validation_20261105",
+    "num_envs": 4,
+    "iterations": 2,
+    "wm_cuda_graph": true,
+    "validation": {
+      "max_errors": {
+        "reward": 0.0,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 0.0,
+        "convex_inertia_kg_m2": 1.0913936421275139e-11,
+        "fk_position_m": 2.421438694000244e-07,
+        "fk_linear_velocity_m_s": 1.4007091522216797e-06,
+        "fk_angular_velocity_rad_s": 1.049041748046875e-05,
+        "fk_quaternion": 5.364418029785156e-07,
+        "hand_convex_vertices_m": 2.0862165799997013e-10,
+        "direct_observation": 3.5762786865234375e-07,
+        "hand_pose": 1.1920928955078125e-07,
+        "position_frame": 5.960464477539063e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 9.5367431640625e-07,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 8.959161758422852
+      },
+      "contact_peaks": {
+        "candidates": 338,
+        "contacts": 41,
+        "constraints": 51
+      },
+      "resets": 5,
+      "optimizer_steps": {
+        "wm": 2,
+        "actor": 2,
+        "critic": 4
+      },
+      "replay_size": 21,
+      "adaptive_replay": true,
+      "event_archive_size": 0,
+      "grasp_sampling": null,
+      "seconds": 3.426803756970912,
+      "model_sync_digest": "2cf5024e94278ce342604eb4d03ebb96de299378ef9de1a9889e5903026614f3",
+      "rank": 0,
+      "world_size": 1
+    },
+    "losses": {
+      "wm_loss": 5.669046401977539,
+      "wm_loss_joint_position": 1.588078498840332,
+      "wm_loss_joint_velocity": 0.6672227382659912,
+      "wm_loss_object_position": 11.434791564941406,
+      "wm_loss_object_rotation": 12.577140808105469,
+      "wm_loss_object_velocity": 3.4103951454162598,
+      "wm_loss_object_omega": 1.2536431550979614,
+      "wm_loss_reward": 0.0018949114019051194,
+      "wm_loss_observation": 0.08039607852697372,
+      "wm_loss_termination": 0.24649132788181305,
+      "wm_loss_cost": 0.2611822187900543,
+      "wm_loss_cost_joint_speed": 1.3059083223342896,
+      "wm_loss_cost_target_rate": 0.0,
+      "wm_loss_cost_object_angular_speed": 1.2602286293510179e-13,
+      "wm_loss_cost_object_linear_speed": 6.381127790337955e-15,
+      "wm_loss_cost_drop": 2.69167458100128e-06
+    }
+  },
+  "calibration": {
+    "run": "/home/brainco/reorientation/training/runs/wm_termination_calibration_validation_20261105",
+    "collected_control_steps": 64,
+    "accepted": false,
+    "reason": "insufficient_positive_or_negative_labels_fit",
+    "fit_samples": 128,
+    "fit_positives": 0,
+    "selection_samples": 64,
+    "selection_positives": 0,
+    "test_samples": 58,
+    "test_positives": 1,
+    "optimizer_steps": {
+      "wm": 2,
+      "actor": 2,
+      "critic": 4
+    }
+  },
+  "formal_training_started": false,
+  "checkpoint_checks": {
+    "v28_checkpoint_strict_load": true,
+    "v28_actor_inference_load": true,
+    "v27_real_checkpoint_strict_load": true,
+    "wm_parameters": 8861495,
+    "termination_parameters": 7937,
+    "calibration_source_unchanged": true,
+    "calibration_optimizer_steps_unchanged": true,
+    "calibration_not_written_when_insufficient": true
+  }
+}

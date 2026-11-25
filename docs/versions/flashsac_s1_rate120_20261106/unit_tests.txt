@@ -1,0 +1,9 @@
+.........                                                                [100%]
+=============================== warnings summary ===============================
+tests/test_flashsac.py::test_s1_mapping_reset_bounds_gradients_and_update
+  /home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/source/viserdex/viserdex/flashsac/exploration.py:23: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+  Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+    report = dict(max_delta_deg=float(value)*180/torch.pi,
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+9 passed, 1 warning in 3.02s

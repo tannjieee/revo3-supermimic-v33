@@ -1,0 +1,62 @@
+{
+  "status": "finite_optimization_experiments_completed_not_promoted",
+  "formal_training_started": false,
+  "hardware_connected": false,
+  "production_algorithm_modified": false,
+  "actor_updated": false,
+  "critic_updated": false,
+  "normalizers_updated": false,
+  "tests": 57,
+  "wm_only_optimizer_steps": 500,
+  "initial_ablation_updates_per_arm": 100,
+  "initial_ablation_arms": 2,
+  "expanded_ablation_updates_per_arm": 100,
+  "expanded_ablation_arms": 3,
+  "collection": {
+    "seeds": [
+      47,
+      48,
+      49
+    ],
+    "worlds_per_run": 64,
+    "snapshot_steps": [
+      64,
+      128,
+      192,
+      256
+    ],
+    "branches_per_snapshot": 8,
+    "branch_horizon": 8,
+    "perturbation_deg": 1.0,
+    "physical_randomization_preserved": true
+  },
+  "source_sha256": {
+    "scripts/supermimic/experiment_v30_response_fit.py": "17dd8375423dd6f5a822e004583dd930d60d336dbdf20df3c487412996a1b1ea",
+    "scripts/supermimic/diagnose_v30_scale_bootstrap.py": "4e254c68485e07a391c5c1788aa4d85f63439b3cc6345dfabfbcaa1c8372ee89",
+    "scripts/supermimic/diagnose_v30_snapshot.py": "861acb9a7a34d04689ab844b762c67fe40da989140a9386181a0c9aceb026b2b",
+    "tests/test_response_experiment.py": "bfc0574bd422454753920534713a796f94b1df3350fec6093cc1b49ea7f6ff3a"
+  },
+  "artifacts": "/home/brainco/reorientation/training/diagnostics/v30_optimization_followup_20261105",
+  "evidence": [
+    "wm_single_state.json",
+    "wm_multistate.json",
+    "scale_bootstrap.json"
+  ],
+  "limitations": [
+    "Same original training checkpoint, exploratory small offline WM updates.",
+    "Snapshots within a world are correlated; 384 training start pairs are 96 randomized worlds, 256 test start pairs are 64 worlds.",
+    "No Actor task improvement demonstrated; derivative magnitude error remains close to zero-response baseline.",
+    "Short real prefixes cannot independently identify true long-term bootstrap values.",
+    "Input scaling equivalence test does not establish optimal physical standard deviation floors."
+  ],
+  "experimental_weights_checked": [
+    "/home/brainco/reorientation/training/diagnostics/v30_optimization_followup_20261105/wm_multistate_ablation/paired_relative_wm_only.pt",
+    "/home/brainco/reorientation/training/diagnostics/v30_optimization_followup_20261105/wm_multistate_ablation/ordinary_wm_only.pt",
+    "/home/brainco/reorientation/training/diagnostics/v30_optimization_followup_20261105/wm_multistate_ablation/paired_pooled_wm_only.pt",
+    "/home/brainco/reorientation/training/diagnostics/v30_optimization_followup_20261105/wm_pair_ablation/paired_wm_only.pt",
+    "/home/brainco/reorientation/training/diagnostics/v30_optimization_followup_20261105/wm_pair_ablation/ordinary_wm_only.pt"
+  ],
+  "experimental_weights_finite": true,
+  "normalization_buffers_unchanged": true,
+  "source_checkpoint_sha256_unchanged": true
+}

@@ -1,0 +1,15 @@
+{
+  "environment_changes": [
+    {
+      "path": ".commands.object_pose.goal_pose_visualizer_cfg.markers.goal.usd_path",
+      "before": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/assets/rounded_die/object_newton.usda",
+      "after": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/assets/rounded_die_50mm/object_newton.usda"
+    },
+    {
+      "path": ".scene.object.spawn.usd_path",
+      "before": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/assets/rounded_die/object_newton.usda",
+      "after": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/assets/rounded_die_50mm/object_newton.usda"
+    }
+  ],
+  "config_changes": []
+}

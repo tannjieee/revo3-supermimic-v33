@@ -1,0 +1,15 @@
+{
+  "source/viserdex/viserdex/flashsac/runner.py": "7a6c5bb8ceba84ddbf19c208bdddd53fa25b7600b5e90674115fc64d61d17cb2",
+  "source/viserdex/viserdex/flashsac/agent.py": "0c376948c85db208bcd11cec7eeefb2a7f676c1a9084802493a40f5396c23c99",
+  "source/viserdex/viserdex/flashsac/rewards.py": "f29efd1a18d969c2baf62c5bfc4a79d870dd148e6819bea79f97d788c247bea4",
+  "source/viserdex/viserdex/flashsac/__init__.py": "de88e5709350fae3ec54b425c250566d62a98102744fcf972a1401a71b71ab8d",
+  "source/viserdex/viserdex/flashsac/exploration.py": "e7059580ef582027dd21f9f2054d8ca1febf54348377e8277aea8c99f3a29b1b",
+  "source/viserdex/viserdex/flashsac/observations.py": "138dc5c3b017b4e33b5e17410a7d56dda0f028392a95c907fb66ecafe2f5ff48",
+  "scripts/flashsac/cli.py": "9a7ec689aa2c409664a9feaa2b4e9203fc601ad2fe49e9a579e0bf5faef8a52b",
+  "scripts/flashsac/run.sh": "f83dc422cef62d4a3014c9f932c13969e3cad1ea281f75d6b45b041153def5a9",
+  "configs/flashsac_die47/task.json": "2b4c6f216c2e190a47508114abaefd6a5d0f0e5a7c597bad693c488cee361366",
+  "configs/flashsac_die47/env.yaml": "d5e45f6b2c5a7763d26d317f7cf6ee696be5c51e23dd0fd07e83cebbd56fec86",
+  "configs/flashsac_die47/README.md": "ca9e756de67de8a370380cdf5d440ffcf15ed3bc19d3612b7761e6c4898bb57b",
+  "tests/test_flashsac.py": "27c4d4b1503bf13ef2c81db0e6180cc60d3be15f67248c86a51f63f73e6ee442",
+  "source/viserdex/viserdex/supermimic/simulation.py": "7b0f225548642e97b34e7f891d411540437e9ad2ffd909b9364fcc18d41d04a5"
+}

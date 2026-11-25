@@ -1,0 +1,91 @@
+{
+  "repo": "leggedrobotics/ViserDexSplats",
+  "revision": "ffe209a34c7c56516507480e91fb96ced3dbe9f8",
+  "files": [
+    {
+      "path": "meshes/RSLCube/cube.glb",
+      "bytes": 25244,
+      "sha256": "bbb7ccf84dd2152aedd656eff9963406ac881d185de26280508794293a1c3f2b"
+    },
+    {
+      "path": "splats/RSLCube/icosphere/exports/clusters/indices/splat_clustered_means3d_indices.pt",
+      "bytes": 192849,
+      "sha256": "09eba8bf897c3dd2045e5e94d4e2efc5b4d156f8eecf67e1951f3928922f304d"
+    },
+    {
+      "path": "splats/RSLCube/icosphere/exports/clusters/indices/splat_clustered_quats_indices.pt",
+      "bytes": 192835,
+      "sha256": "d2edde304b069734553fb45ee43d91196272b3053b664b96538b14bef59ae059"
+    },
+    {
+      "path": "splats/RSLCube/icosphere/exports/clusters/indices/splat_clustered_scales_indices.pt",
+      "bytes": 192842,
+      "sha256": "dbccda89217cab0697d18c1bebdc7deea2d7188b07384474bd2a736844c486d9"
+    },
+    {
+      "path": "splats/RSLCube/icosphere/exports/clusters/indices/splat_clustered_sh0_indices.pt",
+      "bytes": 192821,
+      "sha256": "d6fdb83e5b1aa4488a5ab355c86a1b1e33bde12a75e0ced7e89b0a7deec173ac"
+    },
+    {
+      "path": "splats/RSLCube/icosphere/exports/splat.ply",
+      "bytes": 5923584,
+      "sha256": "e61aa9cb17a1a19d1daba7d91284cb7e9c1d805e05600825f23eef96ba028657"
+    },
+    {
+      "path": "splats/RSLCube/icosphere/keypoints/points_8.pt",
+      "bytes": 1239,
+      "sha256": "d5e65f06e32872cfbf5cf2147179dcabb604911b0b8c2a283effbb2af10dcd01"
+    },
+    {
+      "path": "usd/RSLCube/Props/instanceable_meshes.usd",
+      "bytes": 6837,
+      "sha256": "168293562e61b2b1af8c34a168afa78c6dce97bbbd769df7ed2e82c0dc45d088"
+    },
+    {
+      "path": "usd/RSLCube/RSLCube.usd",
+      "bytes": 6151,
+      "sha256": "288c890f7f36a40c60b727974aeb063331801c519909abb9fa9437ff1df8be89"
+    },
+    {
+      "path": "usd/RSLCube/RSLCube_0p9.usd",
+      "bytes": 2427,
+      "sha256": "b9d9f04a0765c442578a5b3a08fdefe532bd8315cbd0e4ae8052a330e3ce2a4d"
+    },
+    {
+      "path": "usd/RSLCube/RSLCube_non_metric.usd",
+      "bytes": 5062,
+      "sha256": "fe2153992f36869554f8a24b8314dfee65eb0f1c352deaa8ef5596eb234276a0"
+    },
+    {
+      "path": "usd/RSLCube/textures/texture1.png",
+      "bytes": 1116,
+      "sha256": "6ae5641cf0e280f88de0cb1a205cc14c0f0af44cb197a00a97507bfb1b41aec3"
+    },
+    {
+      "path": "usd/RSLCube/textures/texture2.png",
+      "bytes": 1060,
+      "sha256": "df4f618c9a4f95c0639b2ba7d4375bbdae1d9c69e50b678905497957305df243"
+    },
+    {
+      "path": "usd/RSLCube/textures/texture3.png",
+      "bytes": 1122,
+      "sha256": "49c4f1252bd73b2c7602071ed330bf83622c38b80b23c123665a886579122ce0"
+    },
+    {
+      "path": "usd/RSLCube/textures/texture4.png",
+      "bytes": 4909,
+      "sha256": "7e209979e90b6e19a06956a82e0b22815c8292674ec6ef12db2dcacfcbc5844a"
+    },
+    {
+      "path": "usd/RSLCube/textures/texture5.png",
+      "bytes": 8912,
+      "sha256": "528389994b2101ab92be71568fd0fe9dfd0864d616bc94249746b09a4f8cf0b6"
+    },
+    {
+      "path": "usd/RSLCube/textures/texture6.png",
+      "bytes": 992,
+      "sha256": "c1ff11f3b0b9d2502ec6523418f11186e3d07b9b556c9ee4e190aedcd1662b76"
+    }
+  ]
+}

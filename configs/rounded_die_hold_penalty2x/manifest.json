@@ -1,0 +1,37 @@
+{
+  "task_id": "Isaac-ViserDex-Repose-Revo3-SuperMimic-RoundedDie-Hold-Penalty2x-v1",
+  "parent_task_id": "Isaac-ViserDex-Repose-Revo3-SuperMimic-RoundedDie-Hold-v1",
+  "source_sha256": "3c196ef9e8e8a99bb7375bbd2cb1c680892fc0ef145e5e4109f33b8d267b2631",
+  "penalty_multiplier": 2.0,
+  "changes": {
+    "joint_vel_l2": {
+      "before": -3.125e-05,
+      "after": -6.25e-05
+    },
+    "action_l2": {
+      "before": -0.000125,
+      "after": -0.00025
+    },
+    "action_rate_l2": {
+      "before": -0.005555555555555556,
+      "after": -0.011111111111111112
+    },
+    "action_second_diff_l2": {
+      "before": -0.005555555555555556,
+      "after": -0.011111111111111112
+    }
+  },
+  "initialization": "scratch",
+  "parent_checkpoint": null,
+  "training_started": false,
+  "nominal_kp": 3.0,
+  "previous_nominal_kp": 7.0,
+  "kp_randomization_range": [
+    1.8,
+    4.5
+  ],
+  "ema_alpha": 0.5,
+  "control_hz": 20.0,
+  "hold_duration": 0.5,
+  "randomization_changed": false
+}

@@ -1,0 +1,16 @@
+{
+  "python": "3.12.15 (main, Oct 13 2026, 16:52:04) [GCC 15.3.0]",
+  "packages": {
+    "isaacsim": "6.2.0.0",
+    "isaaclab": "28.0.0",
+    "newton": "1.6.1",
+    "warp-lang": "1.17.0",
+    "mujoco": "3.12.0",
+    "mujoco-warp": "3.12.0",
+    "torch": "2.11.0+cu130",
+    "numpy": "2.3.1",
+    "tensorboard": "2.21.0"
+  },
+  "local_patch": "config/mjwarp_capacity_patch.json",
+  "package_versions_alone_are_insufficient": true
+}

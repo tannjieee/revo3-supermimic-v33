@@ -1,0 +1,65 @@
+{
+  "status": "passed",
+  "scope": "periodic video integration and finite Newton validation of 50 mm / 100 g object",
+  "formal_training_ready": false,
+  "formal_training_started": false,
+  "hardware_connected": false,
+  "tests": 104,
+  "distributed_video_runtime_tested": false,
+  "algorithm_config_unchanged": true,
+  "environment_changed": true,
+  "object_dimensions_m": [
+    0.05,
+    0.05,
+    0.05
+  ],
+  "object_mass_kg": 0.1,
+  "object_mass_source": "user_supplied",
+  "inertia_source": "old_shape_relative_distribution_scaled_by_mass_and_size_squared_not_measured",
+  "default_video": {
+    "interval": 500,
+    "steps": 500,
+    "seed": 43,
+    "timeout_s": 240
+  },
+  "artifacts": "/home/brainco/reorientation/training/diagnostics/periodic_video_20261105",
+  "production_algorithm_baseline": "efadc6559330c5407324b0da9b30179e17c7590b",
+  "parent_source_commit": "ca1ea45fd2bf0b2194a8c8d1e6219314bb952913",
+  "new_object_training_iterations": 2,
+  "new_object_optimizer_steps": {
+    "wm": 20,
+    "actor": 0,
+    "critic": 40
+  },
+  "new_object_eval": {
+    "seed": 44,
+    "num_envs": 64,
+    "steps": 500,
+    "drops": 2,
+    "successes": 0
+  },
+  "recording_saved_state_unchanged": true,
+  "full_frame_decode_verified": true,
+  "new_asset_reproduction_byte_identical": true,
+  "source_sha256": {
+    "scripts/supermimic/train.py": "ae8c81dfcb8fda7853db4f316bd890979b561ce185e58fe9c1ea5dbf736ab5ed",
+    "scripts/supermimic/record_manual.py": "7585e24da1aadace9ca1add648b72bd91950c592965285744e764e2daf0179c9",
+    "source/viserdex/viserdex/supermimic/periodic_video.py": "7959be4dfe7651c8185164e4a23380f882236efd2a9f37afd3b78f45526dd211",
+    "source/viserdex/viserdex/supermimic/object_variant.py": "d0cc1ca20a495a1eb91935ae623019016e11ea3118720e9f61705bd98a92c18d",
+    "scripts/preprocessing/prepare_die_50mm.py": "048f3af5eb9eae40efeeda6f93f5e5b6472d2535bd06726b6454e08e6342e99f",
+    "tests/test_periodic_video.py": "735fa514d8895becef2276e287de10aa81be1431fce94f40026ee4308a5a8108",
+    "tests/test_die50_asset.py": "62528628b919b2d2f24886e7e7b369cd2d91cafad308b79b919d8d9ef6cd70ae",
+    "tests/test_rounded_die.py": "787d39727d1c958517e088c0dafdfc92165a1a5306599e93cbe862a82ed026cf",
+    "assets/rounded_die_50mm/manifest.json": "56fc46803f3c048269caf3435937de8ffd93c7cb7d229df55e4b9455d6d93d56",
+    "assets/rounded_die_50mm/object_newton.usda": "0f7bbaed75d8eb6ad027a7106eee0e2c8c8bf6a547a2025c6b3d19a06d4296a0"
+  },
+  "future_launcher_sha256": "e64a319b7c27c3955c152dddeeebaee2ebe4c707e28279194e6cff9ac0719b0e",
+  "limitations": [
+    "The video verifies plumbing; the 50 mm Actor is still the untrained HOME initializer.",
+    "Single fixed-seed video is not a policy performance metric or a bitwise reproducible physics trajectory.",
+    "70 mm WM and bootstrap diagnostics do not establish numerical results for 50 mm.",
+    "Printed-object inertia and contact parameters were not newly measured.",
+    "Finite single-GPU Newton runs only; no multi-GPU rendering test or PhysX comparison.",
+    "Checkpoint equality checks all serialized state, not simulator internals."
+  ]
+}

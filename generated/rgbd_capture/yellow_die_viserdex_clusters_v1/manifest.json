@@ -1,0 +1,21 @@
+{
+  "completed": true,
+  "splat_sha256": "a0d7f24a8fdf4a38c0551f232bdeede98aa5e7ce0807681805e6cdea6441c245",
+  "native_preprocessing_sha256": "3d729d78d48c78816a311a4e65725baf90a27516bced3bea530f99a8847aeb6e",
+  "indices_sha256": {
+    "splat_clustered_means3d_indices.pt": "fbb419b6b04a4641a11a7dee8ef1b141d67cdf3193123ad99a988f366cda16a1",
+    "splat_clustered_sh0_indices.pt": "bcff7145fbee1e6c0a4f463618624f28e97957a5b160df02920fa223436a0e81"
+  },
+  "clusters": {
+    "means3d": {
+      "count": 128,
+      "automatic": false,
+      "maximum": 128
+    },
+    "sh0": {
+      "count": 2,
+      "automatic": true,
+      "maximum": 32
+    }
+  }
+}

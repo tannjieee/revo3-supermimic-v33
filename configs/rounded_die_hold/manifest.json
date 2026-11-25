@@ -1,0 +1,25 @@
+{
+  "task_id": "Isaac-ViserDex-Repose-Revo3-SuperMimic-RoundedDie-Hold-v1",
+  "source_sha256": "546b2385d92cc5125cfdb2ce93c7690e1a0b0fae725c555357ae354a51f6cbe8",
+  "checkpoint_version": 15,
+  "initialization": "scratch",
+  "training_started": false,
+  "angle_threshold_rad": 0.1,
+  "angular_speed_threshold_rad_s": 0.5,
+  "hold_duration_seconds": 0.5,
+  "hold_control_steps": 10,
+  "control_hz": 20,
+  "state_dim": 173,
+  "actor_input": [
+    10,
+    124
+  ],
+  "physics_prediction_dim": 55,
+  "randomization_changed": false,
+  "penalty_weights_changed": false,
+  "initial_position_m": [
+    0.02,
+    -0.01,
+    0.565
+  ]
+}

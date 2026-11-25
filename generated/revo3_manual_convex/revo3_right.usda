@@ -1,0 +1,13 @@
+#usda 1.0
+(
+    defaultPrim = "revo3_single"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "revo3_single" (
+    prepend references = @../../assets/revo3_d405/vendor/brainco-description/revo3_system/optimized/right_20261027/revo3_right.usd@
+)
+{
+}
+

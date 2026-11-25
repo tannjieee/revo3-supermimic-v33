@@ -1,0 +1,27 @@
+{
+  "source_archive": "die_camera_assets_v2_with_gaussians.zip",
+  "source_archive_sha256": "e6456ff6dfaa68878912b88b44f38453917aa81401d00264aa8e8549704e79f5",
+  "task_id": "Isaac-ViserDex-Repose-Revo3-SuperMimic-YellowDie-WujiOffset-HandPose-Hold-v1",
+  "files": {
+    "assets/rounded_die/visual.glb": "e533bdf2153fb0d6e14446fa04ad4dbd8e7c800a1f0f6ea94fd270cd1eaaf8c5",
+    "assets/rounded_die/ATTRIBUTION.txt": "8633a632216257cb9162bcc4fd55916239538710bc4ffb216a5a7ba7087c6505",
+    "assets/rounded_die/asset_manifest.json": "6d0ddfdf41b0d23bedce29afa66b44bbd214d8509c898129562608120c4ad265",
+    "assets/rounded_die/object_newton.usda": "74f0a4e668c37d05475a5dff64be5f4537f945162d560304651fe0ba8ec62784",
+    "assets/rounded_die/collision.obj": "eab83e192e008f8638845ecfe4b96d52986745189961105fdc84d302d14a32f0",
+    "assets/rounded_die/metadata.json": "e78bc58d081232b895a00922fe67763370578f00c0d8b7271743ea41b56d8536",
+    "assets/rounded_die/visual.usda": "86312cd5ebc913ddbf2e5e1095e02e18547d87517255a2ff9ed71abc2caea5d5",
+    "assets/rounded_die/gaussians.npz": "6bc207028f272ae1fa25b8be62bef6f6ca023f2b7c0f59dbab02d135cfb8ed22",
+    "assets/rounded_die/object.usda": "26f7714a6a80e7296f0ce8ba3845566b5703d9559fbb7dcf3d11c6c49c4e3481",
+    "assets/rounded_die/scene.xml": "e16728c577a9ce60c5f2456b71aabccbcf02bd07e6c6c55016d09d55e9971a4b",
+    "assets/rounded_die/gaussians.ply": "a0d7f24a8fdf4a38c0551f232bdeede98aa5e7ce0807681805e6cdea6441c245",
+    "assets/rounded_die/meshes/black_pips.obj": "581a56a7ac06acd04a7d68c71d9f06fa38eb3f5c9588d02bdb88d5fc1f8d6f71",
+    "assets/rounded_die/meshes/yellow_body.obj": "6598263726f3b1a9e830e35dbb2b0e2210478880985c88eddcdb24d53ebe1507",
+    "configs/yellow_die_handpose/env.yaml": "5811393478264c40260661421c221e2a9340175230f0ac0d42d4445ad3561d93",
+    "scripts/supermimic/prepare_yellow_die.py": "6a4c5cf7ea0e0f937676569e61bdc67321a10b9b9cff759847ba2dd28ffb60ae",
+    "scripts/supermimic/start_yellow_die.py": "b6c51b2b99c27d52c61c219ad74d82c2e0185c4cd395d3702c1e449867d2949d",
+    "scripts/supermimic/record_die_target.py": "3b7de804980de5f34d5de63ad2e99f81a28d3e3fdf3b193d50ae806815451e6d",
+    "scripts/supermimic/train.py": "b51278f3025280e3423f68e46822b4c6fc189aa59ac272b89936c8f9809fbfd8",
+    "scripts/run_yellow_die.sh": "2a8ee37ca376f6b71503af24b987c430932d2260e7b6cc73e593bc1abb8e5d16",
+    "source/viserdex/viserdex/supermimic/simulation.py": "ae3e629463c1b0ede97d1ecc54e0e0791f44924479950454c0711b9b21c01878"
+  }
+}

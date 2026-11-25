@@ -1,0 +1,314 @@
+{
+  "repeat1_seed166": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_frozen_r1_seed166_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 15,
+      "timeouts": 49,
+      "violation_fractions": [
+        0.010424202308058739,
+        0.0,
+        0.1179875060915947,
+        0.007694837171584368,
+        0.0004932588199153543
+      ],
+      "rotation_error_rad": 2.320860584062089,
+      "audit_errors": {
+        "reward": 2.2351741790771484e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 7.897615432739258e-07,
+        "fk_linear_velocity_m_s": 9.57399606704712e-07,
+        "fk_angular_velocity_rad_s": 2.592802047729492e-06,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 1.1920928955078125e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.4164838790893555
+      },
+      "contact_peaks": {
+        "candidates": 6041,
+        "contacts": 866,
+        "constraints": 117
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 32.80986253998708
+    },
+    "exit_code": 0,
+    "lifecycle": [
+      {
+        "stage": "writer_close_begin",
+        "pid": 2944668,
+        "time": 1793911941.092425
+      },
+      {
+        "stage": "env_close_begin",
+        "pid": 2944668,
+        "time": 1793911941.0929937
+      },
+      {
+        "stage": "env_close_end",
+        "pid": 2944668,
+        "time": 1793911941.4540362
+      },
+      {
+        "stage": "app_close_begin",
+        "pid": 2944668,
+        "time": 1793911941.454569
+      },
+      {
+        "stage": "app_close_end",
+        "pid": 2944668,
+        "time": 1793911941.4546354
+      }
+    ]
+  },
+  "repeat1_seed167": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_frozen_r1_seed167_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 7,
+      "timeouts": 57,
+      "violation_fractions": [
+        0.013222236186265945,
+        0.0,
+        0.13087117671966553,
+        0.0070775956846773624,
+        0.00022519622871186584
+      ],
+      "rotation_error_rad": 2.1345659971942834,
+      "audit_errors": {
+        "reward": 1.862645149230957e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 8.642673492431641e-07,
+        "fk_linear_velocity_m_s": 1.0076910257339478e-06,
+        "fk_angular_velocity_rad_s": 2.384185791015625e-06,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 9.5367431640625e-07,
+        "position_frame": 1.0058283805847168e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.1920928955078125e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 3.2721426486968994
+      },
+      "contact_peaks": {
+        "candidates": 5793,
+        "contacts": 908,
+        "constraints": 114
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 32.09397543198429
+    },
+    "exit_code": 0,
+    "lifecycle": [
+      {
+        "stage": "writer_close_begin",
+        "pid": 2946014,
+        "time": 1793911988.087759
+      },
+      {
+        "stage": "env_close_begin",
+        "pid": 2946014,
+        "time": 1793911988.088191
+      },
+      {
+        "stage": "env_close_end",
+        "pid": 2946014,
+        "time": 1793911988.4283037
+      },
+      {
+        "stage": "app_close_begin",
+        "pid": 2946014,
+        "time": 1793911988.4287822
+      },
+      {
+        "stage": "app_close_end",
+        "pid": 2946014,
+        "time": 1793911988.4288483
+      }
+    ]
+  },
+  "repeat16_seed166": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_frozen_r16_seed166_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 27,
+      "timeouts": 37,
+      "violation_fractions": [
+        0.01935802772641182,
+        0.0,
+        0.218110591173172,
+        0.023389365524053574,
+        0.0010268501937389374
+      ],
+      "rotation_error_rad": 2.3104608532429793,
+      "audit_errors": {
+        "reward": 2.9802322387695312e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 7.916241884231567e-07,
+        "fk_linear_velocity_m_s": 9.648501873016357e-07,
+        "fk_angular_velocity_rad_s": 2.592802047729492e-06,
+        "fk_quaternion": 5.960464477539062e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 1.1920928955078125e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.4998855590820312
+      },
+      "contact_peaks": {
+        "candidates": 5925,
+        "contacts": 1056,
+        "constraints": 133
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 32.80666477099294
+    },
+    "exit_code": 0,
+    "lifecycle": [
+      {
+        "stage": "writer_close_begin",
+        "pid": 2944669,
+        "time": 1793911940.9920082
+      },
+      {
+        "stage": "env_close_begin",
+        "pid": 2944669,
+        "time": 1793911940.9924433
+      },
+      {
+        "stage": "env_close_end",
+        "pid": 2944669,
+        "time": 1793911941.3601046
+      },
+      {
+        "stage": "app_close_begin",
+        "pid": 2944669,
+        "time": 1793911941.360617
+      },
+      {
+        "stage": "app_close_end",
+        "pid": 2944669,
+        "time": 1793911941.3606873
+      }
+    ]
+  },
+  "repeat16_seed167": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_frozen_r16_seed167_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 30,
+      "timeouts": 34,
+      "violation_fractions": [
+        0.02101416140794754,
+        0.0,
+        0.21687985956668854,
+        0.0281330905854702,
+        0.0011420740047469735
+      ],
+      "rotation_error_rad": 2.182386811617867,
+      "audit_errors": {
+        "reward": 1.862645149230957e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 8.642673492431641e-07,
+        "fk_linear_velocity_m_s": 1.0207295417785645e-06,
+        "fk_angular_velocity_rad_s": 2.212822437286377e-06,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 1.1920928955078125e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.7419203519821167
+      },
+      "contact_peaks": {
+        "candidates": 5629,
+        "contacts": 1015,
+        "constraints": 141
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 32.9756248560152
+    },
+    "exit_code": 0,
+    "lifecycle": [
+      {
+        "stage": "writer_close_begin",
+        "pid": 2946013,
+        "time": 1793911988.936289
+      },
+      {
+        "stage": "env_close_begin",
+        "pid": 2946013,
+        "time": 1793911988.9366145
+      },
+      {
+        "stage": "env_close_end",
+        "pid": 2946013,
+        "time": 1793911989.293705
+      },
+      {
+        "stage": "app_close_begin",
+        "pid": 2946013,
+        "time": 1793911989.29419
+      },
+      {
+        "stage": "app_close_end",
+        "pid": 2946013,
+        "time": 1793911989.2942505
+      }
+    ]
+  }
+}

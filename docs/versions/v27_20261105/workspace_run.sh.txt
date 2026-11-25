@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Pinned Isaac Lab / Newton environment for manual-convex policy retraining.
+set -euo pipefail
+project_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+source_root="$project_root/source_home/brainco1/workspace"
+lab_dir="$source_root/xinyu/IsaacLab-v3.0.0"
+task_dir="$source_root/xinyu/viserDex_revo3_20261102"
+runtime_prefix="$source_root/conda-forge/miniforge3/envs/viserdex-newton"
+runtime_python="$runtime_prefix/bin/python"
+uv_bin="${UV_BIN:-$(command -v uv)}"
+export PYTHONNOUSERSITE=1 PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
+export PYTHONPATH="$task_dir/source/viserdex"
+for package_dir in "$lab_dir"/source/*; do
+    [[ -d "$package_dir" ]] && export PYTHONPATH="$PYTHONPATH:$package_dir"
+done
+export VISERDEX_OBJECT=RoundedDie
+export UV_PROJECT_ENVIRONMENT="$runtime_prefix" UV_PYTHON="$runtime_python"
+export UV_PYTHON_PREFERENCE=only-system UV_PYTHON_DOWNLOADS=never VIRTUAL_ENV="$runtime_prefix"
+export CUDA_HOME="$runtime_prefix/lib/python3.12/site-packages/nvidia/cu13"
+export PATH="$runtime_prefix/bin:$CUDA_HOME/bin:$PATH"
+export LIBRARY_PATH="$runtime_prefix/lib/cuda-build${LIBRARY_PATH:+:$LIBRARY_PATH}"
+export CPATH="$runtime_prefix/include/python3.12:$runtime_prefix/include${CPATH:+:$CPATH}"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=2 MAX_JOBS=4
+export OMNI_KIT_ACCEPT_EULA=YES PYGLET_HEADLESS=true
+export WARP_CACHE_PATH="$project_root/runtime/cache/warp"
+export TORCHINDUCTOR_CACHE_DIR="$project_root/runtime/cache/torchinductor"
+export TORCH_EXTENSIONS_DIR="$project_root/runtime/cache/torch_extensions"
+"$runtime_python" -c 'from importlib.metadata import version; expected={"isaacsim":"6.2.0.0","isaaclab":"28.0.0","newton":"1.6.1","warp-lang":"1.17.0"}; actual={k:version(k) for k in expected}; assert actual==expected, actual'
+mode="${1:-help}"
+[[ $# -eq 0 ]] || shift
+cd -- "$task_dir"
+case "$mode" in
+    prepare)
+        exec "$uv_bin" run --project "$lab_dir" --no-sync python scripts/preprocessing/prepare_revo3_newton.py \
+            --manual_convex_usd "$project_root/assets/revo3_d405/vendor/brainco-description/revo3_system/optimized/right_20261027/revo3_right.usd" \
+            --usd_dir "$task_dir/generated/revo3_manual_convex" --viz none "$@" ;;
+    train)
+        exec "$uv_bin" run --project "$lab_dir" --no-sync python scripts/supermimic/train.py \
+            --policy_variant manual_convex --network_revision hardware_center25_v3 --output_dir "$project_root/training/runs/$(date +%Y%m%d_%H%M%S)" \
+            --num_envs 1024 --device cuda:0 --viz none physics=newton_mjwarp "$@" ;;
+    generate_grasps)
+        exec "$runtime_python" scripts/supermimic/generate_grasps.py "$@" ;;
+    certify_grasps)
+        exec "$uv_bin" run --project "$lab_dir" --no-sync python scripts/supermimic/certify_grasps.py \
+            --num_envs 4 --device cuda:0 --viz none physics=newton_mjwarp "$@" ;;
+    play)
+        exec "$uv_bin" run --project "$lab_dir" --no-sync python scripts/supermimic/record_manual.py \
+            --num_envs 1 --device cuda:0 --viz newton_gl physics=newton_mjwarp "$@" ;;
+    export)
+        exec "$runtime_python" scripts/supermimic/export_direct_actor.py "$@" ;;
+    test)
+        exec "$project_root/runtime/policy/bin/python" -m pytest tests/test_identified_hand.py tests/test_manual_convex_policy.py tests/test_single_goal.py tests/test_orientation_reward.py tests/test_position_goal.py tests/test_dense_stability_reward.py "$@" ;;
+    *)
+        echo 'Usage: training/run.sh prepare | generate_grasps | certify_grasps | train [arguments] | play --checkpoint PATH --env_config PATH --output_dir PATH | test | export --checkpoint PATH --output PATH'
+        [[ "$mode" == help ]] ;;
+esac

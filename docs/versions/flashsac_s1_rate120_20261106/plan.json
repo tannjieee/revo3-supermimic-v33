@@ -1,0 +1,25 @@
+{
+  "authorization": "用户同意仅提高关节目标速率至120deg/s进行对照",
+  "target_rate_deg_s": 120,
+  "max_target_step_deg": 4.8,
+  "reference_rate_deg_s": 60,
+  "actual_joint_speed_risk_deg_s": 90,
+  "initial_physical_std_deg": 0.5,
+  "local_initial_std": 0.10416666666666667,
+  "noise_repeat_max": 1,
+  "smoke_envs": 64,
+  "smoke_steps": 1024,
+  "training_envs": 1024,
+  "training_steps": 4883,
+  "transitions": 5000192,
+  "replay_capacity": 1000000,
+  "seed": 42,
+  "evaluation_seeds": [
+    166,
+    167
+  ],
+  "evaluation_envs": 64,
+  "initialization": "fresh",
+  "stop_on_hard_guard": true,
+  "automatic_restart": false
+}

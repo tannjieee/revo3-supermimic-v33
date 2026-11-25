@@ -1,0 +1,101 @@
+{
+  "version": 29,
+  "simulation_run": "/home/brainco/reorientation/training/runs/stable_value_v29_validation_20261105",
+  "resume_run": "/home/brainco/reorientation/training/runs/stable_value_v29_resume_validation_20261105",
+  "simulation_validation": {
+    "max_errors": {
+      "reward": 1.4901161193847656e-08,
+      "ema": 0.0,
+      "clean_student_observation": 0.0,
+      "convex_vertices_m": 0.0,
+      "convex_inertia_kg_m2": 1.8189894035458565e-11,
+      "fk_position_m": 9.238719940185547e-07,
+      "fk_linear_velocity_m_s": 5.7220458984375e-06,
+      "fk_angular_velocity_rad_s": 1.2040138244628906e-05,
+      "fk_quaternion": 5.960464477539062e-07,
+      "hand_convex_vertices_m": 2.0862234596310534e-10,
+      "direct_observation": 3.5762786865234375e-07,
+      "hand_pose": 2.384185791015625e-07,
+      "position_frame": 2.300366759300232e-07,
+      "hold_counter": 0.0,
+      "orientation_frame": 1.430511474609375e-06,
+      "success_boundary_disagreements": 0,
+      "terminal_reset_state_separation": 13.948121070861816
+    },
+    "contact_peaks": {
+      "candidates": 5345,
+      "contacts": 804,
+      "constraints": 93
+    },
+    "resets": 50,
+    "optimizer_steps": {
+      "wm": 800,
+      "actor": 80,
+      "critic": 1600
+    },
+    "replay_size": 264,
+    "adaptive_replay": true,
+    "event_archive_size": 0,
+    "grasp_sampling": null,
+    "seconds": 49.24554997700034,
+    "model_sync_digest": "66aff9867e39a339de899c92e96d16ed265056842dabb7ce6e437da86f31cb05",
+    "rank": 0,
+    "world_size": 1
+  },
+  "resume_validation": {
+    "max_errors": {
+      "reward": 1.4901161193847656e-08,
+      "ema": 0.0,
+      "clean_student_observation": 0.0,
+      "convex_vertices_m": 0.0,
+      "convex_inertia_kg_m2": 1.8189894035458565e-11,
+      "fk_position_m": 8.009374141693115e-07,
+      "fk_linear_velocity_m_s": 5.185604095458984e-06,
+      "fk_angular_velocity_rad_s": 1.430511474609375e-05,
+      "fk_quaternion": 6.556510925292969e-07,
+      "hand_convex_vertices_m": 2.0862234596310534e-10,
+      "direct_observation": 3.5762786865234375e-07,
+      "hand_pose": 2.384185791015625e-07,
+      "position_frame": 2.3096799850463867e-07,
+      "hold_counter": 0.0,
+      "orientation_frame": 1.1920928955078125e-06,
+      "success_boundary_disagreements": 0,
+      "terminal_reset_state_separation": 11.277815818786621
+    },
+    "contact_peaks": {
+      "candidates": 5319,
+      "contacts": 832,
+      "constraints": 84
+    },
+    "resets": 14,
+    "optimizer_steps": {
+      "wm": 820,
+      "actor": 82,
+      "critic": 1640
+    },
+    "replay_size": 69,
+    "adaptive_replay": true,
+    "event_archive_size": 0,
+    "grasp_sampling": null,
+    "seconds": 5.9158528840052895,
+    "model_sync_digest": "79f933c3d359a33cbd7b0c34d365e20aeac619400727d3662ef98accecf4ab19",
+    "rank": 0,
+    "world_size": 1
+  },
+  "complete_model_digest_restored": true,
+  "real_v28_critic_strict_load_passed": true,
+  "v29_inference_load_passed": true,
+  "all_saved_networks_finite": true,
+  "actor_loss_min": 0.1570478230714798,
+  "actor_loss_max": 0.5154374241828918,
+  "last_actor_loss": 0.15881624817848206,
+  "last_actor_grad_norm": 0.3107195794582367,
+  "last_cost_bootstrap_fraction": 0.34236985445022583,
+  "all_logged_values_within_declared_bounds": true,
+  "real_drops_in_formal_steps": 6,
+  "note": "64 environments, full production network/batches and CUDA Graph, 80 immediate joint iterations; forced warmup timeout; 32-step fresh holdout. This does not prove policy convergence or solve the previous mechanical overshoot.",
+  "regression_tests_passed": 399,
+  "regression_log": "/home/brainco/reorientation/training/validation_stable_value_v29_regression_final.log",
+  "regression_log_sha256": "9f39481de018fb50ccf7dc52e47ed7ab56036a91e7edf4aa84f9341f185a2bff",
+  "regression_command": "/home/brainco/reorientation/training/validation_stable_value_v29_command.json"
+}

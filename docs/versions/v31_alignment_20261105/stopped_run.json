@@ -1,0 +1,28 @@
+{
+  "checkpoint": "/home/brainco/reorientation/training/runs/die50_supported_20261105_214720/latest.pt",
+  "iteration": 400,
+  "version": 30,
+  "optimizer_steps": {
+    "wm": 4000,
+    "actor": 0,
+    "critic": 8000
+  },
+  "object_velocity_scale": 2.0,
+  "physical_velocity_std": [
+    0.05234469845890999,
+    0.01762334629893303,
+    0.012468035332858562
+  ],
+  "effective_physical_std": [
+    0.05258295685052872,
+    0.01831890642642975,
+    0.013433238491415977
+  ],
+  "epsilon_variance_fraction": [
+    0.009041698649525642,
+    0.07449737191200256,
+    0.1385410726070404
+  ],
+  "wm_input_dim": 164,
+  "critic_input_dim": 152
+}

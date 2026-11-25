@@ -1,0 +1,186 @@
+{
+  "status": "completed_feature_experiment_contactsdf_design_only",
+  "evidence_root": "/home/brainco/reorientation/training/diagnostics/contact_wm_features_20261106",
+  "source_checkpoint_sha256": "78f40f3031f5402ff6b4eb1ac3a070d72020f937411b5540733f98d840e788e2",
+  "fitting_script_sha256_at_run": "cc936b9d3f8b8b6288540a1303624b7d3e0865c43158209974908aa263a79aa0",
+  "current_scripts_sha256": {
+    "scripts/supermimic/contact_feature_collect.py": "e16dc31280ebfb925eb444a6012ffe5f1e3a6d5478f8fa30f6f0675dc3083d39",
+    "scripts/supermimic/experiment_contact_features.py": "558a00457703dd9323ce08a1904ac945ba49488d8f65f8171cc18e4c5cde30e3",
+    "scripts/supermimic/analyze_contact_features.py": "77ff0dfe5b55320ab1ed595c746311a9e831f163dc28ae185d408ec67b53c749",
+    "tests/test_contact_feature_experiment.py": "7f58581d7c0aaf1797c5486614d207264361bd551ce8f095c58b4f7ff59e29a8"
+  },
+  "fit_count": 8,
+  "unit_tests": "4 passed",
+  "stats_fix_verification": {
+    "status": "passed",
+    "checks": {
+      "mean": {
+        "finite": true,
+        "bitwise_equal_after_empty_batch_fix": true
+      },
+      "variance": {
+        "finite": true,
+        "bitwise_equal_after_empty_batch_fix": true
+      },
+      "count": {
+        "finite": true,
+        "bitwise_equal_after_empty_batch_fix": true
+      }
+    },
+    "count": 49080.0,
+    "saved_statistics_sha256": "3a95ba8aa714a23d98ef74b80c56a957ba9f880fc0a3b5dd413844853858f8eb",
+    "experiment_results_affected": false,
+    "explanation": "Skip empty live-index batches. Actual training statistics remain bitwise identical; original completed fits are retained."
+  },
+  "test_worlds": 128,
+  "rotation_response": {
+    "resolved": 11,
+    "independent_worlds": 11,
+    "largest_squared_energy_fraction": 0.3441143035888672
+  },
+  "paired_rotation": {
+    "rotation/geometry": {
+      "per_seed": [
+        {
+          "seed": 61,
+          "cosine_difference": -0.05139690265059471,
+          "cosine_difference_cluster95": [
+            -0.12217768081887201,
+            0.015575376864184007
+          ],
+          "base_relative_vector_error": 1.3427252769470215,
+          "alternative_relative_vector_error": 1.661206603050232,
+          "base_relative_vector_error_without_largest": 1.6214659214019775,
+          "alternative_relative_vector_error_without_largest": 2.0262861251831055
+        },
+        {
+          "seed": 62,
+          "cosine_difference": -0.0018971305107697845,
+          "cosine_difference_cluster95": [
+            -0.03950832130556757,
+            0.044037133624607844
+          ],
+          "base_relative_vector_error": 0.7912907004356384,
+          "alternative_relative_vector_error": 0.7677843570709229,
+          "base_relative_vector_error_without_largest": 0.9049039483070374,
+          "alternative_relative_vector_error_without_largest": 0.8813343644142151
+        }
+      ],
+      "mean_across_two_sampling_seeds_cosine_difference": -0.026647020131349564,
+      "world_cluster95": [
+        -0.07527742812579329,
+        0.019664980640465478
+      ],
+      "mean_per_sample_relative_error_difference": 0.007814491167664528,
+      "relative_error_difference_world_cluster95": [
+        -0.08214472583071752,
+        0.10730515694753687
+      ]
+    },
+    "rotation/actuator": {
+      "per_seed": [
+        {
+          "seed": 61,
+          "cosine_difference": 0.029451418668031693,
+          "cosine_difference_cluster95": [
+            -0.08597800528461283,
+            0.16425609263506782
+          ],
+          "base_relative_vector_error": 1.3427252769470215,
+          "alternative_relative_vector_error": 1.7848786115646362,
+          "base_relative_vector_error_without_largest": 1.6214659214019775,
+          "alternative_relative_vector_error_without_largest": 2.166839361190796
+        },
+        {
+          "seed": 62,
+          "cosine_difference": -0.013960391283035278,
+          "cosine_difference_cluster95": [
+            -0.06032919897274538,
+            0.030399110642346454
+          ],
+          "base_relative_vector_error": 0.7912907004356384,
+          "alternative_relative_vector_error": 0.8026739954948425,
+          "base_relative_vector_error_without_largest": 0.9049039483070374,
+          "alternative_relative_vector_error_without_largest": 0.9048435688018799
+        }
+      ],
+      "mean_across_two_sampling_seeds_cosine_difference": 0.007745512295514345,
+      "world_cluster95": [
+        -0.06321534792130644,
+        0.07592346458272498
+      ],
+      "mean_per_sample_relative_error_difference": 0.034379731863737106,
+      "relative_error_difference_world_cluster95": [
+        -0.04919811090962453,
+        0.1594464104961265
+      ]
+    },
+    "rotation/both": {
+      "per_seed": [
+        {
+          "seed": 61,
+          "cosine_difference": -0.024292103946208954,
+          "cosine_difference_cluster95": [
+            -0.17921131591905248,
+            0.13560816483064128
+          ],
+          "base_relative_vector_error": 1.3427252769470215,
+          "alternative_relative_vector_error": 1.150039792060852,
+          "base_relative_vector_error_without_largest": 1.6214659214019775,
+          "alternative_relative_vector_error_without_largest": 1.3670836687088013
+        },
+        {
+          "seed": 62,
+          "cosine_difference": 0.0016156028723344207,
+          "cosine_difference_cluster95": [
+            -0.08382026631046426,
+            0.07892964167351066
+          ],
+          "base_relative_vector_error": 0.7912907004356384,
+          "alternative_relative_vector_error": 0.8132914900779724,
+          "base_relative_vector_error_without_largest": 0.9049039483070374,
+          "alternative_relative_vector_error_without_largest": 0.9146377444267273
+        }
+      ],
+      "mean_across_two_sampling_seeds_cosine_difference": -0.011338249780237675,
+      "world_cluster95": [
+        -0.12393711128018119,
+        0.10157228069887916
+      ],
+      "mean_per_sample_relative_error_difference": -0.06090075150132179,
+      "relative_error_difference_world_cluster95": [
+        -0.16592668298293242,
+        0.02211152613162991
+      ]
+    }
+  },
+  "contactsdf_upstream_commit": "3a21edf8e51788f72a7d77259af4dd584d5ec43f",
+  "contactsdf_implemented": false,
+  "production_model_promoted": false,
+  "collections": {
+    "50": {
+      "status": "complete",
+      "model_unchanged": true,
+      "optimizer_unchanged": true,
+      "snapshots": 8
+    },
+    "51": {
+      "status": "complete",
+      "model_unchanged": true,
+      "optimizer_unchanged": true,
+      "snapshots": 8
+    },
+    "52": {
+      "status": "complete",
+      "model_unchanged": true,
+      "optimizer_unchanged": true,
+      "snapshots": 4
+    },
+    "53": {
+      "status": "complete",
+      "model_unchanged": true,
+      "optimizer_unchanged": true,
+      "snapshots": 4
+    }
+  }
+}

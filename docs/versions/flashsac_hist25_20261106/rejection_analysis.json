@@ -1,0 +1,10 @@
+{
+  "env_id": 2,
+  "joint_id": 10,
+  "requested_delta_deg": 2.468901649095339,
+  "current_mean_minus_previous_command_deg": 0.49065346921703595,
+  "sampled_target_minus_current_mean_deg": 1.9782481798783031,
+  "initialized_std_deg": 0.5,
+  "latent_std": 0.010398348793387413,
+  "interpretation": "Decomposition of the rejected command, not a causal ablation; previous command also contains exploration."
+}

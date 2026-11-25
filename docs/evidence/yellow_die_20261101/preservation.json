@@ -1,0 +1,11 @@
+{
+  "deployment_hashes_verified": 20,
+  "original_tracked_changes": "",
+  "original_status": "running",
+  "original_iteration": 32241,
+  "original_pids": {
+    "0": 809344,
+    "1": 809345
+  },
+  "new_training_started": false
+}

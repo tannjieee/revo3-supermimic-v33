@@ -1,0 +1,120 @@
+{
+  "checkpoint": "/home/brainco/reorientation/training/diagnostics/support_reset_20261105/preflight/model_2.pt",
+  "iteration": 2,
+  "checkpoint_sha256": "e4cb763f19794504eaa867d349c13a3ba8868da307b6427eda353b2ae5dddf6a",
+  "environment": {
+    "source_environment": "/home/brainco/reorientation/training/diagnostics/support_reset_20261105/preflight/env.yaml",
+    "source_environment_sha256": "ea0522f842ecc2080b635257a388a6fffd249dfdde2cfee54d3096224c0b2db3",
+    "contract_sha256": "630956d3c6b1edb59ae7ae93b20f86d583ea1898aabd001171ee5ebf8c045e33",
+    "assets": {
+      "robot": {
+        "path": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/generated/revo3_manual_convex/revo3_right.usda",
+        "sha256": "5fc759d7e84181022c2e0c375f7ef7859d585a9f297dddb02437d37217d5d2c0"
+      },
+      "object": {
+        "path": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/assets/rounded_die_50mm/object_newton.usda",
+        "sha256": "0f7bbaed75d8eb6ad027a7106eee0e2c8c8bf6a547a2025c6b3d19a06d4296a0"
+      }
+    },
+    "physics": "isaaclab_newton.physics.mjwarp_manager:NewtonMJWarpManager",
+    "step_dt": 0.04,
+    "nconmax": 640,
+    "njmax": 1024
+  },
+  "geometry_digest": "bb071f245e160bc7c1751d5a77bb7872aae3098ffb6b90aa00a052f7494301ac",
+  "object_asset": {
+    "usd_path": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/assets/rounded_die_50mm/object_newton.usda",
+    "usd_sha256": "0f7bbaed75d8eb6ad027a7106eee0e2c8c8bf6a547a2025c6b3d19a06d4296a0",
+    "variant": "die50",
+    "dimensions_m": [
+      0.049999967217445374,
+      0.05000000074505806,
+      0.04999997466802597
+    ],
+    "mass_kg": 0.1,
+    "mass_source": "user_supplied",
+    "material_srgb": {
+      "yellow_body": "#F4EE2A",
+      "black_pips": "#123E35"
+    }
+  },
+  "collision_dimensions_mm": [
+    49.99996908009052,
+    50.00000074505806,
+    49.99997280538082
+  ],
+  "noise_config": {
+    "enabled": true,
+    "joint_enabled": true,
+    "joint_noise_std": 0.005,
+    "joint_bias_std": 0.01,
+    "joint_delay_max_steps": 0,
+    "max_period": 3,
+    "jitter_probability": 0.1,
+    "failure_probability": 0.3,
+    "position_noise": 0.012,
+    "position_bias": 0.012,
+    "rotation_noise_deg": 1.0,
+    "rotation_bias_deg": 0.1,
+    "failure_position_extent": 0.15
+  },
+  "seed": 43,
+  "steps": 500,
+  "fps": 25.0,
+  "policy_hz": 25.0,
+  "policy_input": "10 x 81 noisy observations",
+  "actor_amp": "none",
+  "exploration_action_noise": false,
+  "camera_eye": [
+    -0.22,
+    -0.24,
+    0.78
+  ],
+  "camera_target": [
+    0.02,
+    0.0,
+    0.565
+  ],
+  "continuous": true,
+  "selected_environment": 0,
+  "target_shaping": null,
+  "hold_protocol": {
+    "angle_rad": 0.1,
+    "angular_speed_rad_s": 0.5,
+    "duration_s": 0.52
+  },
+  "target_visualization": "authored yellow-body and black-pips subsets, two coincident visual-only markers, world goal quaternion, scale 1",
+  "target_marker_position": [
+    0.1599999964237213,
+    -0.15000000596046448,
+    0.6150000095367432
+  ],
+  "object_support_reset": {
+    "meshes": {
+      "shapes": 144,
+      "max_vertex_error_m": 2.6234178596822688e-09,
+      "max_support_error_m": 2.3842312568689294e-09,
+      "object_vertex_error_m": 1.421754851063103e-15,
+      "object_support_error_m": 9.124645483638005e-16
+    },
+    "reset_count": 1,
+    "max_gap_m": 2.030496220813044e-06,
+    "min_gap_m": 2.030496220813044e-06,
+    "last": [
+      {
+        "gap_m": 2.030496220813044e-06,
+        "height_shift_m": -0.008972755721301476,
+        "query_iterations": 5,
+        "support_geom": 61,
+        "support_body": "query_right_middle_MCP_link",
+        "normal_up_dot": 0.9547578048209879,
+        "env_id": 0,
+        "position_w": [
+          2.71722674369812e-05,
+          -0.027933010831475258,
+          0.5560272336006165
+        ]
+      }
+    ]
+  }
+}

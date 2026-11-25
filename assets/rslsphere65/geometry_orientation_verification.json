@@ -1,0 +1,65 @@
+{
+  "axes": [
+    {
+      "axis_and_expected_letter": "+X / E",
+      "foreground_psnr": 33.72887337587255
+    },
+    {
+      "axis_and_expected_letter": "-X / T",
+      "foreground_psnr": 34.00667652424812
+    },
+    {
+      "axis_and_expected_letter": "+Y / H",
+      "foreground_psnr": 31.242500486271073
+    },
+    {
+      "axis_and_expected_letter": "-Y / R",
+      "foreground_psnr": 31.583938250917676
+    },
+    {
+      "axis_and_expected_letter": "+Z / S",
+      "foreground_psnr": 33.05333782007873
+    },
+    {
+      "axis_and_expected_letter": "-Z / L",
+      "foreground_psnr": 34.50039780287925
+    }
+  ],
+  "source_mesh_unchanged_sha256": "32318829419a97770424eb1327607d40cfbd1d40d2b99a2674fd12bb913b9377",
+  "input_diameter_m": 0.065,
+  "coordinate_transform": [
+    [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "up_axis": "Z",
+  "gaussian_center_radius_quantiles_m": [
+    0.028568245470523834,
+    0.029930689558386802,
+    0.03162177465856075,
+    0.03241811003535986,
+    0.03249622881412506
+  ],
+  "note": "Gaussian centers/scales are an appearance fit and need not lie exactly on the physical collision sphere. Continue using supplied USD sphere for physics."
+}

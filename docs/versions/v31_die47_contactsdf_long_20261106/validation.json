@@ -1,0 +1,696 @@
+{
+  "recorded_at": "2026-11-06T02:59:54.178964+08:00",
+  "scope": "In-progress snapshot; do not interpret as final experiment result",
+  "asset": {
+    "variant": "die50_47g",
+    "nominal_mass_kg": 0.047,
+    "geometry_unchanged": true,
+    "inertia_assumption": "same internal mass distribution, 0.47 times former 100g inertia",
+    "usd_sha256": "73ea851c84ece61abf9de1b13aeacee93846443778c664d1c43163bc05903068"
+  },
+  "tests": {
+    "passed": 93,
+    "log": "/home/brainco/reorientation/training/diagnostics/die47_warmup_long_20261106/regression_final.log",
+    "fixed_reset_pytest_not_included": "Requires official simulator runtime; actual 64-world reset validation passed instead",
+    "additional_failure_reporting_passed": 3,
+    "additional_failure_reporting_log": "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106/failure_reporting_tests_passed.log"
+  },
+  "fixed_reset": {
+    "passed": true,
+    "num_envs": 64,
+    "steps": 550,
+    "drops": 0,
+    "max_position_drift_m": 0.00030795298516750336,
+    "max_orientation_drift_deg": 0.6925848637381424,
+    "live_domain_parameters_unchanged": true
+  },
+  "preflight": {
+    "iterations": 60,
+    "warmup_iterations": 40,
+    "num_envs": 64,
+    "exit_code": 0,
+    "wm_actor_critic_updates": [
+      600,
+      20,
+      1200
+    ],
+    "bootstrap_rollout_gradient_ratio_iteration51": 35.177,
+    "path": "/home/brainco/reorientation/training/diagnostics/die47_warmup_long_20261106/preflight"
+  },
+  "videos_decoded": [
+    {
+      "path": "/home/brainco/reorientation/training/diagnostics/die47_warmup_long_20261106/preflight/videos/iteration_000060/rollout.mp4",
+      "decoded_frames": 500,
+      "dimensions": [
+        1280,
+        960
+      ],
+      "fps": 25.0
+    },
+    {
+      "path": "/home/brainco/reorientation/training/runs/die50_47g_warmup_baseline_20261106/videos/iteration_000500/rollout.mp4",
+      "decoded_frames": 500,
+      "dimensions": [
+        1280,
+        960
+      ],
+      "fps": 25.0
+    },
+    {
+      "path": "/home/brainco/reorientation/training/runs/die50_47g_warmup_baseline_20261106/videos/iteration_001000/rollout.mp4",
+      "decoded_frames": 500,
+      "dimensions": [
+        1280,
+        960
+      ],
+      "fps": 25.0
+    },
+    {
+      "path": "/home/brainco/reorientation/training/runs/die50_47g_warmup_baseline_20261106/videos/iteration_001500/rollout.mp4",
+      "decoded_frames": 500,
+      "dimensions": [
+        1280,
+        960
+      ],
+      "fps": 25.0
+    }
+  ],
+  "baseline_long": {
+    "status_file": "/home/brainco/reorientation/training/diagnostics/die47_warmup_long_20261106/long_status.json",
+    "run": "/home/brainco/reorientation/training/runs/die50_47g_warmup_baseline_20261106",
+    "planned_iterations": 10000,
+    "last_observed_iteration": 2311,
+    "cumulative_drops": 2539,
+    "cumulative_successes": 4,
+    "warmup_drops": 0,
+    "warmup_target_rate_violations": 0,
+    "last_gradient_audits": [
+      {
+        "actor_gradient_cost_reward_ratio": 0.6009906530380249,
+        "actor_gradient_bootstrap_rollout_ratio": 92.30949401855469,
+        "actor_gradient_bootstrap_rollout_cosine": 0.02091449312865734,
+        "iteration": 2201
+      },
+      {
+        "actor_gradient_cost_reward_ratio": 0.2973203659057617,
+        "actor_gradient_bootstrap_rollout_ratio": 158.85025024414062,
+        "actor_gradient_bootstrap_rollout_cosine": -0.13578040897846222,
+        "iteration": 2251
+      },
+      {
+        "actor_gradient_cost_reward_ratio": 1.0911363363265991,
+        "actor_gradient_bootstrap_rollout_ratio": 90.6373291015625,
+        "actor_gradient_bootstrap_rollout_cosine": 0.2704330086708069,
+        "iteration": 2301
+      }
+    ],
+    "final_independent_evaluation": {
+      "status_file": "/home/brainco/reorientation/training/diagnostics/die47_warmup_long_20261106/final_eval_status.json",
+      "plan": "/home/brainco/reorientation/training/diagnostics/die47_warmup_long_20261106/final_eval_plan.json",
+      "seeds": [
+        66,
+        67
+      ],
+      "worlds": 64,
+      "steps": 640,
+      "checkpoints": [
+        1000,
+        10000
+      ]
+    }
+  },
+  "contactsdf": {
+    "status_file": "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106/fit_status.json",
+    "plan": "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106/plan.json",
+    "selfcheck": {
+      "status": "passed",
+      "surface_points": 641,
+      "models": {
+        "quasi": {
+          "fk_jacobian_max_error": 2.5611717628659658e-08,
+          "action_derivative_autograd": 13.023499845358506,
+          "action_derivative_finite_difference": 13.023499845332687,
+          "action_derivative_relative_error": 1.9825198270251827e-12,
+          "parameter_gradients_finite": true,
+          "first_step_physical_mse": 0.011415510718492797,
+          "minimum_query_gap_m": -0.00024323025333695958,
+          "quaternion_norm_max_error": 0.0
+        },
+        "dynamic": {
+          "fk_jacobian_max_error": 2.5611717628659658e-08,
+          "action_derivative_autograd": -8.64899070353835,
+          "action_derivative_finite_difference": -8.648990563075998,
+          "action_derivative_relative_error": 1.6240317243324462e-08,
+          "parameter_gradients_finite": true,
+          "first_step_physical_mse": 0.09601247032388319,
+          "minimum_query_gap_m": -0.00024323025333695958,
+          "quaternion_norm_max_error": 0.0
+        }
+      },
+      "scope": "Implementation derivative consistency only; not a certificate of Newton response fidelity or policy readiness."
+    },
+    "fit_status": "fitting",
+    "fit_progress": {
+      "quasi_seed75": {
+        "complete": true,
+        "latest_update": 2000
+      },
+      "dynamic_seed75": {
+        "complete": false,
+        "latest_update": 650
+      }
+    },
+    "test_used_for_selection": false,
+    "actor_critic_updated": false,
+    "production_actor_integration": false,
+    "automatic_post_fit_analysis_status": "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106/analysis_status.json",
+    "rollout_gradient_check": {
+      "scope": "Initial models; first two training states; perturb first target only; not real physics gradient accuracy",
+      "models": {
+        "quasi": [
+          {
+            "horizon": 1,
+            "readout": 1.2459212581370571,
+            "first_target_directional_derivative": 13.023499845358506,
+            "parameter_gradient_norm": 42.75310905075569,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": 13.023499845339348,
+                "relative_disagreement": 1.4710338035408735e-12
+              },
+              "1e-05": {
+                "derivative": 13.02349984561024,
+                "relative_disagreement": 1.932926142150782e-11
+              },
+              "1e-06": {
+                "derivative": 13.023499845332687,
+                "relative_disagreement": 1.9825198270251827e-12
+              },
+              "1e-07": {
+                "derivative": 13.023499866315902,
+                "relative_disagreement": 1.6091984515590294e-09
+              },
+              "1e-09": {
+                "derivative": 13.023497613673385,
+                "relative_disagreement": 1.7135832515412872e-07
+              },
+              "1e-11": {
+                "derivative": 13.023138123458011,
+                "relative_disagreement": 2.7774554059190687e-05
+              },
+              "1e-13": {
+                "derivative": 13.040679647247089,
+                "relative_disagreement": 0.0013174008068060617
+              }
+            },
+            "max_object_angular_speed_rad_s": 0.6755280728037957
+          },
+          {
+            "horizon": 2,
+            "readout": -5.861657934170542,
+            "first_target_directional_derivative": -14.464441663305891,
+            "parameter_gradient_norm": 49.297428442247565,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": -14.464441664410188,
+                "relative_disagreement": 7.634564291036856e-11
+              },
+              "1e-05": {
+                "derivative": -14.464441663042392,
+                "relative_disagreement": 1.8217049134677168e-11
+              },
+              "1e-06": {
+                "derivative": -14.464441668859962,
+                "relative_disagreement": 3.8398101413507914e-10
+              },
+              "1e-07": {
+                "derivative": -14.464441719930221,
+                "relative_disagreement": 3.9147262791098525e-09
+              },
+              "1e-09": {
+                "derivative": -14.464444753059523,
+                "relative_disagreement": 2.1361024805046105e-07
+              },
+              "1e-11": {
+                "derivative": -14.46354147560669,
+                "relative_disagreement": 6.223452796558877e-05
+              },
+              "1e-13": {
+                "derivative": -14.450662888521038,
+                "relative_disagreement": 0.0009525963812214148
+              }
+            },
+            "max_object_angular_speed_rad_s": 8.779431706625068
+          },
+          {
+            "horizon": 4,
+            "readout": -32.63788105207381,
+            "first_target_directional_derivative": 0.7069437840148626,
+            "parameter_gradient_norm": 94.99745855604453,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": 0.7069437853246541,
+                "relative_disagreement": 1.309791497483559e-09
+              },
+              "1e-05": {
+                "derivative": 0.7069437838680414,
+                "relative_disagreement": 1.468212218469489e-10
+              },
+              "1e-06": {
+                "derivative": 0.7069437870654838,
+                "relative_disagreement": 3.0506212000958044e-09
+              },
+              "1e-07": {
+                "derivative": 0.7069436236406546,
+                "relative_disagreement": 1.6037420802472724e-07
+              },
+              "1e-09": {
+                "derivative": 0.7069367313761177,
+                "relative_disagreement": 7.052638744897699e-06
+              },
+              "1e-11": {
+                "derivative": 0.7087663789206999,
+                "relative_disagreement": 0.0018225949058373603
+              },
+              "1e-13": {
+                "derivative": 0.7105427357601002,
+                "relative_disagreement": 0.0035989517452376107
+              }
+            },
+            "max_object_angular_speed_rad_s": 14.576161696484585
+          },
+          {
+            "horizon": 8,
+            "readout": 0.34010710912790376,
+            "first_target_directional_derivative": -6.417298279900304,
+            "parameter_gradient_norm": 53.66205132135147,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": -6.417335605246599,
+                "relative_disagreement": 5.816330731420782e-06
+              },
+              "1e-05": {
+                "derivative": -6.41729865016316,
+                "relative_disagreement": 5.769761953054637e-08
+              },
+              "1e-06": {
+                "derivative": -6.417298276328864,
+                "relative_disagreement": 5.565332756601961e-10
+              },
+              "1e-07": {
+                "derivative": -6.417297910843445,
+                "relative_disagreement": 5.7509693899554325e-08
+              },
+              "1e-09": {
+                "derivative": -6.417315567830428,
+                "relative_disagreement": 2.693950444101973e-06
+              },
+              "1e-11": {
+                "derivative": -6.410916242316489,
+                "relative_disagreement": 0.0009945053674386241
+              },
+              "1e-13": {
+                "derivative": -6.394884621840902,
+                "relative_disagreement": 0.0034926938225085854
+              }
+            },
+            "max_object_angular_speed_rad_s": 14.077754479413485
+          }
+        ],
+        "dynamic": [
+          {
+            "horizon": 1,
+            "readout": -0.5486239000050581,
+            "first_target_directional_derivative": -8.64899070353835,
+            "parameter_gradient_norm": 17.66907993153228,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": -8.647578794580557,
+                "relative_disagreement": 0.00016324551686891148
+              },
+              "1e-05": {
+                "derivative": -8.64897658443553,
+                "relative_disagreement": 1.6324566997690527e-06
+              },
+              "1e-06": {
+                "derivative": -8.648990563075998,
+                "relative_disagreement": 1.6240317243324462e-08
+              },
+              "1e-07": {
+                "derivative": -8.648990681425772,
+                "relative_disagreement": 2.556665765167116e-09
+              },
+              "1e-09": {
+                "derivative": -8.648988858439566,
+                "relative_disagreement": 2.133311097345326e-07
+              },
+              "1e-11": {
+                "derivative": -8.649214677802775,
+                "relative_disagreement": 2.5895329549247034e-05
+              },
+              "1e-13": {
+                "derivative": -8.621992009238966,
+                "relative_disagreement": 0.003121600568762276
+              }
+            },
+            "max_object_angular_speed_rad_s": 2.723419303243231
+          },
+          {
+            "horizon": 2,
+            "readout": -1.5313710575097148,
+            "first_target_directional_derivative": -7.033946117319964,
+            "parameter_gradient_norm": 459.1406621048534,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": -7.050897612189688,
+                "relative_disagreement": 0.002404161257485642
+              },
+              "1e-05": {
+                "derivative": -7.034115573945065,
+                "relative_disagreement": 2.409067967671854e-05
+              },
+              "1e-06": {
+                "derivative": -7.033947546308816,
+                "relative_disagreement": 2.0315602912489744e-07
+              },
+              "1e-07": {
+                "derivative": -7.033945762513483,
+                "relative_disagreement": 5.0442024315578745e-08
+              },
+              "1e-09": {
+                "derivative": -7.033849502846579,
+                "relative_disagreement": 1.3735458272456997e-05
+              },
+              "1e-11": {
+                "derivative": -7.036271565397101,
+                "relative_disagreement": 0.0003304943613281138
+              },
+              "1e-13": {
+                "derivative": -6.659117701701689,
+                "relative_disagreement": 0.053288496864558006
+              }
+            },
+            "max_object_angular_speed_rad_s": 1.7563794843127931
+          },
+          {
+            "horizon": 4,
+            "readout": 8.070013846416225,
+            "first_target_directional_derivative": 64.89166887948821,
+            "parameter_gradient_norm": 2109.6463018838567,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": 11.248055837249638,
+                "relative_disagreement": 0.8266640998532699
+              },
+              "1e-05": {
+                "derivative": 64.28651293841625,
+                "relative_disagreement": 0.009325633806641729
+              },
+              "1e-06": {
+                "derivative": 64.8856111107321,
+                "relative_disagreement": 9.335202593352748e-05
+              },
+              "1e-07": {
+                "derivative": 64.89160266021088,
+                "relative_disagreement": 1.020458842753142e-06
+              },
+              "1e-09": {
+                "derivative": 64.89177462043472,
+                "relative_disagreement": 1.6294969143247982e-06
+              },
+              "1e-11": {
+                "derivative": 64.89528914244147,
+                "relative_disagreement": 5.5786221174177725e-05
+              },
+              "1e-13": {
+                "derivative": 62.518878962691815,
+                "relative_disagreement": 0.036565401349177115
+              }
+            },
+            "max_object_angular_speed_rad_s": 4.355281239228119
+          },
+          {
+            "horizon": 8,
+            "readout": -2.7495062985211876,
+            "first_target_directional_derivative": 696277894.2163994,
+            "parameter_gradient_norm": 21887465676.125965,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": 27309.577072582902,
+                "relative_disagreement": 0.9999607777622994
+              },
+              "1e-05": {
+                "derivative": 58336.47561653177,
+                "relative_disagreement": 0.9999162166771326
+              },
+              "1e-06": {
+                "derivative": 1770638.7667663372,
+                "relative_disagreement": 0.9974569941377228
+              },
+              "1e-07": {
+                "derivative": -36391860.167485766,
+                "relative_disagreement": 1.0522662868802428
+              },
+              "1e-09": {
+                "derivative": 707783153.7434248,
+                "relative_disagreement": 0.01625534525111919
+              },
+              "1e-11": {
+                "derivative": 696345892.0214994,
+                "relative_disagreement": 9.764946685125951e-05
+              },
+              "1e-13": {
+                "derivative": 700874064.7540535,
+                "relative_disagreement": 0.0065577694607188855
+              }
+            },
+            "max_object_angular_speed_rad_s": 2.877443819660288
+          }
+        ],
+        "baseline": [
+          {
+            "horizon": 1,
+            "readout": -0.04111103704141528,
+            "first_target_directional_derivative": -0.4627976241690048,
+            "parameter_gradient_norm": 3.8877010245053882,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": -0.46279255514227596,
+                "relative_disagreement": 5.069026728810044e-06
+              },
+              "1e-05": {
+                "derivative": -0.4627975734871475,
+                "relative_disagreement": 5.0681857266532404e-08
+              },
+              "1e-06": {
+                "derivative": -0.4627976237236986,
+                "relative_disagreement": 4.453061808185055e-10
+              },
+              "1e-07": {
+                "derivative": -0.46279762466738816,
+                "relative_disagreement": 4.983833901128776e-10
+              },
+              "1e-09": {
+                "derivative": -0.4627977480409217,
+                "relative_disagreement": 1.2387191694607225e-07
+              },
+              "1e-11": {
+                "derivative": -0.4627947330915206,
+                "relative_disagreement": 2.891077484190596e-06
+              },
+              "1e-13": {
+                "derivative": -0.46400383535427636,
+                "relative_disagreement": 0.0012062111852715884
+              }
+            },
+            "max_object_angular_speed_rad_s": 0.007150095355626819
+          },
+          {
+            "horizon": 2,
+            "readout": -0.08160333108298062,
+            "first_target_directional_derivative": -0.544649893056817,
+            "parameter_gradient_norm": 7.580044563210079,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": -0.5446458326328896,
+                "relative_disagreement": 4.0604239274211196e-06
+              },
+              "1e-05": {
+                "derivative": -0.544649852449175,
+                "relative_disagreement": 4.060764202673539e-08
+              },
+              "1e-06": {
+                "derivative": -0.5446498926656163,
+                "relative_disagreement": 3.912007384698768e-10
+              },
+              "1e-07": {
+                "derivative": -0.5446498939354338,
+                "relative_disagreement": 8.78616845945146e-10
+              },
+              "1e-09": {
+                "derivative": -0.5446499015682171,
+                "relative_disagreement": 8.511400140243097e-09
+              },
+              "1e-11": {
+                "derivative": -0.5446372519646303,
+                "relative_disagreement": 1.2641092186682634e-05
+              },
+              "1e-13": {
+                "derivative": -0.5474093400792412,
+                "relative_disagreement": 0.002759447022424255
+              }
+            },
+            "max_object_angular_speed_rad_s": 0.01191900325610948
+          },
+          {
+            "horizon": 4,
+            "readout": -0.1589875362636495,
+            "first_target_directional_derivative": -0.13518368139859227,
+            "parameter_gradient_norm": 14.653114801540816,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": -0.13518068071857736,
+                "relative_disagreement": 3.0006800149084967e-06
+              },
+              "1e-05": {
+                "derivative": -0.13518365137854538,
+                "relative_disagreement": 3.002004689278692e-08
+              },
+              "1e-06": {
+                "derivative": -0.13518368101317346,
+                "relative_disagreement": 3.8541880797993144e-10
+              },
+              "1e-07": {
+                "derivative": -0.13518368230380773,
+                "relative_disagreement": 9.05215458146813e-10
+              },
+              "1e-09": {
+                "derivative": -0.1351836559360109,
+                "relative_disagreement": 2.5462581376700655e-08
+              },
+              "1e-11": {
+                "derivative": -0.1351849188147014,
+                "relative_disagreement": 1.237416109134415e-06
+              },
+              "1e-13": {
+                "derivative": -0.13863910020006642,
+                "relative_disagreement": 0.0034554188014741527
+              }
+            },
+            "max_object_angular_speed_rad_s": 0.021092393443799127
+          },
+          {
+            "horizon": 8,
+            "readout": -0.2971639092148284,
+            "first_target_directional_derivative": -0.07688091194805434,
+            "parameter_gradient_norm": 28.399991763125268,
+            "finite_difference": {
+              "0.0001": {
+                "derivative": -0.07687786512000638,
+                "relative_disagreement": 3.046828047956196e-06
+              },
+              "1e-05": {
+                "derivative": -0.07688088153046113,
+                "relative_disagreement": 3.041759320809856e-08
+              },
+              "1e-06": {
+                "derivative": -0.07688091155366727,
+                "relative_disagreement": 3.943870646727632e-10
+              },
+              "1e-07": {
+                "derivative": -0.07688091496760308,
+                "relative_disagreement": 3.019548736049593e-09
+              },
+              "1e-09": {
+                "derivative": -0.07688158443208692,
+                "relative_disagreement": 6.72484032585019e-07
+              },
+              "1e-11": {
+                "derivative": -0.07680522884356833,
+                "relative_disagreement": 7.568310448601012e-05
+              },
+              "1e-13": {
+                "derivative": -0.07688294445529209,
+                "relative_disagreement": 2.0325072377508357e-06
+              }
+            },
+            "max_object_angular_speed_rad_s": 0.035533391390949305
+          }
+        ]
+      }
+    },
+    "first_quasi_seed75_validation_final2000": {
+      "valid": 512,
+      "resolved": 92,
+      "real_norm": {
+        "p10": 9.31306365359319e-10,
+        "median": 1.2262433983778465e-06,
+        "p90": 0.0005946450983174145
+      },
+      "noise_norm": {
+        "p10": 1.2818028860550612e-09,
+        "median": 1.4940292203391436e-06,
+        "p90": 1.398073527525412e-05
+      },
+      "base_rmse": 0.43531566858291626,
+      "persistence_rmse": 0.0006181999924592674,
+      "cosine_mean": -0.050031449645757675,
+      "positive_fraction": 0.489130437374115,
+      "amplitude_ratio": {
+        "p10": 8.005988547665766e-07,
+        "median": 0.00021993654081597924,
+        "p90": 395.35931396484375
+      },
+      "relative_vector_error": 131.78665161132812,
+      "per_sample_relative_error": {
+        "p10": 0.9999933838844299,
+        "median": 1.0000178813934326,
+        "p90": 395.378662109375
+      },
+      "zero_response_baseline_relative_error": 1.0,
+      "quiet": {
+        "count": 199,
+        "false_response_gt1e_4": 3,
+        "model_norm": {
+          "p10": 3.17561171803149e-10,
+          "median": 1.4782364221588296e-09,
+          "p90": 9.168928727376624e-09
+        }
+      }
+    },
+    "initial_failure": {
+      "status": "failed",
+      "started_unix": 1793904733.741007,
+      "argv": [
+        "/home/brainco/reorientation/runtime/policy/bin/python",
+        "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106/fit_source/scripts/supermimic/experiment_contact_sdf.py",
+        "--experiment",
+        "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106",
+        "--output",
+        "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106/fits",
+        "--updates",
+        "2000",
+        "--batch_starts",
+        "8",
+        "--seeds",
+        "75",
+        "76"
+      ],
+      "returncode": 1,
+      "finished_unix": 1793905289.6656878
+    },
+    "recovery_status_file": "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106/fit_status.json",
+    "recovery_output": "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106/fits_recovery",
+    "recovery_scope": "same protocol; reuse complete quasi75; replay incomplete dynamic75 to diagnose failure; remaining independent arms proceed; failed arms explicitly unscored"
+  },
+  "remaining": [
+    "WM response fidelity",
+    "bootstrap dominance",
+    "ContactSDF multi-step gradient conditioning",
+    "ContactSDF policy training comparison requires independent validation"
+  ],
+  "evidence_roots": [
+    "/home/brainco/reorientation/training/diagnostics/die47_warmup_long_20261106",
+    "/home/brainco/reorientation/training/diagnostics/contactsdf_47g_20261106"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "task_id": "Isaac-ViserDex-Repose-Revo3-SuperMimic-YellowDie-WujiOffset-HandPose-Hold-v1",
+  "checkpoint_version": 17,
+  "iteration": 32100,
+  "checkpoint_sha256": "b9b2f53510c8e9d59ca35bed1b87b7f81a19de11309cc9c6808c29fef38a7108",
+  "environment_contract": "87c4f21505fea039e5205f1e16c5b28199d311634251daee56c935acfbb1d3fa",
+  "splat_sha256": "a0d7f24a8fdf4a38c0551f232bdeede98aa5e7ce0807681805e6cdea6441c245"
+}

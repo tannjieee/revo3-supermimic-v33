@@ -1,0 +1,147 @@
+{
+  "variant": "rounded_die_58mm_packaged_v1",
+  "source": "/home/brainco/reorientation/assets/dice_58mm_isaaclab/dice_58mm.usda",
+  "source_usd_sha256": "e391ba683080e484db4de956318f8ae0458ec30118060435b8e37735fbbc83cf",
+  "source_manifest": {
+    "asset": "dice_58mm",
+    "usd": "dice_58mm.usd",
+    "default_prim": "/Object",
+    "units": "m",
+    "up_axis": "Z",
+    "origin": "center of original visual bounding box",
+    "source_70mm_center_m": [
+      -2.2130000000002148e-05,
+      6.294000000000091e-05,
+      5.190000000000056e-05
+    ],
+    "uniform_scale": 0.8285714285714286,
+    "mass_kg": 0.07336211199999998,
+    "mass_source": "Estimated: 47*(58/50)^3 g; user approved estimate, not measured",
+    "center_of_mass_m": [
+      -0.00014158612269959852,
+      -2.4407045865685936e-05,
+      -0.00015451502121332155
+    ],
+    "inertia_tensor_kg_m2": [
+      [
+        3.748820660963219e-05,
+        -2.8617744734649168e-08,
+        -3.443743486137861e-08
+      ],
+      [
+        -2.8617744734649168e-08,
+        3.749416727415682e-05,
+        4.1859147709982896e-09
+      ],
+      [
+        -3.443743486137861e-08,
+        4.1859147709982896e-09,
+        3.750127936765649e-05
+      ]
+    ],
+    "principal_moments_kg_m2": [
+      3.744993279587419e-05,
+      3.749294004520081e-05,
+      3.75407804103705e-05
+    ],
+    "principal_axes_quaternion_wxyz": [
+      0.886560594424063,
+      -0.30620180917079043,
+      -0.31604088889002097,
+      0.14271972892558465
+    ],
+    "inertia_model": "Homogeneous effective density normalized to 73.362112 g (estimated); real infill distribution not measured",
+    "collision": "Original 200-vertex / 396-triangle convex hull scaled by 58/70; concave pips are visual only, as in original asset",
+    "static_friction": 1.0,
+    "dynamic_friction": 1.0,
+    "restitution": 0.0,
+    "contact_offset_m": 0.0004142857142857143,
+    "physics_coefficients_source": "Inherited original 70 mm USD; not re-identified for PLA",
+    "display_colors_srgb": {
+      "body": "#F4EE2A",
+      "pips": "#123E35"
+    },
+    "display_colors_calibrated": false,
+    "meshes": [
+      {
+        "path": "/Object/Visual/Part_0",
+        "vertices": 8138,
+        "triangles": 11206,
+        "dimensions_m": [
+          0.05799996320690427,
+          0.05800000024693353,
+          0.05799996938024249
+        ]
+      },
+      {
+        "path": "/Object/Collision",
+        "vertices": 200,
+        "triangles": 396,
+        "dimensions_m": [
+          0.05799996320690427,
+          0.05800000024693353,
+          0.05799996938024249
+        ]
+      }
+    ],
+    "face_values_by_normal": {
+      "-X": 1,
+      "+X": 6,
+      "-Y": 4,
+      "+Y": 3,
+      "-Z": 2,
+      "+Z": 5
+    },
+    "source_sha256": {
+      "object.usda": "26f7714a6a80e7296f0ce8ba3845566b5703d9559fbb7dcf3d11c6c49c4e3481",
+      "printable_58mm_stl": "d829813895671035eff0e69b60043d792e6e838500b8c70e1abfa1a1a532f22c"
+    },
+    "mass_is_estimated": true,
+    "mass_estimate": {
+      "reference_edge_mm": 50,
+      "reference_mass_g": 47,
+      "target_edge_mm": 58,
+      "formula_g": "47 * (58 / 50) ** 3",
+      "estimated_mass_g": 73.362112,
+      "assumption": "Same effective bulk density",
+      "user_approved": true,
+      "measured_58mm_mass_available": false
+    },
+    "validation": {
+      "usd_structure": "validation/usd_structure.json",
+      "runtime": "validation/physx_smoke.json",
+      "runtime_backend": "PhysX",
+      "runtime_steps": 480,
+      "runtime_mass_kg": 0.07336211204528809,
+      "runtime_final_center_height_m": 0.029000042006373405,
+      "runtime_passed": true,
+      "print_3mf": "printing/validation.json"
+    }
+  },
+  "usd_sha256": "a6f7dca392baa8c1061bed5b4953498a12f0fc2916f0ac9723e8814535ef4278",
+  "dimensions_m": [
+    0.05799996107816696,
+    0.057999998331069946,
+    0.05799996852874756
+  ],
+  "collision_dimensions_m": [
+    0.05799996107816696,
+    0.057999998331069946,
+    0.05799996852874756
+  ],
+  "mass_kg": 0.07336211199999998,
+  "mass_source": "Estimated: 47*(58/50)^3 g; user approved estimate, not measured",
+  "mass_is_estimated": true,
+  "diagonal_inertia_kg_m2": [
+    3.744993227883242e-05,
+    3.749294046428986e-05,
+    3.7540779885603115e-05
+  ],
+  "material_srgb": {
+    "yellow_body": "#F4EE2A",
+    "black_pips": "#123E35"
+  },
+  "visual_faces": 11206,
+  "collision_vertices": 200,
+  "source_assets_modified": false
+}

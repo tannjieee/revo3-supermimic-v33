@@ -1,0 +1,27 @@
+{
+  "parent_task": "Isaac-ViserDex-Repose-Revo3-SuperMimic-RoundedDie-WujiOffset-HandPose-Hold-v1",
+  "task_id": "Isaac-ViserDex-Repose-Revo3-SuperMimic-YellowDie-WujiOffset-HandPose-Hold-v1",
+  "parent_checkpoint": "/home/zhangke/viserDex_supermimic_rounded_die_wuji_handpose_20261031/repository/outputs/rounded_die_wuji_handpose_2x2048_scratch_seed42/latest.pt",
+  "parent_checkpoint_sha256": "07f5d4b4467ab8c50cb8d1d3098080ce06f627a9a9d754046e1a937ce4c4ca83",
+  "iteration": 32100,
+  "old_contract": "1f1f179b3324a0992e88a5aabac06e8bebd3c3ded0ad6cb0db623aa1d54e0ca5",
+  "new_contract": "87c4f21505fea039e5205f1e16c5b28199d311634251daee56c935acfbb1d3fa",
+  "geometry_digest": "012f803542d59e3d205f01aefda4ef66f514cece269ffeb8b51957337c275778",
+  "collision": {
+    "vertices": 200,
+    "triangles": 396,
+    "dimensions_mm": [
+      69.99995422363281,
+      70.0,
+      69.99996185302734
+    ]
+  },
+  "collision_obj_identical": true,
+  "usd_physics_identical": true,
+  "geometry_spec_identical": true,
+  "environment_equal_except_relocated_paths": true,
+  "change": "Yellow/black visual mesh, materials and matching Gaussian assets",
+  "observation": "Original noisy 124 x 10 state observations; no rendered RGB input",
+  "training_started": false,
+  "export_purpose": "Actor-only preview, not a training-resume checkpoint"
+}

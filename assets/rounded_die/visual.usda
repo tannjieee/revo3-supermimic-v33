@@ -1,0 +1,19 @@
+#usda 1.0
+(
+    defaultPrim = "Object"
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Xform "Object" (
+    prepend references = @object.usda@
+)
+{
+    bool physics:rigidBodyEnabled = 0
+
+    over "Collision"
+    {
+        bool physics:collisionEnabled = 0
+    }
+}
+

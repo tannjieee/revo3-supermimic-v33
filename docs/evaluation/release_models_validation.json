@@ -1,0 +1,27 @@
+{
+  "asset_dependencies": {
+    "robot": {
+      "layers": 9,
+      "resolved_assets": 1,
+      "allowed_builtin_modules": []
+    },
+    "object": {
+      "layers": 1,
+      "resolved_assets": 6,
+      "allowed_builtin_modules": [
+        "OmniPBR.mdl"
+      ]
+    }
+  },
+  "finite_tensors": {
+    "teacher": 76,
+    "student": 227,
+    "pose_estimator": 204
+  },
+  "teacher_strict_load": true,
+  "pose_strict_load_forward_shape": [
+    2,
+    27
+  ],
+  "student_torchscript_export_and_roundtrip": true
+}

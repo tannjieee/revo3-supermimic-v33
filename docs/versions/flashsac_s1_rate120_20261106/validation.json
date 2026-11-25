@@ -1,0 +1,515 @@
+{
+  "flashsac_s1_rate120_smoke_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_rate120_smoke_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 1024,
+      "transitions": 65536,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "completed_episodes": 147,
+      "successes": 0,
+      "drops": 86,
+      "timeouts": 61,
+      "violation_fractions": [
+        0.6540069580078125,
+        0.0,
+        0.2574920654296875,
+        0.041046142578125,
+        0.001312255859375
+      ],
+      "rotation_error_rad": 2.137156954384409,
+      "audit_errors": {
+        "reward": 1.4901161193847656e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 1.0207295417785645e-06,
+        "fk_linear_velocity_m_s": 1.4249235391616821e-06,
+        "fk_angular_velocity_rad_s": 3.2186508178710938e-06,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 1.1920928955078125e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.1920928955078125e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 13.009791374206543
+      },
+      "contact_peaks": {
+        "candidates": 5948,
+        "contacts": 1089,
+        "constraints": 148
+      },
+      "boundary_audits": [
+        {
+          "step": 3,
+          "kind": "truncated",
+          "terminal_history_differs": true,
+          "old_goal_preserved": true
+        },
+        {
+          "step": 5,
+          "kind": "terminated",
+          "terminal_history_differs": true,
+          "old_goal_preserved": true
+        }
+      ],
+      "source_checkpoint_unchanged": null,
+      "frames": 0,
+      "elapsed_s": 108.76544512796681
+    },
+    "last_metrics": {
+      "vector_steps": 1024,
+      "transitions": 65536,
+      "q_updates": 1852,
+      "actor_updates": 926,
+      "successes": 0,
+      "drops": 86,
+      "timeouts": 61,
+      "rotation_error_rad": 2.137156954384409,
+      "reward": 0.028537530628454988,
+      "violation_fractions": [
+        0.6540069580078125,
+        0.0,
+        0.2574920654296875,
+        0.041046142578125,
+        0.001312255859375
+      ],
+      "command": {
+        "max_delta_deg": 4.774642031750121,
+        "limit_deg": 4.8,
+        "env_id": 55,
+        "joint_id": 19
+      },
+      "elapsed_s": 108.71130782796536,
+      "transitions_s": 602.8443711091224,
+      "peak_torch_memory_bytes": 1459504640,
+      "critic/loss": 4.129209995269775,
+      "critic/max_entropy_bonus": -0.08733220398426056,
+      "diagnostic/target_outside_support_mass": 0.11037291586399078,
+      "diagnostic/target_below_support_mass": 0.0,
+      "diagnostic/target_above_support_mass": 0.11037291586399078,
+      "diagnostic/target_lower_edge_probability": 3.1601400678482605e-06,
+      "diagnostic/target_upper_edge_probability": 0.11033293604850769,
+      "diagnostic/target_q_mean": 1.536388635635376,
+      "diagnostic/next_logpi_mean": -14.06373119354248,
+      "diagnostic/alpha": 0.007786068599671125,
+      "diagnostic/normalized_reward_mean": 0.0018225011881440878,
+      "diagnostic/target_edge_probability": 0.11033609509468079,
+      "diagnostic/twin_q_gap": 0.01760595291852951,
+      "diagnostic/alpha_logpi_abs_mean": 0.1095011830329895,
+      "diagnostic/reward_denominator": 9.034025192260742,
+      "diagnostic/velocity_bn_abs_p99": 2.5246689319610596
+    },
+    "exit_code": 0
+  },
+  "flashsac_s1_rate120_5m_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_s1_rate120_5m_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 4883,
+      "transitions": 5000192,
+      "q_updates": 9570,
+      "actor_updates": 4785,
+      "completed_episodes": 10878,
+      "successes": 5,
+      "drops": 3628,
+      "timeouts": 7253,
+      "violation_fractions": [
+        0.7974411249160767,
+        0.0,
+        0.256793737411499,
+        0.03646399825811386,
+        0.000725572113879025
+      ],
+      "rotation_error_rad": 2.2295543940468154,
+      "audit_errors": {
+        "reward": 8.940696716308594e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 4.440892098500626e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 3.63960862159729e-06,
+        "fk_linear_velocity_m_s": 7.852911949157715e-06,
+        "fk_angular_velocity_rad_s": 3.874301910400391e-06,
+        "fk_quaternion": 7.748603820800781e-07,
+        "hand_convex_vertices_m": 2.0862224711135525e-10,
+        "direct_observation": 3.5762786865234375e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.909272193908691e-07,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.9073486328125e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 10.247106552124023
+      },
+      "contact_peaks": {
+        "candidates": 113375,
+        "contacts": 22084,
+        "constraints": 180
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": null,
+      "frames": 0,
+      "elapsed_s": 634.8583488430013
+    },
+    "last_metrics": {
+      "vector_steps": 4883,
+      "transitions": 5000192,
+      "q_updates": 9570,
+      "actor_updates": 4785,
+      "successes": 5,
+      "drops": 3628,
+      "timeouts": 7253,
+      "rotation_error_rad": 2.2295543940468154,
+      "reward": 0.024671267625764576,
+      "violation_fractions": [
+        0.7974411249160767,
+        0.0,
+        0.256793737411499,
+        0.03646399825811386,
+        0.000725572113879025
+      ],
+      "command": {
+        "max_delta_deg": 4.7911932876563545,
+        "limit_deg": 4.8,
+        "env_id": 844,
+        "joint_id": 12
+      },
+      "elapsed_s": 634.8044827040285,
+      "transitions_s": 7876.7433693931425,
+      "peak_torch_memory_bytes": 8550744064,
+      "critic/loss": 2.9535717964172363,
+      "critic/max_entropy_bonus": -0.026867054402828217,
+      "diagnostic/target_outside_support_mass": 0.10975923389196396,
+      "diagnostic/target_below_support_mass": 0.0,
+      "diagnostic/target_above_support_mass": 0.10975923389196396,
+      "diagnostic/target_lower_edge_probability": 3.7842262656795356e-08,
+      "diagnostic/target_upper_edge_probability": 0.261258989572525,
+      "diagnostic/target_q_mean": 4.1200714111328125,
+      "diagnostic/next_logpi_mean": -13.666172981262207,
+      "diagnostic/alpha": 0.003270151326432824,
+      "diagnostic/normalized_reward_mean": 0.003585097147151828,
+      "diagnostic/target_edge_probability": 0.2612590193748474,
+      "diagnostic/twin_q_gap": 0.005109506659209728,
+      "diagnostic/alpha_logpi_abs_mean": 0.04469045251607895,
+      "diagnostic/reward_denominator": 15.07341194152832,
+      "diagnostic/velocity_bn_abs_p99": 2.3278684616088867
+    },
+    "exit_code": 0
+  },
+  "flashsac_rate120_at3m_eval166_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_rate120_at3m_eval166_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 5804,
+      "actor_updates": 2902,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.00465625012293458,
+        6.25000029685907e-05,
+        0.0
+      ],
+      "rotation_error_rad": 2.299902515411377,
+      "audit_errors": {
+        "reward": 2.9802322387695312e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 8.866190910339355e-07,
+        "fk_linear_velocity_m_s": 3.650784492492676e-07,
+        "fk_angular_velocity_rad_s": 4.76837158203125e-07,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.336508810520172e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.2745449542999268
+      },
+      "contact_peaks": {
+        "candidates": 5176,
+        "contacts": 1179,
+        "constraints": 69
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 32.024811057024635
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 5804,
+      "actor_updates": 2902,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.2998609855771064,
+      "reward": 0.021580334830408294,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.0048502604477107525,
+        6.510417006211355e-05,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.5204262638091216,
+        "limit_deg": 4.8,
+        "env_id": 33,
+        "joint_id": 20
+      },
+      "elapsed_s": 30.56592105102027,
+      "transitions_s": 1005.0408737470251,
+      "peak_torch_memory_bytes": 84682240
+    },
+    "exit_code": 0
+  },
+  "flashsac_rate120_at3m_eval167_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_rate120_at3m_eval167_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 5804,
+      "actor_updates": 2902,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.005031250417232513,
+        0.0,
+        0.0
+      ],
+      "rotation_error_rad": 2.1432728056907653,
+      "audit_errors": {
+        "reward": 2.9802322387695312e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 8.717179298400879e-07,
+        "fk_linear_velocity_m_s": 3.2782554626464844e-07,
+        "fk_angular_velocity_rad_s": 5.364418029785156e-07,
+        "fk_quaternion": 7.152557373046875e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.383074939250946e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.1920928955078125e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.2736834287643433
+      },
+      "contact_peaks": {
+        "candidates": 5042,
+        "contacts": 1154,
+        "constraints": 66
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 32.22112321096938
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 5804,
+      "actor_updates": 2902,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.1435625558098157,
+      "reward": 0.028933389283095797,
+      "violation_fractions": [
+        0.0,
+        0.0,
+        0.00524088554084301,
+        0.0,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.6031103994671803,
+        "limit_deg": 4.8,
+        "env_id": 10,
+        "joint_id": 19
+      },
+      "elapsed_s": 30.961115650017746,
+      "transitions_s": 992.2123074393281,
+      "peak_torch_memory_bytes": 84682240
+    },
+    "exit_code": 0
+  },
+  "flashsac_rate120_final_eval166_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_rate120_final_eval166_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 9570,
+      "actor_updates": 4785,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.0026562500279396772,
+        0.0,
+        0.0033437502570450306,
+        0.0004687500186264515,
+        0.0
+      ],
+      "rotation_error_rad": 2.2688750195503236,
+      "audit_errors": {
+        "reward": 2.9802322387695312e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 9.094947017729282e-12,
+        "fk_position_m": 9.238719940185547e-07,
+        "fk_linear_velocity_m_s": 2.130866050720215e-06,
+        "fk_angular_velocity_rad_s": 2.6226043701171875e-06,
+        "fk_quaternion": 6.556510925292969e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.778887033462524e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.2375673055648804
+      },
+      "contact_peaks": {
+        "candidates": 4059,
+        "contacts": 615,
+        "constraints": 60
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 22.367714021005668
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 9570,
+      "actor_updates": 4785,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.268995204071204,
+      "reward": 0.021921339297356703,
+      "violation_fractions": [
+        0.0027669272385537624,
+        0.0,
+        0.003222656436264515,
+        0.0004231771163176745,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.42112214346630616,
+        "limit_deg": 4.8,
+        "env_id": 21,
+        "joint_id": 1
+      },
+      "elapsed_s": 21.444654976017773,
+      "transitions_s": 1432.524796242007,
+      "peak_torch_memory_bytes": 84682240
+    },
+    "exit_code": 0
+  },
+  "flashsac_rate120_final_eval167_20261106": {
+    "path": "/home/brainco/reorientation/training/runs/flashsac_rate120_final_eval167_20261106",
+    "result": {
+      "status": "complete",
+      "vector_steps": 500,
+      "transitions": 32000,
+      "q_updates": 9570,
+      "actor_updates": 4785,
+      "completed_episodes": 64,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 64,
+      "violation_fractions": [
+        0.002843750175088644,
+        0.0,
+        0.0036875002551823854,
+        0.000375000003259629,
+        0.0
+      ],
+      "rotation_error_rad": 2.1103078479766846,
+      "audit_errors": {
+        "reward": 1.862645149230957e-08,
+        "ema": 0.0,
+        "clean_student_observation": 0.0,
+        "convex_vertices_m": 8.881784197001252e-16,
+        "convex_inertia_kg_m2": 7.275957614183426e-12,
+        "fk_position_m": 9.313225746154785e-07,
+        "fk_linear_velocity_m_s": 2.205371856689453e-06,
+        "fk_angular_velocity_rad_s": 2.6226043701171875e-06,
+        "fk_quaternion": 7.152557373046875e-07,
+        "hand_convex_vertices_m": 2.0862234596310534e-10,
+        "direct_observation": 2.384185791015625e-07,
+        "hand_pose": 1.9073486328125e-06,
+        "position_frame": 9.778887033462524e-08,
+        "hold_counter": 0.0,
+        "orientation_frame": 1.430511474609375e-06,
+        "success_boundary_disagreements": 0,
+        "terminal_reset_state_separation": 1.1598249673843384
+      },
+      "contact_peaks": {
+        "candidates": 4156,
+        "contacts": 608,
+        "constraints": 57
+      },
+      "boundary_audits": [],
+      "source_checkpoint_unchanged": true,
+      "frames": 0,
+      "elapsed_s": 22.3202072569984
+    },
+    "last_metrics": {
+      "vector_steps": 480,
+      "transitions": 30720,
+      "q_updates": 9570,
+      "actor_updates": 4785,
+      "successes": 0,
+      "drops": 0,
+      "timeouts": 0,
+      "rotation_error_rad": 2.1104769532879195,
+      "reward": 0.02935667096171528,
+      "violation_fractions": [
+        0.002962239785119891,
+        0.0,
+        0.0035807292442768812,
+        0.0003580729244276881,
+        0.0
+      ],
+      "command": {
+        "max_delta_deg": 0.3287267594689587,
+        "limit_deg": 4.8,
+        "env_id": 10,
+        "joint_id": 16
+      },
+      "elapsed_s": 21.24336941697402,
+      "transitions_s": 1446.098281163152,
+      "peak_torch_memory_bytes": 84682240
+    },
+    "exit_code": 0
+  }
+}

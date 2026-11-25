@@ -1,0 +1,508 @@
+{
+  "recorded_at": "2026-11-06T00:41:37.444536+08:00",
+  "base_commit": "6f04c8c64102be20a0dfda978d3f8fe71611b4bf",
+  "checkpoint_version": 31,
+  "reset_protocol": "fixed_palm_v1",
+  "status": "detail_mismatches_fixed_and_runtime_validated",
+  "changes": [
+    "resume at a recording boundary snapshots and records before warmup",
+    "reject conflicting explicit saved goal-position requests",
+    "record canonical default goal position in checkpoint and actor export metadata",
+    "fresh manual-convex default uses validated 25 Hz HOME initialization",
+    "fixed profile rejects unsupported revision, missing HOME initialization, and invalid or non-upright root/gravity"
+  ],
+  "tests": {
+    "main_passed": 109,
+    "main_log": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106/root/regression_final.log",
+    "training_passed": 77,
+    "training_report": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106/training/README.md",
+    "counts_overlap_not_additive": true
+  },
+  "fixed_pose_changed": false,
+  "algorithm_objective_changed": false,
+  "scaling_or_exploration_changed": false,
+  "physics_or_assets_changed": false,
+  "formal_training_started": false,
+  "hardware_used": false,
+  "fresh_runtime": {
+    "num_envs": 64,
+    "iterations": 2,
+    "network_revision_flag_omitted": true,
+    "resolved_revision": "hardware_center25_v3",
+    "control_dt": 0.04,
+    "absolute_policy_optimization": true,
+    "optimizer_steps": {
+      "wm": 20,
+      "actor": 0,
+      "critic": 40
+    },
+    "default_goal_position_base_m": [
+      0.0342517340065347,
+      -0.008562948749966636,
+      0.10168801281703035
+    ]
+  },
+  "resume_runtime": {
+    "passed": true,
+    "source": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106/fresh/model_2.pt",
+    "boundary": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106/resume/model_2.pt",
+    "checkpoint_state": {
+      "all_nonmetadata_payload_equal_bitwise": true,
+      "compared_tensor_counts_by_root": {
+        "rng_cpu": 1,
+        "rng_cuda": 1,
+        "wm": 32,
+        "actor": 14,
+        "critic": 16,
+        "opt_wm": 60,
+        "opt_critic": 24,
+        "target_critic": 16
+      },
+      "compared_keys": [
+        "version",
+        "imagination_protocol",
+        "geometry_spec",
+        "config",
+        "noise_config",
+        "iteration",
+        "resume_actor_ramp",
+        "real_steps",
+        "step_credit",
+        "optimizer_steps",
+        "grasp_sampling",
+        "rng_cpu",
+        "rng_cuda",
+        "wm",
+        "actor",
+        "critic",
+        "opt_wm",
+        "opt_actor",
+        "opt_critic",
+        "target_critic"
+      ],
+      "iteration": 2,
+      "optimizer_steps": {
+        "wm": 20,
+        "actor": 0,
+        "critic": 40
+      },
+      "normalizer_buffers_included": {
+        "wm": [
+          "input_norm.mean",
+          "input_norm.variance",
+          "input_norm.count",
+          "input_norm.std_floor",
+          "delta_norm.mean",
+          "delta_norm.variance",
+          "delta_norm.count"
+        ],
+        "actor": [
+          "obs_norm.mean",
+          "obs_norm.variance",
+          "obs_norm.count",
+          "obs_norm.std_floor"
+        ],
+        "critic": [
+          "input_norm.mean",
+          "input_norm.variance",
+          "input_norm.count",
+          "input_norm.std_floor"
+        ],
+        "target_critic": [
+          "input_norm.mean",
+          "input_norm.variance",
+          "input_norm.count",
+          "input_norm.std_floor"
+        ]
+      },
+      "network_revision": "hardware_center25_v3",
+      "metadata_differences": [
+        "pid",
+        "parent_checkpoint",
+        "environment_binding",
+        "execution",
+        "initial_model_digest"
+      ],
+      "source_matches_untouched_fresh_latest_payload": true,
+      "fresh_source_sha256": "d845376985ed7574429e9658ad8da207c98f18c40163df7bfd2bac4935553773",
+      "boundary_sha256": "463948ffeb28f28056d7c20933b076bf014123df2774e75884fa2244a84b0c95",
+      "source_sha_unchanged_during_this_audit": true,
+      "source_mtime_ns": 1793896362345844184,
+      "boundary_mtime_ns": 1793896396895530745,
+      "source_mtime_before_boundary_and_video_start": true,
+      "source_pre_resume_hash_available": false
+    },
+    "goal_metadata": {
+      "default_goal_position_base_m": [
+        0.0342517340065347,
+        -0.008562948749966636,
+        0.10168801281703035
+      ],
+      "default_goal_position_source": "object_default_root_pose"
+    },
+    "boundary_recording": {
+      "trigger": "resume_boundary",
+      "iteration": 2,
+      "decoded_frames": 500,
+      "fps": 25.0,
+      "size": [
+        1280,
+        960
+      ],
+      "drops": 0,
+      "timeouts": 1,
+      "reset_frame": 500,
+      "reset_position_error_m": 2.946602786768615e-08,
+      "reset_joint_velocity_max": 0.0,
+      "reset_object_velocity_max": 0.0,
+      "max_post_state_visible_quaternion_difference_deg": 8.87267600082659e-06
+    },
+    "log_sequence": {
+      "boundary_complete_line": 128,
+      "iteration_3_line": 131,
+      "boundary_complete_before_iteration_3": true,
+      "metrics_iterations": [
+        3
+      ],
+      "iteration_3_optimizer_steps": {
+        "wm": 30,
+        "actor": 0,
+        "critic": 60
+      }
+    },
+    "export": {
+      "path": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106/lifecycle/resume_boundary_actor.pt",
+      "sha256": "18333fa78186b72786196742529cefbf52e72445850f7816a841bff890744395",
+      "goal_metadata_preserved": true,
+      "actor_tensors_byte_equal": true,
+      "random_histories": 32,
+      "history_shape": [
+        32,
+        10,
+        81
+      ],
+      "raw_action_max_difference": 0.0,
+      "sequential_api_steps": 12,
+      "sequential_api_max_difference": 0.0
+    },
+    "rejected_goal_log": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106/root/rejected_goal.log",
+    "scope": "Read-only CPU verification of actual fresh/resume/video artifacts. No pre-resume SHA was recorded; source integrity evidence is full payload equality with fresh latest, mtime, and unchanged SHA during this audit. Actor zero updates means no learned-policy performance claim."
+  },
+  "reset_response_probe": {
+    "seed": 47,
+    "num_envs": 16,
+    "steps": 70,
+    "command": "1-degree cosine displacement around HOME; no Actor or learning",
+    "reset_checks": [
+      {
+        "step": 33,
+        "worlds": 8,
+        "both_buffer_delay_slots_checked": 336,
+        "selected_physical_exact_initial": true,
+        "other_physical_untouched": true,
+        "history_is_fresh": true
+      },
+      {
+        "step": 65,
+        "worlds": 8,
+        "both_buffer_delay_slots_checked": 336,
+        "selected_physical_exact_initial": true,
+        "other_physical_untouched": true,
+        "history_is_fresh": true
+      }
+    ],
+    "first_four_transition_differences": [
+      {
+        "reset_step": 33,
+        "offset": 0,
+        "joint_position_rad": 1.0634539648890495e-06,
+        "joint_velocity_rad_s": 2.9996037483215332e-05,
+        "object_position_m": 0.0,
+        "quaternion_component": 9.08970832824707e-07,
+        "object_linear_velocity_m_s": 3.3515971153974533e-07,
+        "object_angular_velocity_rad_s": 3.428757190704346e-05
+      },
+      {
+        "reset_step": 33,
+        "offset": 1,
+        "joint_position_rad": 4.4354237616062164e-07,
+        "joint_velocity_rad_s": 1.3493001461029053e-05,
+        "object_position_m": 5.960464477539063e-08,
+        "quaternion_component": 1.0579824447631836e-06,
+        "object_linear_velocity_m_s": 1.3665412552654743e-06,
+        "object_angular_velocity_rad_s": 4.335399717092514e-05
+      },
+      {
+        "reset_step": 33,
+        "offset": 2,
+        "joint_position_rad": 1.83936208486557e-07,
+        "joint_velocity_rad_s": 1.4195218682289124e-05,
+        "object_position_m": 1.1920928955078125e-07,
+        "quaternion_component": 1.4416873455047607e-06,
+        "object_linear_velocity_m_s": 1.4865072444081306e-06,
+        "object_angular_velocity_rad_s": 4.45730984210968e-05
+      },
+      {
+        "reset_step": 33,
+        "offset": 3,
+        "joint_position_rad": 2.784654498100281e-07,
+        "joint_velocity_rad_s": 4.8704445362091064e-05,
+        "object_position_m": 2.384185791015625e-07,
+        "quaternion_component": 1.8049031496047974e-06,
+        "object_linear_velocity_m_s": 4.014698788523674e-06,
+        "object_angular_velocity_rad_s": 0.00026022642850875854
+      },
+      {
+        "reset_step": 65,
+        "offset": 0,
+        "joint_position_rad": 2.2649765014648438e-06,
+        "joint_velocity_rad_s": 0.00010366365313529968,
+        "object_position_m": 1.1920928955078125e-07,
+        "quaternion_component": 1.73225998878479e-06,
+        "object_linear_velocity_m_s": 1.6789417713880539e-06,
+        "object_angular_velocity_rad_s": 8.960440754890442e-05
+      },
+      {
+        "reset_step": 65,
+        "offset": 1,
+        "joint_position_rad": 1.0728836059570312e-06,
+        "joint_velocity_rad_s": 2.4158507585525513e-05,
+        "object_position_m": 5.960464477539063e-08,
+        "quaternion_component": 1.564621925354004e-06,
+        "object_linear_velocity_m_s": 2.356187906116247e-06,
+        "object_angular_velocity_rad_s": 5.75575977563858e-05
+      },
+      {
+        "reset_step": 65,
+        "offset": 2,
+        "joint_position_rad": 3.5762786865234375e-07,
+        "joint_velocity_rad_s": 3.501772880554199e-05,
+        "object_position_m": 1.1920928955078125e-07,
+        "quaternion_component": 1.5385448932647705e-06,
+        "object_linear_velocity_m_s": 1.8671853467822075e-06,
+        "object_angular_velocity_rad_s": 4.9190595746040344e-05
+      },
+      {
+        "reset_step": 65,
+        "offset": 3,
+        "joint_position_rad": 3.5762786865234375e-07,
+        "joint_velocity_rad_s": 1.4454126358032227e-05,
+        "object_position_m": 1.7881393432617188e-07,
+        "quaternion_component": 1.6838312149047852e-06,
+        "object_linear_velocity_m_s": 1.5606638044118881e-06,
+        "object_angular_velocity_rad_s": 5.728378891944885e-05
+      }
+    ],
+    "domain_unchanged": true,
+    "solver": {
+      "overflow_mask": 0,
+      "flags": [],
+      "affected_worlds": [],
+      "world_flags": [],
+      "contact_peaks": {
+        "candidates": 688,
+        "contacts": 126,
+        "constraints": 30
+      },
+      "solver_iterations_max": 3,
+      "solver_config": {
+        "iterations": 100,
+        "ls_iterations": 100,
+        "nconmax": 640,
+        "njmax": 1024,
+        "tolerance": 1e-06
+      },
+      "num_substeps": 2
+    },
+    "parity": {
+      "reward": 7.450580596923828e-09,
+      "ema": 0.0,
+      "clean_student_observation": 0.0,
+      "convex_vertices_m": 5.551115123125783e-17,
+      "convex_inertia_kg_m2": 1.4551915228366852e-11,
+      "fk_position_m": 4.1816383600234985e-07,
+      "fk_linear_velocity_m_s": 1.1082738637924194e-07,
+      "fk_angular_velocity_rad_s": 4.76837158203125e-07,
+      "fk_quaternion": 6.556510925292969e-07,
+      "hand_convex_vertices_m": 2.0862232124875421e-10,
+      "hand_pose": 4.656612873077393e-10,
+      "position_frame": 9.272480383515358e-08,
+      "hold_counter": 0.0,
+      "orientation_frame": 1.1920928955078125e-06,
+      "success_boundary_disagreements": 0,
+      "terminal_reset_state_separation": 0.8286128044128418
+    },
+    "scope": "Physical and native-delay/history identity; randomized goals and perception intentionally differ after reset"
+  },
+  "real_td_audit": {
+    "passed": true,
+    "source": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106/root/reset_response.transitions.pt",
+    "real_transitions": 1120,
+    "reset_worlds": 16,
+    "windows": 1008,
+    "shortened_windows": 96,
+    "pre_reset_terminal_aux_preserved": true,
+    "post_reset_goals_changed": true,
+    "continuing_full_state_chain_bitwise_equal": true,
+    "fresh_policy_history": true,
+    "all_bootstrap_goals_last_valid_old_episode": true,
+    "all_bootstrap_action_and_delay_memory_correct": true,
+    "max_td_target_error": 5.960464477539063e-08,
+    "max_real_reward_error": 4.842877388000488e-08,
+    "caveats": [
+      "Probe used external fixed commands and zero AR memory, so nonzero AR reset semantics are covered by code review/regression rather than this real trace.",
+      "Goal-dependent synthetic target value isolates bootstrap input correctness; this does not certify learned Critic quality."
+    ]
+  },
+  "synthetic_td_audit": {
+    "passed": true,
+    "physical_initial_and_reset_identical": true,
+    "prefix_lengths": [
+      1,
+      4,
+      3,
+      8
+    ],
+    "bootstrap_goal_uses_old_episode": true,
+    "timeout_keeps_pre_reset_action_and_ready": true,
+    "failure_has_no_bootstrap": true,
+    "replay_uniform_samples": 512,
+    "reward_target_max_error": 2.9802322387695312e-08,
+    "caveat": "Synthetic fixed-pose transitions; independent arithmetic and boundary logic, not Newton dynamics"
+  },
+  "goal_position_mismatch_reproduction": {
+    "goal_slot_is_retained_in_orientation_only_actor": true,
+    "track_object_position": false,
+    "sampled_goal_position_source": "object default_root_pose + init_pos_offset because explicit goal_position_base_m is None",
+    "default_goal_position_changed_from_hand_center_m": [
+      -0.020748265993465298,
+      0.0014370512500333638,
+      0.0016880128170303488
+    ],
+    "distance_change_m": 0.020866361573146138,
+    "actor_normalized_goal_slot_difference": [
+      20.74826616048813,
+      -1.4370508342981339,
+      -1.6880154609680176
+    ],
+    "explicit_goal_position_in_export_metadata": false,
+    "explicit_goal_position_in_policy_config": false,
+    "numerical_details": {
+      "actual_fixed_default": {
+        "goal_position_base_m": [
+          0.0342517340065347,
+          -0.008562948749966636,
+          0.10168801281703035
+        ],
+        "raw_observation_goal_position": [
+          0.03425173461437225,
+          -0.008562948554754257,
+          0.10168801248073578
+        ],
+        "normalized_goal_position": [
+          -3.427267074584961e-05,
+          3.725290298461914e-07,
+          0.00010728836059570312
+        ],
+        "encoder_target": [
+          0.0,
+          0.550000011920929,
+          0.8500000238418579,
+          0.47499996423721313,
+          0.0,
+          0.550000011920929,
+          0.8500000238418579,
+          0.47499996423721313,
+          0.0,
+          0.550000011920929,
+          0.8500000238418579,
+          0.47499996423721313,
+          0.0,
+          0.550000011920929,
+          0.8500000238418579,
+          0.47499996423721313,
+          0.32499998807907104,
+          0.32500001788139343,
+          0.23750001192092896,
+          0.9825466871261597,
+          0.6499999761581421
+        ]
+      },
+      "old_hand_center": {
+        "goal_position_base_m": [
+          0.055,
+          -0.01,
+          0.1
+        ],
+        "raw_observation_goal_position": [
+          0.054999999701976776,
+          -0.009999999776482582,
+          0.10000000149011612
+        ],
+        "normalized_goal_position": [
+          20.748231887817383,
+          -1.437050461769104,
+          -1.6879081726074219
+        ],
+        "encoder_target": [
+          0.0,
+          0.550000011920929,
+          0.8500000238418579,
+          0.47499996423721313,
+          0.0,
+          0.550000011920929,
+          0.8500000238418579,
+          0.47499996423721313,
+          0.0,
+          0.550000011920929,
+          0.8500000238418579,
+          0.47499996423721313,
+          0.0,
+          0.550000011920929,
+          0.8500000238418579,
+          0.47499996423721313,
+          0.32499998807907104,
+          0.32500001788139343,
+          0.23750001192092896,
+          0.9825466871261597,
+          0.6499999761581421
+        ]
+      }
+    },
+    "action_difference_max": 0.0,
+    "interpretation": "Training/recording remain internally aligned. Current Actor has zero updates and constant HOME output, so no learned-policy action impact is claimed. Documentation calls hand_center the current nominal object center, which is stale. The standalone export does not explicitly store the derived default command position; callers must recover it from env.yaml or supply it knowingly."
+  },
+  "rejected_goal_request": {
+    "exit_code": 1,
+    "log": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106/root/rejected_goal.log",
+    "training_directory_created": false
+  },
+  "production_video": {
+    "interval": 500,
+    "steps": 500,
+    "seed": 43
+  },
+  "remaining": [
+    "WM action-response reliability and bootstrap/common failure-risk gradients still require optimization on the new distribution",
+    "finite probes are not learned-policy or arbitrary-perturbation certification",
+    "real action/reset probe uses zero AR memory; nonzero exploration reset covered by source/regression, not that trace",
+    "no real multi-rank resumed-video experiment; collective propagation code and helper paths reviewed"
+  ],
+  "source_sha256": {
+    "scripts/supermimic/train.py": "5fc85dcea4a6edaa81bd41309d4273c3e3730c09b0fd1b63b96a2a3534c1e454",
+    "scripts/supermimic/record_manual.py": "8e13d8b54bb31696dce80226b60305ef2abb210161eca2060418eb5cd592d0bd",
+    "source/viserdex/viserdex/supermimic/fixed_palm_reset.py": "d241efe6eaaa2afd7cad6a1e5d79c8b2dea89b2620e34f6ff032ae2cde3bac3b",
+    "source/viserdex/viserdex/supermimic/goal_contract.py": "8125e882b0c9a706a8245559ea594e5692f34e841dc72bb1929b94da9915e995",
+    "source/viserdex/viserdex/supermimic/periodic_video.py": "fa518524fe0c739a06a456bbbf56975c4c4350771b7ec10268b47cbe6f91d9dd",
+    "source/viserdex/viserdex/supermimic/inference.py": "b73f02641f29a477f7a87360770ffe750c45723131ec50341c40b725b88f638d",
+    "source/viserdex/viserdex/supermimic/trainer.py": "2722a4c355742f4901e13a891dbabe082e47ec2972f168314da203bbe77edaa8",
+    "source/viserdex/viserdex/supermimic/core.py": "39752931d1ae2c25e0bf9baeb1bc5176ba1232aa54e6afba21a400d088536220",
+    "source/viserdex/viserdex/supermimic/console_log.py": "535c119401253b5997e91870a70eab6aa51f18a6aaf3287d8193acf581ce139a",
+    "tests/test_fixed_palm_reset.py": "0be5613b4845ea63b2cca41aee9372c60928e29fb348464baf63855b6260a30b",
+    "tests/test_goal_contract.py": "dd324c31ca213b7732c50a8ba22968ba5fc6808728839331a388aab132cc37bf",
+    "tests/test_periodic_video.py": "66879ad90402d58df3f49edb540896c39318c6e4a63bc29edfb8376804a5d710"
+  },
+  "source_scope": "Final working source including preserved independent console formatting; only task-owned hunks are committed. Final help/output text and inherited-goal-offset handling were checked after runtime; current default offset is zero.",
+  "independent_review": "training and lifecycle agents independently reviewed final changes and actual resume/export artifacts",
+  "evidence_root": "/home/brainco/reorientation/training/diagnostics/fixed_detail_audit_20261106"
+}

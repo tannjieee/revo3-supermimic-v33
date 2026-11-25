@@ -1,0 +1,970 @@
+{
+  "status": "superseded_invalid_contact_claim",
+  "formal_training_ready": false,
+  "scope": "Zero-step support reset; no policy-quality claim",
+  "tests_passed": 56,
+  "geometry_randomized_cases": 256,
+  "real_environment_count": 64,
+  "evaluation_transitions": 32000,
+  "object_variant": "die50",
+  "mass_kg": 0.1,
+  "reset_audit": {
+    "meshes": {
+      "shapes": 144,
+      "max_vertex_error_m": 2.623418328644329e-09,
+      "max_support_error_m": 2.384230576857327e-09,
+      "object_vertex_error_m": 1.421754851063103e-15,
+      "object_support_error_m": 9.124645483638005e-16
+    },
+    "reset_count": 128,
+    "max_gap_m": 2.1945227770888324e-06,
+    "min_gap_m": 2.000059863295144e-06,
+    "last": [
+      {
+        "gap_m": 2.175018822839507e-06,
+        "height_shift_m": 0.0042522066038481535,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9959790812697615,
+        "env_id": 0,
+        "position_w": [
+          7.036106109619141,
+          -7.002593517303467,
+          0.5692521929740906
+        ]
+      },
+      {
+        "gap_m": 2.001826466907929e-06,
+        "height_shift_m": 0.002110914611424257,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9947731047709287,
+        "env_id": 1,
+        "position_w": [
+          7.028322696685791,
+          -5.016906261444092,
+          0.5671108961105347
+        ]
+      },
+      {
+        "gap_m": 2.0034690096957364e-06,
+        "height_shift_m": 0.0009057787094901709,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9907692886317906,
+        "env_id": 2,
+        "position_w": [
+          7.0117716789245605,
+          -3.0036587715148926,
+          0.565905749797821
+        ]
+      },
+      {
+        "gap_m": 2.1153108061624744e-06,
+        "height_shift_m": 9.386157173042753e-05,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9750588691993655,
+        "env_id": 3,
+        "position_w": [
+          7.008727550506592,
+          -1.0229443311691284,
+          0.5650938749313354
+        ]
+      },
+      {
+        "gap_m": 2.128596302180438e-06,
+        "height_shift_m": -0.0019906767626347507,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9919302672081921,
+        "env_id": 4,
+        "position_w": [
+          7.018846035003662,
+          0.9775847792625427,
+          0.5630093216896057
+        ]
+      },
+      {
+        "gap_m": 2.007020020409371e-06,
+        "height_shift_m": 0.002178876887729428,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.991930267207981,
+        "env_id": 5,
+        "position_w": [
+          7.025431156158447,
+          2.9720582962036133,
+          0.5671788454055786
+        ]
+      },
+      {
+        "gap_m": 2.0017913230817277e-06,
+        "height_shift_m": 0.002551041337486702,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9947731047698413,
+        "env_id": 6,
+        "position_w": [
+          7.028665542602539,
+          4.970427989959717,
+          0.5675510168075562
+        ]
+      },
+      {
+        "gap_m": 2.1163478355041485e-06,
+        "height_shift_m": -0.0027813749210415517,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9935113578091238,
+        "env_id": 7,
+        "position_w": [
+          7.010812282562256,
+          6.985768795013428,
+          0.5622186064720154
+        ]
+      },
+      {
+        "gap_m": 2.0016372211412155e-06,
+        "height_shift_m": 0.003693624304825574,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9948052674537153,
+        "env_id": 8,
+        "position_w": [
+          5.036024570465088,
+          -7.026659965515137,
+          0.5686936378479004
+        ]
+      },
+      {
+        "gap_m": 2.0240809351843874e-06,
+        "height_shift_m": 0.0010049537779796072,
+        "query_iterations": 6,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9108610082648914,
+        "env_id": 9,
+        "position_w": [
+          5.010079383850098,
+          -5.005439758300781,
+          0.5660049319267273
+        ]
+      },
+      {
+        "gap_m": 2.174236553249863e-06,
+        "height_shift_m": 0.00048753852293160344,
+        "query_iterations": 5,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9316890208347327,
+        "env_id": 10,
+        "position_w": [
+          5.0245771408081055,
+          -3.0222954750061035,
+          0.5654875636100769
+        ]
+      },
+      {
+        "gap_m": 2.0013831494436227e-06,
+        "height_shift_m": 0.0013341180478394013,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9936591434937065,
+        "env_id": 11,
+        "position_w": [
+          5.016948699951172,
+          -1.0178078413009644,
+          0.5663341283798218
+        ]
+      },
+      {
+        "gap_m": 2.0016033144344343e-06,
+        "height_shift_m": 0.0026868538734829556,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9948052674538522,
+        "env_id": 12,
+        "position_w": [
+          5.035784721374512,
+          0.9749146699905396,
+          0.5676868557929993
+        ]
+      },
+      {
+        "gap_m": 2.172974094845542e-06,
+        "height_shift_m": 0.004691597598614275,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9959790812706976,
+        "env_id": 13,
+        "position_w": [
+          5.039839267730713,
+          2.9864299297332764,
+          0.5696915984153748
+        ]
+      },
+      {
+        "gap_m": 2.003224103254033e-06,
+        "height_shift_m": 0.0031003204796522313,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9936591434935279,
+        "env_id": 14,
+        "position_w": [
+          5.023791790008545,
+          4.980664253234863,
+          0.5681003332138062
+        ]
+      },
+      {
+        "gap_m": 2.1299287533412337e-06,
+        "height_shift_m": -0.003853033897529466,
+        "query_iterations": 8,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.7588935816044781,
+        "env_id": 15,
+        "position_w": [
+          5.001762390136719,
+          6.985202789306641,
+          0.5611469745635986
+        ]
+      },
+      {
+        "gap_m": 2.1148495675398924e-06,
+        "height_shift_m": -0.005369684602681307,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.995024263196873,
+        "env_id": 16,
+        "position_w": [
+          3.00824236869812,
+          -6.993768215179443,
+          0.5596303343772888
+        ]
+      },
+      {
+        "gap_m": 2.1764071553557693e-06,
+        "height_shift_m": -0.0017243323115961814,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9898341439009642,
+        "env_id": 17,
+        "position_w": [
+          3.009445905685425,
+          -5.029112815856934,
+          0.5632756948471069
+        ]
+      },
+      {
+        "gap_m": 2.002744693630142e-06,
+        "height_shift_m": 0.0019622943705057405,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9936591434950723,
+        "env_id": 18,
+        "position_w": [
+          3.0229036808013916,
+          -3.0269272327423096,
+          0.5669623017311096
+        ]
+      },
+      {
+        "gap_m": 2.0856862205036337e-06,
+        "height_shift_m": -0.0005499388746173992,
+        "query_iterations": 7,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.7536278201867008,
+        "env_id": 19,
+        "position_w": [
+          3.009542226791382,
+          -1.0052155256271362,
+          0.5644500851631165
+        ]
+      },
+      {
+        "gap_m": 2.0016847816513916e-06,
+        "height_shift_m": 0.0030113185316324176,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9948052674537217,
+        "env_id": 20,
+        "position_w": [
+          3.0315725803375244,
+          0.9707828164100647,
+          0.5680113434791565
+        ]
+      },
+      {
+        "gap_m": 2.003973353494382e-06,
+        "height_shift_m": -0.004465628608953651,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.999065002091542,
+        "env_id": 21,
+        "position_w": [
+          3.0313119888305664,
+          2.97957181930542,
+          0.5605343580245972
+        ]
+      },
+      {
+        "gap_m": 2.0013127920413852e-06,
+        "height_shift_m": 0.00038427815954127087,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9935113578098674,
+        "env_id": 23,
+        "position_w": [
+          3.014432430267334,
+          6.994232654571533,
+          0.5653842687606812
+        ]
+      },
+      {
+        "gap_m": 2.009671982426042e-06,
+        "height_shift_m": 0.0017347665241986623,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.987946810060855,
+        "env_id": 24,
+        "position_w": [
+          1.0158461332321167,
+          -7.017919540405273,
+          0.566734790802002
+        ]
+      },
+      {
+        "gap_m": 2.000059863295144e-06,
+        "height_shift_m": -0.0010672116604961354,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9997631319629617,
+        "env_id": 25,
+        "position_w": [
+          1.037551760673523,
+          -4.990063190460205,
+          0.5639327764511108
+        ]
+      },
+      {
+        "gap_m": 2.0136496443350335e-06,
+        "height_shift_m": 0.0003788236439565343,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9871369994863991,
+        "env_id": 26,
+        "position_w": [
+          1.0108896493911743,
+          -2.9987452030181885,
+          0.5653788447380066
+        ]
+      },
+      {
+        "gap_m": 2.043336054114067e-06,
+        "height_shift_m": -0.0010359781388411399,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9935113578088378,
+        "env_id": 27,
+        "position_w": [
+          1.0196553468704224,
+          -0.9902786016464233,
+          0.5639640092849731
+        ]
+      },
+      {
+        "gap_m": 2.013190895953783e-06,
+        "height_shift_m": -0.009304640353855906,
+        "query_iterations": 5,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9651870646789483,
+        "env_id": 28,
+        "position_w": [
+          1.0021978616714478,
+          0.9821067452430725,
+          0.5556953549385071
+        ]
+      },
+      {
+        "gap_m": 2.04573767606777e-06,
+        "height_shift_m": 0.001103098742166915,
+        "query_iterations": 5,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9386403462526756,
+        "env_id": 29,
+        "position_w": [
+          1.0101418495178223,
+          2.9858620166778564,
+          0.5661031007766724
+        ]
+      },
+      {
+        "gap_m": 2.1329851417884686e-06,
+        "height_shift_m": -0.00568930691981865,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9951535724457136,
+        "env_id": 30,
+        "position_w": [
+          1.0114750862121582,
+          4.999730587005615,
+          0.5593106746673584
+        ]
+      },
+      {
+        "gap_m": 2.001673510229167e-06,
+        "height_shift_m": 0.0012132677643324416,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9948052674530816,
+        "env_id": 31,
+        "position_w": [
+          1.0237997770309448,
+          6.976283073425293,
+          0.5662132501602173
+        ]
+      },
+      {
+        "gap_m": 2.1863959132672463e-06,
+        "height_shift_m": 0.0030466249749526927,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9959790812698618,
+        "env_id": 32,
+        "position_w": [
+          -0.9662211537361145,
+          -7.014341831207275,
+          0.5680466294288635
+        ]
+      },
+      {
+        "gap_m": 2.0314592964668753e-06,
+        "height_shift_m": -0.003080501274645979,
+        "query_iterations": 6,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.8973806658194426,
+        "env_id": 33,
+        "position_w": [
+          -0.994873583316803,
+          -4.995223045349121,
+          0.5619195103645325
+        ]
+      },
+      {
+        "gap_m": 2.0081265864142275e-06,
+        "height_shift_m": -0.0032732016449529555,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9863972258576958,
+        "env_id": 34,
+        "position_w": [
+          -0.9864713549613953,
+          -3.017828941345215,
+          0.5617268085479736
+        ]
+      },
+      {
+        "gap_m": 2.0197578876419954e-06,
+        "height_shift_m": -0.0017497099717417447,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9773935001082975,
+        "env_id": 35,
+        "position_w": [
+          -0.9941588640213013,
+          -1.0035545825958252,
+          0.5632503032684326
+        ]
+      },
+      {
+        "gap_m": 2.0257417716387996e-06,
+        "height_shift_m": -0.0032048855928232325,
+        "query_iterations": 6,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.90197957098625,
+        "env_id": 36,
+        "position_w": [
+          -0.9927442073822021,
+          1.000753402709961,
+          0.5617951154708862
+        ]
+      },
+      {
+        "gap_m": 2.0208973960926026e-06,
+        "height_shift_m": -0.0033036991617595296,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9813898830712513,
+        "env_id": 37,
+        "position_w": [
+          -0.9887450337409973,
+          2.981877088546753,
+          0.5616962909698486
+        ]
+      },
+      {
+        "gap_m": 2.0016450556930624e-06,
+        "height_shift_m": 0.0037066949720191145,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9948052674533001,
+        "env_id": 38,
+        "position_w": [
+          -0.9659616351127625,
+          4.979153633117676,
+          0.5687066912651062
+        ]
+      },
+      {
+        "gap_m": 2.0395012771891107e-06,
+        "height_shift_m": -0.00014992623733341842,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9836359272923594,
+        "env_id": 39,
+        "position_w": [
+          -0.9922012090682983,
+          6.971035957336426,
+          0.5648500919342041
+        ]
+      },
+      {
+        "gap_m": 2.12193950060062e-06,
+        "height_shift_m": -0.005236314108168057,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9948052674529194,
+        "env_id": 40,
+        "position_w": [
+          -2.987574577331543,
+          -7.0233988761901855,
+          0.5597636699676514
+        ]
+      },
+      {
+        "gap_m": 2.0392185601246594e-06,
+        "height_shift_m": -0.0018104589125802414,
+        "query_iterations": 3,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9953348872290002,
+        "env_id": 41,
+        "position_w": [
+          -2.9673635959625244,
+          -5.021364212036133,
+          0.5631895661354065
+        ]
+      },
+      {
+        "gap_m": 2.042087928703555e-06,
+        "height_shift_m": -0.004659464734034162,
+        "query_iterations": 6,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.8999339477697398,
+        "env_id": 42,
+        "position_w": [
+          -2.9821789264678955,
+          -2.9937243461608887,
+          0.5603405237197876
+        ]
+      },
+      {
+        "gap_m": 2.00290258926334e-06,
+        "height_shift_m": 0.003045925642013912,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9935113578095922,
+        "env_id": 43,
+        "position_w": [
+          -2.977170705795288,
+          -0.9910125732421875,
+          0.5680459141731262
+        ]
+      },
+      {
+        "gap_m": 2.0014509170933764e-06,
+        "height_shift_m": 0.0032377152319409894,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9950242631969834,
+        "env_id": 44,
+        "position_w": [
+          -2.9627277851104736,
+          1.0091657638549805,
+          0.5682377219200134
+        ]
+      },
+      {
+        "gap_m": 2.001036921007878e-06,
+        "height_shift_m": 0.0030770197813471192,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9954986264346779,
+        "env_id": 45,
+        "position_w": [
+          -2.9717397689819336,
+          3.0056960582733154,
+          0.568077027797699
+        ]
+      },
+      {
+        "gap_m": 2.006477052440549e-06,
+        "height_shift_m": -0.004868009916038744,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9889605183559913,
+        "env_id": 46,
+        "position_w": [
+          -2.969444751739502,
+          4.975045680999756,
+          0.5601319670677185
+        ]
+      },
+      {
+        "gap_m": 2.0089342078090016e-06,
+        "height_shift_m": -0.004720844671388613,
+        "query_iterations": 3,
+        "support_geom": 52,
+        "support_body": "query_right_ring_MPR_link",
+        "normal_up_dot": 0.9986233710607114,
+        "env_id": 47,
+        "position_w": [
+          -2.9935672283172607,
+          7.005074501037598,
+          0.560279130935669
+        ]
+      },
+      {
+        "gap_m": 2.001626537649934e-06,
+        "height_shift_m": 0.003252433391344685,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.994805267453916,
+        "env_id": 48,
+        "position_w": [
+          -4.965750217437744,
+          -7.029422760009766,
+          0.568252444267273
+        ]
+      },
+      {
+        "gap_m": 2.001514832344222e-06,
+        "height_shift_m": 0.0023823398294993622,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9950242631966447,
+        "env_id": 49,
+        "position_w": [
+          -4.981452941894531,
+          -5.003525733947754,
+          0.5673823356628418
+        ]
+      },
+      {
+        "gap_m": 2.036983723422039e-06,
+        "height_shift_m": 0.0021105107108093588,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9859062725347202,
+        "env_id": 50,
+        "position_w": [
+          -4.983983516693115,
+          -2.996682643890381,
+          0.5671104788780212
+        ]
+      },
+      {
+        "gap_m": 2.0175329247857346e-06,
+        "height_shift_m": 0.0006830316000758646,
+        "query_iterations": 5,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9592875198926037,
+        "env_id": 51,
+        "position_w": [
+          -4.989438533782959,
+          -1.0055805444717407,
+          0.5656830072402954
+        ]
+      },
+      {
+        "gap_m": 2.0302566058619563e-06,
+        "height_shift_m": -0.0006782474174524475,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9640998176454857,
+        "env_id": 52,
+        "position_w": [
+          -4.990617752075195,
+          0.9936902523040771,
+          0.564321756362915
+        ]
+      },
+      {
+        "gap_m": 2.169257657308432e-06,
+        "height_shift_m": -0.00043925895618993765,
+        "query_iterations": 5,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.8542839457799624,
+        "env_id": 53,
+        "position_w": [
+          -4.99255895614624,
+          2.9746620655059814,
+          0.5645607113838196
+        ]
+      },
+      {
+        "gap_m": 2.0032310966558532e-06,
+        "height_shift_m": -0.006830126496506654,
+        "query_iterations": 3,
+        "support_geom": 50,
+        "support_body": "query_right_middle_MPR_link",
+        "normal_up_dot": 0.9993119659135012,
+        "env_id": 54,
+        "position_w": [
+          -4.99544095993042,
+          4.97235631942749,
+          0.5581698417663574
+        ]
+      },
+      {
+        "gap_m": 2.098059234913106e-06,
+        "height_shift_m": -0.0006429916271952704,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.945569810203652,
+        "env_id": 55,
+        "position_w": [
+          -4.978808879852295,
+          6.9913411140441895,
+          0.5643569827079773
+        ]
+      },
+      {
+        "gap_m": 2.1172727816235512e-06,
+        "height_shift_m": -0.006120895980576357,
+        "query_iterations": 3,
+        "support_geom": 50,
+        "support_body": "query_right_middle_MPR_link",
+        "normal_up_dot": 0.995613262994756,
+        "env_id": 56,
+        "position_w": [
+          -6.998745918273926,
+          -7.026944637298584,
+          0.5588790774345398
+        ]
+      },
+      {
+        "gap_m": 2.0338433070222333e-06,
+        "height_shift_m": -0.00681332484295355,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.982838981998036,
+        "env_id": 57,
+        "position_w": [
+          -6.987695693969727,
+          -4.993780136108398,
+          0.5581866502761841
+        ]
+      },
+      {
+        "gap_m": 2.0368874564037363e-06,
+        "height_shift_m": 0.0003436791061145125,
+        "query_iterations": 5,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9441838940937429,
+        "env_id": 58,
+        "position_w": [
+          -6.989203929901123,
+          -3.0265815258026123,
+          0.5653436779975891
+        ]
+      },
+      {
+        "gap_m": 2.1945227770888324e-06,
+        "height_shift_m": -0.003490789892488598,
+        "query_iterations": 6,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.8545005967769006,
+        "env_id": 59,
+        "position_w": [
+          -6.997445583343506,
+          -1.0246680974960327,
+          0.5615091919898987
+        ]
+      },
+      {
+        "gap_m": 2.001647646574421e-06,
+        "height_shift_m": 0.0012864807492332445,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9950242631971061,
+        "env_id": 60,
+        "position_w": [
+          -6.982926368713379,
+          1.0033519268035889,
+          0.5662865042686462
+        ]
+      },
+      {
+        "gap_m": 2.001693718462613e-06,
+        "height_shift_m": 0.0026349752822602615,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9948052674531956,
+        "env_id": 61,
+        "position_w": [
+          -6.97166109085083,
+          2.9762938022613525,
+          0.5676349997520447
+        ]
+      },
+      {
+        "gap_m": 2.000967306762443e-06,
+        "height_shift_m": -0.005786955598571945,
+        "query_iterations": 3,
+        "support_geom": 50,
+        "support_body": "query_right_middle_MPR_link",
+        "normal_up_dot": 0.9995910729716805,
+        "env_id": 62,
+        "position_w": [
+          -6.996723651885986,
+          4.9734063148498535,
+          0.5592130422592163
+        ]
+      },
+      {
+        "gap_m": 2.007793512440464e-06,
+        "height_shift_m": 0.00042251631301230136,
+        "query_iterations": 5,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9650079244806972,
+        "env_id": 63,
+        "position_w": [
+          -6.970597743988037,
+          6.981377601623535,
+          0.565422534942627
+        ]
+      }
+    ]
+  },
+  "evaluation_metrics": {
+    "reward_sum": 11.89495986327529,
+    "hand_pose_cost_sum": 0.09824295587895904,
+    "hand_pose_reward_sum": 0.0,
+    "action_saturation_sum": 0.0,
+    "action_near_bound_sum": 0.0,
+    "action_tanh_slope_sum": 461.48383617401123,
+    "terminated": 1,
+    "timeouts": 63,
+    "successes": 0,
+    "drops": 1,
+    "completed_episode_goals": 0.0,
+    "task_samples": 32000,
+    "task_angle_sum_rad": 70919.38511657715,
+    "task_hand_center_distance_sum_m": 768.175637960434,
+    "task_stable_samples": 0,
+    "post_evaluation_samples": 16049,
+    "cost_joint_speed_sum": 0.0,
+    "cost_joint_speed_violations": 0,
+    "cost_joint_speed_max_ratio": 0.30976590514183044,
+    "cost_target_rate_sum": 0.0,
+    "cost_target_rate_violations": 0,
+    "cost_target_rate_max_ratio": 0.716095507144928,
+    "cost_object_angular_speed_sum": 12.806693500013788,
+    "cost_object_angular_speed_violations": 713,
+    "cost_object_angular_speed_max_ratio": 25.770910263061523,
+    "cost_object_linear_speed_sum": 29.628977427067447,
+    "cost_object_linear_speed_violations": 412,
+    "cost_object_linear_speed_max_ratio": 47.0277214050293,
+    "cost_drop_sum": 0.00876395683735609,
+    "cost_drop_violations": 1,
+    "cost_drop_max_ratio": 1.093616008758545,
+    "object_hold_cost_gate_sum": 8.869470418198034,
+    "goals_per_completed_episode": 0.0,
+    "task_mean_angle_rad": 2.216230784893036,
+    "task_mean_hand_center_distance_m": 0.024005488686263562,
+    "task_stable_fraction": 0.0,
+    "object_hold_cost_gate_mean": 0.00027717095056868857
+  },
+  "video": "/home/brainco/reorientation/training/diagnostics/support_reset_20261105/preflight/videos/iteration_000002/rollout.mp4",
+  "initial_image": "/home/brainco/reorientation/training/diagnostics/support_reset_20261105/preflight/videos/iteration_000002/initial_view.png",
+  "checkpoint": "/home/brainco/reorientation/training/diagnostics/support_reset_20261105/preflight/model_2.pt",
+  "source_sha256": {
+    "source/viserdex/viserdex/supermimic/support_placement.py": "e0dafff42601e36264da600f9494829c1695579ec161bcf6553d1b0800f7c969",
+    "scripts/supermimic/train.py": "36690c8fc51856793f122beceece6a0f8eec661b98a4eca97d75d188bbbb30e1",
+    "scripts/supermimic/record_manual.py": "5dfe878a743dfac1a79e4872b205c8f2d8d9e9e4bca5e7d9f6c87fa0dc8eb99c",
+    "tests/test_support_placement.py": "45c32cc7f9a39b859830518744cc64d89b97968f9b172e2ae6a4f94bc4e63b8d"
+  },
+  "video_decode": {
+    "frames": 500,
+    "width": 1280,
+    "height": 960,
+    "fps": 25,
+    "duration_s": 20,
+    "recorder_returncode": 0
+  },
+  "preflight_launcher_exit_code": 143,
+  "preflight_exit_note": "Two updates and the recorder completed, but the outer launcher later returned SIGTERM (143), without final validation.json. Cause not established; not claimed as a clean full-run exit. A separate model_2 to model_3 resume completed updates and wrote final validation.",
+  "resume_launcher_exit_code": 0,
+  "evaluation_launcher_exit_code": 0,
+  "contact_claim_valid": false,
+  "superseded_by": "docs/versions/v31_alignment_20261105/validation.json",
+  "reason": "World XYZW quaternions were incorrectly reordered as WXYZ in the reset adapter; old query gaps did not validate actual written support."
+}

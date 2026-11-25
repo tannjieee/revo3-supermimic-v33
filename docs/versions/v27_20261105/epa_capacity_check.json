@@ -1,0 +1,6 @@
+{
+  "tested_pose_pairs": 528,
+  "overflows": [],
+  "max_distance_difference_m": 0.0,
+  "scope": "Independent float32 static queries on saved 40 control boundaries; not the unsaved failing integration substep. Geometry from prior audited export; mass/torque not used by distance queries."
+}

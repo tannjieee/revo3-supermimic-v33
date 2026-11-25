@@ -1,0 +1,467 @@
+{
+  "recorded_at": "2026-11-06T00:20:09.825684+08:00",
+  "base_commit": "b2ad77d20b35adfcf1c9c016b736684053c3390a",
+  "status": "fixed_matched_HOME_and_palm_pose_validated",
+  "checkpoint_version": 31,
+  "reset_protocol": "fixed_palm_v1",
+  "explicit_user_task_definition_change": true,
+  "initial_pose_randomization_removed": true,
+  "rotation_goal_randomization_retained": true,
+  "physical_domain_randomization_retained": true,
+  "physics_or_assets_changed": false,
+  "algorithm_objective_changed": false,
+  "exploration_or_scaling_changed": false,
+  "reset_settling_steps": 0,
+  "online_contact_search": false,
+  "formal_training_started": false,
+  "hardware_used": false,
+  "home_hold_runs": [
+    {
+      "passed": true,
+      "seed": 43,
+      "num_envs": 64,
+      "steps": 550,
+      "seconds_per_world": 22.0,
+      "home_command_only": true,
+      "zero_action_exploration": true,
+      "initial_goal_unique_count": 64,
+      "observed_reset_worlds": 160,
+      "drops": 0,
+      "timeouts": 96,
+      "max_reset_local_position_error_m": 1.043081283569336e-07,
+      "max_position_drift_m": 0.00031590042635798454,
+      "max_orientation_drift_deg": 0.7073532801884438,
+      "max_linear_speed_m_s": 0.0018073886167258024,
+      "max_angular_speed_rad_s": 0.058717817068099976,
+      "thresholds": {
+        "max_position_drift_m": 0.005,
+        "max_orientation_drift_deg": 5.0,
+        "drops": 0
+      },
+      "forced_partial_reset": {
+        "step": 26,
+        "reset_worlds": 32,
+        "selected_goals_changed": true,
+        "other_goals_unchanged": true
+      },
+      "domain_parameter_ranges": {
+        "object.body_mass": [
+          0.08034029603004456,
+          0.11999701708555222
+        ],
+        "object.shape_material_mu": [
+          0.7057819366455078,
+          1.468877911567688
+        ],
+        "actuator.fingers.kp": [
+          0.47711604833602905,
+          31.05354118347168
+        ],
+        "actuator.fingers.kd": [
+          0.025321628898382187,
+          0.5035906434059143
+        ]
+      },
+      "solver_diagnostic": {
+        "overflow_mask": 0,
+        "flags": [],
+        "affected_worlds": [],
+        "world_flags": [],
+        "contact_peaks": {
+          "candidates": 2688,
+          "contacts": 448,
+          "constraints": 30
+        },
+        "solver_iterations_max": 1,
+        "solver_config": {
+          "iterations": 100,
+          "ls_iterations": 100,
+          "nconmax": 640,
+          "njmax": 1024,
+          "tolerance": 1e-06
+        },
+        "num_substeps": 2
+      },
+      "report": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/runtime/basin2_seed43.json",
+      "support_reset": {
+        "protocol": "fixed_palm_v1",
+        "reset_count": 160,
+        "min_gap_m": 1.907355037880227e-06,
+        "max_gap_m": 1.9611558698240337e-06,
+        "max_local_position_error_m": 1.043081283569336e-07,
+        "meshes": {
+          "shapes": 144,
+          "max_vertex_error_m": 2.623418328644329e-09,
+          "max_support_error_m": 2.384230576857327e-09,
+          "object_vertex_error_m": 2.1886986228946254e-15,
+          "object_support_error_m": 1.7937040741600185e-15
+        }
+      },
+      "live_domain_parameters_unchanged": null
+    },
+    {
+      "passed": true,
+      "seed": 42,
+      "num_envs": 1024,
+      "steps": 550,
+      "seconds_per_world": 22.0,
+      "home_command_only": true,
+      "zero_action_exploration": true,
+      "initial_goal_unique_count": 1024,
+      "observed_reset_worlds": 2560,
+      "drops": 0,
+      "timeouts": 1536,
+      "max_reset_local_position_error_m": 8.605420589447021e-07,
+      "max_position_drift_m": 0.0003209069254808128,
+      "max_orientation_drift_deg": 0.8314661417006265,
+      "max_linear_speed_m_s": 0.0018598343012854457,
+      "max_angular_speed_rad_s": 0.06102321669459343,
+      "thresholds": {
+        "max_position_drift_m": 0.005,
+        "max_orientation_drift_deg": 5.0,
+        "drops": 0
+      },
+      "forced_partial_reset": {
+        "step": 26,
+        "reset_worlds": 512,
+        "selected_goals_changed": true,
+        "other_goals_unchanged": true
+      },
+      "domain_parameter_ranges": {
+        "object.body_mass": [
+          0.08008267730474472,
+          0.11995799839496613
+        ],
+        "object.shape_material_mu": [
+          0.7002025842666626,
+          1.499405026435852
+        ],
+        "actuator.fingers.kp": [
+          0.47173815965652466,
+          32.12163162231445
+        ],
+        "actuator.fingers.kd": [
+          0.024880187585949898,
+          0.5078465342521667
+        ]
+      },
+      "solver_diagnostic": {
+        "overflow_mask": 0,
+        "flags": [],
+        "affected_worlds": [],
+        "world_flags": [],
+        "contact_peaks": {
+          "candidates": 43008,
+          "contacts": 7168,
+          "constraints": 30
+        },
+        "solver_iterations_max": 2,
+        "solver_config": {
+          "iterations": 100,
+          "ls_iterations": 100,
+          "nconmax": 640,
+          "njmax": 1024,
+          "tolerance": 1e-06
+        },
+        "num_substeps": 2
+      },
+      "report": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/runtime/final_1024_seed42.json",
+      "support_reset": {
+        "protocol": "fixed_palm_v1",
+        "reset_count": 2560,
+        "min_gap_m": 1.6362392104386e-06,
+        "max_gap_m": 1.9611558698240337e-06,
+        "max_local_position_error_m": 8.605420589447021e-07,
+        "meshes": {
+          "shapes": 144,
+          "max_vertex_error_m": 2.6234192031784355e-09,
+          "max_support_error_m": 2.384232297703015e-09,
+          "object_vertex_error_m": 1.7606580170989858e-15,
+          "object_support_error_m": 1.3253287356462806e-15
+        }
+      },
+      "live_domain_parameters_unchanged": null
+    },
+    {
+      "passed": true,
+      "seed": 44,
+      "num_envs": 64,
+      "steps": 550,
+      "seconds_per_world": 22.0,
+      "home_command_only": true,
+      "zero_action_exploration": true,
+      "initial_goal_unique_count": 64,
+      "observed_reset_worlds": 160,
+      "drops": 0,
+      "timeouts": 96,
+      "max_reset_local_position_error_m": 1.043081283569336e-07,
+      "max_position_drift_m": 0.0003213156887795776,
+      "max_orientation_drift_deg": 0.7063284850086774,
+      "max_linear_speed_m_s": 0.0017962879501283169,
+      "max_angular_speed_rad_s": 0.058684658259153366,
+      "thresholds": {
+        "max_position_drift_m": 0.005,
+        "max_orientation_drift_deg": 5.0,
+        "drops": 0
+      },
+      "forced_partial_reset": {
+        "step": 26,
+        "reset_worlds": 32,
+        "selected_goals_changed": true,
+        "other_goals_unchanged": true
+      },
+      "domain_parameter_ranges": {
+        "object.body_mass": [
+          0.08037789911031723,
+          0.11955147236585617
+        ],
+        "object.shape_material_mu": [
+          0.7388061881065369,
+          1.482067346572876
+        ],
+        "actuator.fingers.kp": [
+          0.4746023416519165,
+          29.759136199951172
+        ],
+        "actuator.fingers.kd": [
+          0.02505233697593212,
+          0.5032051801681519
+        ]
+      },
+      "solver_diagnostic": {
+        "overflow_mask": 0,
+        "flags": [],
+        "affected_worlds": [],
+        "world_flags": [],
+        "contact_peaks": {
+          "candidates": 2688,
+          "contacts": 448,
+          "constraints": 30
+        },
+        "solver_iterations_max": 1,
+        "solver_config": {
+          "iterations": 100,
+          "ls_iterations": 100,
+          "nconmax": 640,
+          "njmax": 1024,
+          "tolerance": 1e-06
+        },
+        "num_substeps": 2
+      },
+      "report": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/runtime/final_64_seed44.json",
+      "support_reset": {
+        "protocol": "fixed_palm_v1",
+        "reset_count": 160,
+        "min_gap_m": 1.907355037880227e-06,
+        "max_gap_m": 1.9611558698240337e-06,
+        "max_local_position_error_m": 1.043081283569336e-07,
+        "meshes": {
+          "shapes": 144,
+          "max_vertex_error_m": 2.623418328644329e-09,
+          "max_support_error_m": 2.384230576857327e-09,
+          "object_vertex_error_m": 2.1886986228946254e-15,
+          "object_support_error_m": 1.7937040741600185e-15
+        }
+      },
+      "live_domain_parameters_unchanged": null
+    },
+    {
+      "passed": true,
+      "seed": 45,
+      "num_envs": 64,
+      "steps": 550,
+      "seconds_per_world": 22.0,
+      "home_command_only": true,
+      "zero_action_exploration": true,
+      "initial_goal_unique_count": 64,
+      "observed_reset_worlds": 160,
+      "drops": 0,
+      "timeouts": 96,
+      "max_reset_local_position_error_m": 1.043081283569336e-07,
+      "max_position_drift_m": 0.00032654620008543134,
+      "max_orientation_drift_deg": 0.6993460573253675,
+      "max_linear_speed_m_s": 0.0018067412311211228,
+      "max_angular_speed_rad_s": 0.0587037019431591,
+      "thresholds": {
+        "max_position_drift_m": 0.005,
+        "max_orientation_drift_deg": 5.0,
+        "drops": 0
+      },
+      "forced_partial_reset": {
+        "step": 26,
+        "reset_worlds": 32,
+        "selected_goals_changed": true,
+        "other_goals_unchanged": true,
+        "other_physical_states_unchanged": true
+      },
+      "domain_parameter_ranges": {
+        "object.body_mass": [
+          0.08045189827680588,
+          0.11908242851495743
+        ],
+        "object.shape_material_mu": [
+          0.7624524235725403,
+          1.496340036392212
+        ],
+        "actuator.fingers.kp": [
+          0.47852519154548645,
+          31.7773380279541
+        ],
+        "actuator.fingers.kd": [
+          0.025399550795555115,
+          0.5074981451034546
+        ]
+      },
+      "solver_diagnostic": {
+        "overflow_mask": 0,
+        "flags": [],
+        "affected_worlds": [],
+        "world_flags": [],
+        "contact_peaks": {
+          "candidates": 2688,
+          "contacts": 448,
+          "constraints": 30
+        },
+        "solver_iterations_max": 1,
+        "solver_config": {
+          "iterations": 100,
+          "ls_iterations": 100,
+          "nconmax": 640,
+          "njmax": 1024,
+          "tolerance": 1e-06
+        },
+        "num_substeps": 2
+      },
+      "report": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/runtime/final_partial_64_seed45.json",
+      "support_reset": {
+        "protocol": "fixed_palm_v1",
+        "reset_count": 160,
+        "min_gap_m": 1.907355037880227e-06,
+        "max_gap_m": 1.9611558698240337e-06,
+        "max_local_position_error_m": 1.043081283569336e-07,
+        "meshes": {
+          "shapes": 144,
+          "max_vertex_error_m": 2.623418328644329e-09,
+          "max_support_error_m": 2.384230576857327e-09,
+          "object_vertex_error_m": 2.1886986228946254e-15,
+          "object_support_error_m": 1.7937040741600185e-15
+        }
+      },
+      "live_domain_parameters_unchanged": true
+    }
+  ],
+  "tests": {
+    "passed": 67,
+    "skipped": 0,
+    "log": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/contract/regression.log",
+    "counts_overlap_prior_audits": true
+  },
+  "preflight": {
+    "passed": true,
+    "source_run": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/preflight",
+    "checkpoint_version": 31,
+    "optimizer_steps": {
+      "wm": 20,
+      "actor": 0,
+      "critic": 40
+    },
+    "environment_contract": "597c3886c1da242004078efe718eca8643ac69a7d7f7b3204e701f6d946e2bbb",
+    "fixed_pose_serialized_matches_production": true,
+    "saved_base_position_m": [
+      0.0342517340065347,
+      -0.008562948749966636,
+      0.10168801281703035
+    ],
+    "saved_base_quaternion_xyzw": [
+      0.036851804416084884,
+      0.6479978003253494,
+      0.027523838655177456,
+      0.7602520855548316
+    ],
+    "no_persistent_or_warmup_grasp_bank": true,
+    "video": {
+      "status": "complete",
+      "returncode": 0,
+      "stream": {
+        "width": 1280,
+        "height": 960,
+        "fps": 25.0,
+        "decoded_frames": 500
+      },
+      "reset_steps": [
+        500
+      ],
+      "drops": 0,
+      "timeouts": 1,
+      "max_rendered_orientation_error_deg": 8.87267600082659e-06,
+      "max_transition_event_angle_error_deg": 4.6871162368233854e-05,
+      "max_displayed_event_angle_error_deg": 4.428413515711327e-05,
+      "reset_local_position_error_m": 2.946602786768615e-08,
+      "reset_joint_velocity_max": 0.0,
+      "reset_object_velocity_max": 0.0,
+      "max_hold_position_drift_m": 0.000321128419805944,
+      "randomized_goal_change_at_timeout_deg": 168.37492202096846,
+      "raw_action_equals_HOME": true,
+      "no_target_shaping": true
+    },
+    "initial_view": {
+      "file": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/preflight/videos/iteration_000002/initial_view.png",
+      "sha256": "5d5820f377b419c0beaaac30b6aa23dcf9e2a69ffd0a38678ef357bfad990f97",
+      "visually_reviewed": true,
+      "observation": "die lies across palm in HOME; target die is separate visual-only marker",
+      "phase_evidence": "record_manual: env.reset, then three render calls and initial_view save before first adapter.step; IsaacLab reset.forward updates FK without stepping physics; Newton render does not call solver step",
+      "snapshot_count": 1,
+      "palm_contact_hulls": 3,
+      "contact_gap_m": 1.9590206057858423e-06
+    },
+    "scope": "Read-only artifact and source audit. Does not claim learned Actor performance; Actor has zero optimizer updates. No newly confirmed mismatch."
+  },
+  "production_video": {
+    "interval": 500,
+    "steps": 500,
+    "seed": 43
+  },
+  "geometry": {
+    "report": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/geometry/README.md",
+    "world_and_motion_report": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105/geometry/basin_world_and_motion.json",
+    "float32_inverse_transform_queries": 2048,
+    "world_layouts": 1024,
+    "palm_contact_hulls": 3,
+    "passive_MCP_supports": [
+      "little",
+      "ring"
+    ],
+    "single_distal_joint_pose_samples": 410
+  },
+  "remaining": [
+    "finite 22-second HOME holding is not a perturbation or learned-rotation certificate",
+    "WM action-response reliability unresolved on the new distribution",
+    "bootstrap dominance and common cost-head failure-risk gradients unresolved",
+    "100 g nominal mass confirmed; inertia/friction still simulation estimates"
+  ],
+  "failed_evidence_retained": [
+    "initial slice candidates drifted 6.383–11.774 mm and were rejected",
+    "initial NumPy float YAML serialization rejected by saved config test, fixed and rerun",
+    "candidate report NumPy bool serialization failed after simulation, fixed and rerun",
+    "first combined test invocation omitted IsaacLab PhysX import path, corrected environment; 67 passed"
+  ],
+  "source_sha256": {
+    "tests/test_fixed_palm_reset.py": "89f0beb6c0b8902f5adefe3d2050f8e2da135855d10e1eb8dd9950a2608778db",
+    "source/viserdex/viserdex/supermimic/recording_trajectory.py": "3362c1ab15dc0e2c6e3b0a190e7e8c632ff04281384788139929e02bcbbb0d1f",
+    "source/viserdex/viserdex/supermimic/periodic_video.py": "7959be4dfe7651c8185164e4a23380f882236efd2a9f37afd3b78f45526dd211",
+    "source/viserdex/viserdex/supermimic/support_placement.py": "d1de180203a4b88ef85c0fa16fa1ba04120623292287d85ea170def35bdc9539",
+    "source/viserdex/viserdex/supermimic/console_log.py": "535c119401253b5997e91870a70eab6aa51f18a6aaf3287d8193acf581ce139a",
+    "source/viserdex/viserdex/supermimic/fixed_palm_reset.py": "7ac9ba3c8ca6cf51137cb0ddba80197febe71df0ba2d9aab1ab60f122a155664",
+    "source/viserdex/viserdex/supermimic/trainer.py": "2722a4c355742f4901e13a891dbabe082e47ec2972f168314da203bbe77edaa8",
+    "source/viserdex/viserdex/supermimic/core.py": "39752931d1ae2c25e0bf9baeb1bc5176ba1232aa54e6afba21a400d088536220",
+    "scripts/supermimic/check_fixed_palm_reset.py": "9a0551178ca3aa6ec23f9883d0a352b9ee99e69389260c5bc14975d16464357d",
+    "scripts/supermimic/record_manual.py": "8e13d8b54bb31696dce80226b60305ef2abb210161eca2060418eb5cd592d0bd",
+    "scripts/supermimic/train.py": "018933395eee7a91e1c57119a5e3fa67d01c1c8dc381cf232bc7d79bc549891d"
+  },
+  "external_script_sha256": {
+    "/home/brainco/reorientation/training/run.sh": "00f7e924ad8bd24f0140224a43b19a8bb6841c2a08ad2d72c57108e6d2c2958c",
+    "/home/brainco/reorientation/training/start_v31.sh": "f23911afbf54cf8f4f9f252b1fc9258bc1053e126d78820448647fd9574b95c3"
+  },
+  "source_scope": "Validated working source, including preserved independent console formatting edits; only task-owned hunks are committed",
+  "evidence_root": "/home/brainco/reorientation/training/diagnostics/fixed_palm_reset_20261105"
+}

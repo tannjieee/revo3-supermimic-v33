@@ -1,0 +1,438 @@
+{
+  "iteration": 2,
+  "seconds": 20.0,
+  "frames": 500,
+  "successes": 0,
+  "drops": 1,
+  "resets": 1,
+  "timeouts": 0,
+  "completed_episodes": [
+    {
+      "end_step": 16,
+      "goals": 0,
+      "drop": true,
+      "timeout": false
+    }
+  ],
+  "unfinished_episode_goals": 0,
+  "parity_max_errors": {
+    "reward": 2.0954757928848267e-09,
+    "ema": 0.0,
+    "clean_student_observation": 0.0,
+    "convex_vertices_m": 0.0,
+    "convex_inertia_kg_m2": 1.0913936421275139e-11,
+    "fk_position_m": 2.0489096641540527e-07,
+    "fk_linear_velocity_m_s": 2.2351741790771484e-08,
+    "fk_angular_velocity_rad_s": 1.471489667892456e-07,
+    "fk_quaternion": 5.364418029785156e-07,
+    "hand_convex_vertices_m": 2.0862165877228179e-10,
+    "direct_observation": 2.384185791015625e-07,
+    "hand_pose": 1.1641532182693481e-10,
+    "position_frame": 5.960464477539063e-08,
+    "hold_counter": 0.0,
+    "orientation_frame": 1.1920928955078125e-06,
+    "success_boundary_disagreements": 0,
+    "terminal_reset_state_separation": 0.2802932858467102
+  },
+  "contact_peaks": {
+    "candidates": 48,
+    "contacts": 6,
+    "constraints": 33
+  },
+  "live_convex_audit": {
+    "joint_names": [
+      "right_little_MPR_joint",
+      "right_little_MCP_joint",
+      "right_little_PIP_joint",
+      "right_little_DIP_joint",
+      "right_ring_MPR_joint",
+      "right_ring_MCP_joint",
+      "right_ring_PIP_joint",
+      "right_ring_DIP_joint",
+      "right_middle_MPR_joint",
+      "right_middle_MCP_joint",
+      "right_middle_PIP_joint",
+      "right_middle_DIP_joint",
+      "right_index_MPR_joint",
+      "right_index_MCP_joint",
+      "right_index_PIP_joint",
+      "right_index_DIP_joint",
+      "right_thumb_MCP_joint",
+      "right_thumb_PIP_joint",
+      "right_thumb_DIP_joint",
+      "right_thumb_CMP_joint",
+      "right_thumb_CMR_joint"
+    ],
+    "limits_rad": [
+      [
+        -0.5235987755982988,
+        0.17453292519943295
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.4363323129985824,
+        0.3490658503988659
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        0.4363323129985824
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        0.5235987755982988
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        0.0,
+        1.3089969389957472
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        0.0,
+        1.9198621771937625
+      ],
+      [
+        0.0,
+        1.8500490071139892
+      ]
+    ],
+    "collision_instances": 144,
+    "rigid_bodies": 22,
+    "joint_frame_quaternion_conversion": "USD Gf: imaginary XYZ then real W; runtime XYZW",
+    "root_prim": "/revo3_single",
+    "sdk_software_limits": {
+      "schema": "revo3_sdk_position_limits_v1",
+      "sha256": "c680ac9aa4a344fa9d47772f923238399e920f344cb0a97c43bada1edd164704",
+      "serial": "BCUTR2291J2600001",
+      "sdk_version": "2.3.2",
+      "firmware": "0.1.5",
+      "captured_at": "2026-11-04T08:20:12.969647+00:00",
+      "readback_sha256": "fc377078da577798083d4d7667c1896d547cf3804aa3029f6bbdf18acf158ce3",
+      "coordinate": "policy_encoder_rad"
+    },
+    "training_soft_limits": {
+      "schema": "revo3_urdf_encoder_limits_v2",
+      "sha256": "4a911b596499290aea7496a1a080ebfaa78f368f565e2e5f9c0475565a086289",
+      "coordinate": "policy_encoder_rad",
+      "source_urdf": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102/config/revo3_right_limits_reference.urdf",
+      "source_revision": "2a98621de70d59d182b8075214cebb96fd5375d3",
+      "joint_names": [
+        "right_little_MPR_joint",
+        "right_little_MCP_joint",
+        "right_little_PIP_joint",
+        "right_little_DIP_joint",
+        "right_ring_MPR_joint",
+        "right_ring_MCP_joint",
+        "right_ring_PIP_joint",
+        "right_ring_DIP_joint",
+        "right_middle_MPR_joint",
+        "right_middle_MCP_joint",
+        "right_middle_PIP_joint",
+        "right_middle_DIP_joint",
+        "right_index_MPR_joint",
+        "right_index_MCP_joint",
+        "right_index_PIP_joint",
+        "right_index_DIP_joint",
+        "right_thumb_MCP_joint",
+        "right_thumb_PIP_joint",
+        "right_thumb_DIP_joint",
+        "right_thumb_CMP_joint",
+        "right_thumb_CMR_joint"
+      ],
+      "geometric_limits_rad": [
+        [
+          -0.5235987755982988,
+          0.17453292519943295
+        ],
+        [
+          -0.08726646259971647,
+          1.5707963267948966
+        ],
+        [
+          -0.17453292519943295,
+          1.5707963267948966
+        ],
+        [
+          -0.3490658503988659,
+          1.5707963267948966
+        ],
+        [
+          -0.4363323129985824,
+          0.3490658503988659
+        ],
+        [
+          -0.08726646259971647,
+          1.5707963267948966
+        ],
+        [
+          -0.17453292519943295,
+          1.5707963267948966
+        ],
+        [
+          -0.3490658503988659,
+          1.5707963267948966
+        ],
+        [
+          -0.3490658503988659,
+          0.4363323129985824
+        ],
+        [
+          -0.08726646259971647,
+          1.5707963267948966
+        ],
+        [
+          -0.17453292519943295,
+          1.5707963267948966
+        ],
+        [
+          -0.3490658503988659,
+          1.5707963267948966
+        ],
+        [
+          -0.17453292519943295,
+          0.5235987755982988
+        ],
+        [
+          -0.08726646259971647,
+          1.5707963267948966
+        ],
+        [
+          -0.17453292519943295,
+          1.5707963267948966
+        ],
+        [
+          -0.3490658503988659,
+          1.5707963267948966
+        ],
+        [
+          0.0,
+          1.3089969389957472
+        ],
+        [
+          -0.17453292519943295,
+          1.5707963267948966
+        ],
+        [
+          -0.3490658503988659,
+          1.5707963267948966
+        ],
+        [
+          0.0,
+          1.9198621771937625
+        ],
+        [
+          0.0,
+          1.8500490071139892
+        ]
+      ],
+      "encoder_bias_rad": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.017453292519943295,
+        0.0
+      ],
+      "conversion": "encoder = URDF geometric angle - identified encoder bias",
+      "sdk_software_limits": {
+        "schema": "revo3_sdk_position_limits_v1",
+        "sha256": "c680ac9aa4a344fa9d47772f923238399e920f344cb0a97c43bada1edd164704",
+        "serial": "BCUTR2291J2600001",
+        "sdk_version": "2.3.2",
+        "firmware": "0.1.5",
+        "captured_at": "2026-11-04T08:20:12.969647+00:00",
+        "readback_sha256": "fc377078da577798083d4d7667c1896d547cf3804aa3029f6bbdf18acf158ce3",
+        "coordinate": "policy_encoder_rad"
+      },
+      "sdk_containment_required": false
+    },
+    "policy_encoder_limits_rad": [
+      [
+        -0.5235987755982988,
+        0.17453292519943295
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.4363323129985824,
+        0.3490658503988659
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        0.4363323129985824
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        0.5235987755982988
+      ],
+      [
+        -0.08726646259971647,
+        1.5707963267948966
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        0.0,
+        1.3089969389957472
+      ],
+      [
+        -0.17453292519943295,
+        1.5707963267948966
+      ],
+      [
+        -0.3490658503988659,
+        1.5707963267948966
+      ],
+      [
+        -0.017453292519943295,
+        1.9024088846738192
+      ],
+      [
+        0.0,
+        1.8500490071139892
+      ]
+    ],
+    "live_convex": {
+      "collision_instances": 144,
+      "live_vertex_instances": 9678,
+      "max_vertex_error_m": 2.0862165877228179e-10,
+      "comparison_frame": "owning rigid link"
+    }
+  },
+  "object_support_reset": {
+    "meshes": {
+      "shapes": 144,
+      "max_vertex_error_m": 2.6234178596822688e-09,
+      "max_support_error_m": 2.3842312568689294e-09,
+      "object_vertex_error_m": 1.421754851063103e-15,
+      "object_support_error_m": 9.124645483638005e-16
+    },
+    "reset_count": 2,
+    "max_gap_m": 2.030496220813044e-06,
+    "min_gap_m": 2.002160584156969e-06,
+    "last": [
+      {
+        "gap_m": 2.002160584156969e-06,
+        "height_shift_m": -0.006711995870554759,
+        "query_iterations": 4,
+        "support_geom": 41,
+        "support_body": "query_world",
+        "normal_up_dot": 0.9931308294245244,
+        "env_id": 0,
+        "position_w": [
+          0.008266843855381012,
+          0.0022898968309164047,
+          0.5582879781723022
+        ]
+      }
+    ]
+  }
+}

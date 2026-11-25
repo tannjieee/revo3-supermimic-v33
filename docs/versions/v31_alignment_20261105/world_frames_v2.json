@@ -1,0 +1,10 @@
+{
+  "protocol": "world_xyzw_v2",
+  "samples": 4096,
+  "seed": 43,
+  "min_gap_m": 1.9601206681112625e-06,
+  "max_gap_m": 2.2039726296642743e-06,
+  "passed": true,
+  "full_evidence": "/home/brainco/reorientation/training/diagnostics/alignment_audit_20261105/world_frames_v2.json",
+  "full_evidence_sha256": "d62539c21276b3b2e08a1b06c5f5308a1fc3642c16507bbaa48e6431b31bdfe4"
+}

@@ -1,0 +1,13 @@
+{
+  "docs/revo3_network_v30_zh.md": true,
+  "scripts/supermimic/train.py": true,
+  "source/viserdex/viserdex/supermimic/core.py": true,
+  "source/viserdex/viserdex/supermimic/inference.py": true,
+  "source/viserdex/viserdex/supermimic/networks.py": true,
+  "source/viserdex/viserdex/supermimic/stable_values.py": true,
+  "source/viserdex/viserdex/supermimic/trainer.py": true,
+  "docs/flashsac_migration_20261106_zh.md": true,
+  "docs/paper_critic.md": true,
+  "source/viserdex/viserdex/supermimic/console_log.py": true,
+  "tests/test_paper_critic.py": true
+}

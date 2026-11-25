@@ -1,0 +1,10 @@
+{
+  "path": "/home/brainco/reorientation/training/runs/flashsac_hist25_s0_video166_20261106_02/rollout.mp4",
+  "decoded_frames": 500,
+  "fps": 25.0,
+  "size": [
+    960,
+    720
+  ],
+  "duration_s": 20.0
+}

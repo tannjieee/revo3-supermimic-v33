@@ -1,0 +1,657 @@
+{
+  "status": "completed_diagnostic_rerun_and_analysis; learning_quality_not_passed",
+  "recorded_at": "2026-11-06T01:28:37.419600+08:00",
+  "repository": "/home/brainco/reorientation/source_home/brainco1/workspace/xinyu/viserDex_revo3_20261102",
+  "evidence_root": "/home/brainco/reorientation/training/diagnostics/wm_bootstrap_rootcause_20261106",
+  "source_base_commit": "fa468ea399e3c6ebe8fc6471b43c7ab1019e58f8",
+  "branch": "codex/absolute-position-v30",
+  "source_files_sha256": {
+    "scripts/supermimic/train.py": "5fc85dcea4a6edaa81bd41309d4273c3e3730c09b0fd1b63b96a2a3534c1e454",
+    "source/viserdex/viserdex/supermimic/__init__.py": "22e861c32a627a2772c1a52b70485d438dd8b52bbc839365c3b55a5d7b44104a",
+    "source/viserdex/viserdex/supermimic/absolute_policy.py": "2afcac6874cd739f1868ee4105350a425f64e1f0085db4fc727e72ca3f538647",
+    "source/viserdex/viserdex/supermimic/action_smoothness.py": "67840661b8d8679c980682bb1dfe22ff15192a94d27beb6f1a52d4bb62bbe7f1",
+    "source/viserdex/viserdex/supermimic/console_log.py": "535c119401253b5997e91870a70eab6aa51f18a6aaf3287d8193acf581ce139a",
+    "source/viserdex/viserdex/supermimic/constraints.py": "0d8b3d9f698dae8cfb32bd2a0486f4b85497ec8d3ade22a86cd933c020ed7d7d",
+    "source/viserdex/viserdex/supermimic/context.py": "5dde2f07f71d4e90af4958baf695d2d8ece8af451248a0c36387c87253ace230",
+    "source/viserdex/viserdex/supermimic/convex_audit.py": "d1240da474c045dd59b784ad917d4b6c99e0c279075e2043b3d824f215413de3",
+    "source/viserdex/viserdex/supermimic/core.py": "39752931d1ae2c25e0bf9baeb1bc5176ba1232aa54e6afba21a400d088536220",
+    "source/viserdex/viserdex/supermimic/direct_actions.py": "a48dbcf85fa3653a3d5f6656ff9312005b5320cde3a89b3136f9990bbc5ff75a",
+    "source/viserdex/viserdex/supermimic/distributed.py": "e19966e732deba1e86ff9a4b381af6cbb3b26abf862abbd9a1a8135c224bd342",
+    "source/viserdex/viserdex/supermimic/execution_benchmark.py": "b93e61c8b9fa4c084969de7c79d262c86e0c52ba32b765912e313d076942119b",
+    "source/viserdex/viserdex/supermimic/fixed_palm_reset.py": "d241efe6eaaa2afd7cad6a1e5d79c8b2dea89b2620e34f6ff032ae2cde3bac3b",
+    "source/viserdex/viserdex/supermimic/geometry.py": "4725fac838918f96a42b0b1497a959ad3306949b693c2395ce3d8871cee350e5",
+    "source/viserdex/viserdex/supermimic/geometry_asset.py": "caf27a7a5d8f66379bf6a89226652cedc8117118cfee208218ded62ace0fdb26",
+    "source/viserdex/viserdex/supermimic/goal_contract.py": "8125e882b0c9a706a8245559ea594e5692f34e841dc72bb1929b94da9915e995",
+    "source/viserdex/viserdex/supermimic/goal_hold.py": "951223c9782dd23871be48a4d273b396a84c159c784f7851ba7fa050af1ae029",
+    "source/viserdex/viserdex/supermimic/grasp_bank.py": "63b7f692fe6502c1f13b2ef6dabcca792bbab4838d585a90d177b2969d8ec8a7",
+    "source/viserdex/viserdex/supermimic/grasp_candidates.py": "010780d0961d0cc5f913303d7e0edf71e608d9a1af734bda7322acd777ccb83d",
+    "source/viserdex/viserdex/supermimic/grasp_contacts.py": "195ffaf4516a0c8b0b74af66c640945d68b94eb3280efef9fd63d3a5536d3603",
+    "source/viserdex/viserdex/supermimic/grasp_runtime.py": "1cb3357f4eb1cfe06b366a71b286eac49e4be2b634a6a0f0baa35f3824511c87",
+    "source/viserdex/viserdex/supermimic/hand_pose.py": "97f248e5ab4330b2ccab212a0b65bb430d6bb1433200f2dcd4fb3296ea811b74",
+    "source/viserdex/viserdex/supermimic/hold_command.py": "66b7470e74c28e4176d70389cb0c86cdfafd015cc0639d38a217f86257867b3e",
+    "source/viserdex/viserdex/supermimic/identified_hand.py": "d22511a830cd8b43c6d12e2617acae26e8886165628b0cba92ec30533874cdb7",
+    "source/viserdex/viserdex/supermimic/inference.py": "b73f02641f29a477f7a87360770ffe750c45723131ec50341c40b725b88f638d",
+    "source/viserdex/viserdex/supermimic/manual_convex.py": "b1cff12d03f44347a140b19e39708abb71c49592bf209e657431d762fb55a91b",
+    "source/viserdex/viserdex/supermimic/networks.py": "ee6273839ea697efd60493bd856e284add7b50f48504d8695f96179c52a2213c",
+    "source/viserdex/viserdex/supermimic/object_variant.py": "d0cc1ca20a495a1eb91935ae623019016e11ea3118720e9f61705bd98a92c18d",
+    "source/viserdex/viserdex/supermimic/orientation_reward.py": "12ecf1b1f27d696e69552cfd2dcdb68c7854991b3b91c3753ffe442f0d408050",
+    "source/viserdex/viserdex/supermimic/output_limits.py": "b0e0a27a9a57da89966a78129d6c884ad9528ab03f8773e24e2cacfcc67afbda",
+    "source/viserdex/viserdex/supermimic/periodic_video.py": "fa518524fe0c739a06a456bbbf56975c4c4350771b7ec10268b47cbe6f91d9dd",
+    "source/viserdex/viserdex/supermimic/physics_health.py": "addf3640cea21d01c6a7b54d82094cf0169f826b445a21d5007957fe1f23cf61",
+    "source/viserdex/viserdex/supermimic/policy_contract.py": "6347891c59811053a995db7611a4ecd5926f850723483363ddaccc1cec4b5540",
+    "source/viserdex/viserdex/supermimic/position_reward.py": "53fe41b0f690c07fdad0b15bd582419ba3a56932ae13a64620b1a5207149e46a",
+    "source/viserdex/viserdex/supermimic/recording_trajectory.py": "3362c1ab15dc0e2c6e3b0a190e7e8c632ff04281384788139929e02bcbbb0d1f",
+    "source/viserdex/viserdex/supermimic/replay.py": "3f07509c55d49661dea10a95dae3eba4e3ded6158f293853e4fca56a05bcdc52",
+    "source/viserdex/viserdex/supermimic/revised_contract.py": "5d6bb249ae0a1cd5837e772ad100d2dc567e5633e61089bb6a7d0e050698021e",
+    "source/viserdex/viserdex/supermimic/runtime_capacity.py": "5d32c6f9e688d39c347957622061f368cffd6bc40d2f61e7c8f73a609851f6b6",
+    "source/viserdex/viserdex/supermimic/sdk_limits.py": "cd2bbedbe7b879d2831a39bfdf518569ac8a4695ec31e6643302a688d79854fc",
+    "source/viserdex/viserdex/supermimic/sensors.py": "614d17e6f90285b6c52b47cf5d2b4b14e01af53859ce720216014430cfb58ebd",
+    "source/viserdex/viserdex/supermimic/simulation.py": "f57e5ab78150c75bfb0e081570e68c68b68701abc1192dbe2c6c2c254ccebe95",
+    "source/viserdex/viserdex/supermimic/single_goal.py": "dae31d710648495146fe14165f5826ba56ee63c2c4cb378b6190fc1c0a36f1b9",
+    "source/viserdex/viserdex/supermimic/solver_budget.py": "8c015988eee874967b97d0549ef5d818412ef9a7c8770eb257d3e89cf6093075",
+    "source/viserdex/viserdex/supermimic/spatial_contract.py": "14be173d3f3d812c3908d0ce06a490dd10c90898330a0d58e22cb421edcb1f90",
+    "source/viserdex/viserdex/supermimic/stability_reward.py": "894bc9ce02939dc0325a77d80763869e3fa6f863c83be1560d55f0b4c5365ef5",
+    "source/viserdex/viserdex/supermimic/stable_values.py": "d79fc9f13bc3d77a3c444cd6d151e8e4208caf9e3a30d059b959a83c922b1777",
+    "source/viserdex/viserdex/supermimic/state_layout.py": "2297580ff6630b6334df5765e25e25316e7c8708bbcd60b8548ddbd325af5fe2",
+    "source/viserdex/viserdex/supermimic/stream_audit.py": "89661d034c3a200baa0da216943da7cdfb3e4f9a840338da65c3760c32241954",
+    "source/viserdex/viserdex/supermimic/support_placement.py": "d1de180203a4b88ef85c0fa16fa1ba04120623292287d85ea170def35bdc9539",
+    "source/viserdex/viserdex/supermimic/target_shaping.py": "dd97a791f8280f7849b8d2ff29257bf8dd39f93b3a1738073f0d113353647cf3",
+    "source/viserdex/viserdex/supermimic/termination_calibration.py": "824e097c736adbfec85bc7890adc8f28de53113b94dd11e1520a8a0b96c05f4e",
+    "source/viserdex/viserdex/supermimic/trainer.py": "2722a4c355742f4901e13a891dbabe082e47ec2972f168314da203bbe77edaa8",
+    "source/viserdex/viserdex/supermimic/training_limits.py": "85e93d76230cb006a4790716cfc25342bb17f6d620c4727abc558ae6ef18b41d",
+    "source/viserdex/viserdex/supermimic/validation.py": "b3a01d81f8d9c61bf27b55f5554941e3cdb0aa01be1024aa492bad4b91cd87e5",
+    "source/viserdex/viserdex/supermimic/warmup.py": "0a8bd2e23e56d6ae69ceb97a7ca034a6a34e88bf1204e03304e1bc1ff4bcab0f",
+    "source/viserdex/viserdex/supermimic/wm_cuda_graph.py": "b854053c0db34533cb18f78931c3232a6806ac1b5aad29fae9829850188fb1da",
+    "source/viserdex/viserdex/supermimic/wm_supervision.py": "5509e066ae29cf57a10168c53c9140a012abb8fee9f4d39315a50750ceed8a45",
+    "source/viserdex/viserdex/supermimic/wuji_actions.py": "4e9feac69b0f64340e8e8e27494914578b5d7d28436b4b587abdc802e7bd2785",
+    "source/viserdex/viserdex/supermimic/wuji_pose.py": "9dbd7545168a0ed6b1165929dcf842345c2e1ee07c34ce7d4c3283e4e2552d41"
+  },
+  "source_hash_count": 59,
+  "source_hashes_still_match": true,
+  "source_working_diff_scope": "Original manifest stores diffstat; independent console formatting retained",
+  "production_algorithm_modified_this_turn": false,
+  "physics_modified_this_turn": false,
+  "checkpoint_version": 31,
+  "formal_10000_iteration_training_started": false,
+  "diagnostic_training_completed": true,
+  "hardware_used": false,
+  "run": {
+    "command": [
+      "bash",
+      "/home/brainco/reorientation/training/run.sh",
+      "train",
+      "--output_dir",
+      "/home/brainco/reorientation/training/diagnostics/wm_bootstrap_rootcause_20261106/current_v31_train",
+      "--num_envs",
+      "1024",
+      "--iterations",
+      "1500",
+      "--seed",
+      "42",
+      "--network_revision",
+      "hardware_center25_v3",
+      "--object_variant",
+      "die50",
+      "--object_hold_costs",
+      "--no-track_object_position",
+      "--stability_reward_scale",
+      "0",
+      "--joint_speed_limit_deg_s",
+      "90",
+      "--target_rate_limit_deg_s",
+      "60",
+      "--wm_task_losses",
+      "--stable_value_learning",
+      "--absolute_policy_optimization",
+      "--actor_cost_weight",
+      "0.05",
+      "--critic_td_steps",
+      "8",
+      "--joint_velocity_norm_floor_rad_s",
+      "1.5707963267948966",
+      "--adaptive_replay",
+      "--microbatch",
+      "128",
+      "--wm_microbatch",
+      "2048",
+      "--actor_microbatch",
+      "4096",
+      "--critic_microbatch",
+      "8192",
+      "--wm_cuda_graph",
+      "--replay_storage",
+      "cuda",
+      "--audit_interval",
+      "50",
+      "--save_interval",
+      "500",
+      "--latest_interval",
+      "100",
+      "--video_interval",
+      "500",
+      "--video_steps",
+      "500",
+      "--video_seed",
+      "43",
+      "--console_log",
+      "json"
+    ],
+    "num_envs": 1024,
+    "iterations": 1500,
+    "seed": 42,
+    "object": "die50 50mm nominal100g",
+    "reset_protocol": "fixed_palm_v1",
+    "environment_contract": "597c3886c1da242004078efe718eca8643ac69a7d7f7b3204e701f6d946e2bbb",
+    "optimizer_steps": {
+      "wm": 15000,
+      "actor": 1000,
+      "critic": 30000
+    },
+    "wall_seconds_validation": 803.1665621470311,
+    "training_events": {
+      "drops": 1540,
+      "successes": 4,
+      "timeouts": 6770,
+      "task_samples": 3840000
+    },
+    "exit_code": 0
+  },
+  "actual_validations": {
+    "online_checks": {
+      "reward": 1.1920928955078125e-07,
+      "ema": 0.0,
+      "clean_student_observation": 0.0,
+      "convex_vertices_m": 4.440892098500626e-16,
+      "convex_inertia_kg_m2": 1.4551915228366852e-11,
+      "fk_position_m": 3.7997961044311523e-06,
+      "fk_linear_velocity_m_s": 2.3663043975830078e-05,
+      "fk_angular_velocity_rad_s": 1.9073486328125e-05,
+      "fk_quaternion": 5.960464477539062e-07,
+      "hand_convex_vertices_m": 2.0862224711135525e-10,
+      "direct_observation": 4.76837158203125e-07,
+      "hand_pose": 2.86102294921875e-06,
+      "position_frame": 9.87434759736061e-07,
+      "hold_counter": 0.0,
+      "orientation_frame": 1.6689300537109375e-06,
+      "success_boundary_disagreements": 0,
+      "terminal_reset_state_separation": 30.809551239013672
+    },
+    "contact_peaks": {
+      "candidates": 101305,
+      "contacts": 16770,
+      "constraints": 223
+    },
+    "failure_artifacts": [],
+    "capacity_overflow_observed": false,
+    "known_warning": "OmniPBR.mdl material reference; not a capacity warning",
+    "video_full_decode": {
+      "decoder": "/home/brainco/reorientation/source_home/brainco1/workspace/conda-forge/miniforge3/envs/viserdex-newton/lib/python3.12/site-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2",
+      "initial_ffprobe_attempt": "not installed; replaced by bundled imageio ffmpeg",
+      "results": [
+        {
+          "path": "/home/brainco/reorientation/training/diagnostics/wm_bootstrap_rootcause_20261106/current_v31_train/videos/iteration_000500/rollout.mp4",
+          "exit_code": 0,
+          "decoded_frames": 500,
+          "stderr": ""
+        },
+        {
+          "path": "/home/brainco/reorientation/training/diagnostics/wm_bootstrap_rootcause_20261106/current_v31_train/videos/iteration_001000/rollout.mp4",
+          "exit_code": 0,
+          "decoded_frames": 500,
+          "stderr": ""
+        },
+        {
+          "path": "/home/brainco/reorientation/training/diagnostics/wm_bootstrap_rootcause_20261106/current_v31_train/videos/iteration_001500/rollout.mp4",
+          "exit_code": 0,
+          "decoded_frames": 500,
+          "stderr": ""
+        }
+      ]
+    }
+  },
+  "independent_evaluation": {
+    "seed": 43,
+    "num_envs": 64,
+    "steps": 640,
+    "action_exploration": false,
+    "physical_and_sensor_randomization": true,
+    "model500": {
+      "reward_sum": 15.912511695176363,
+      "hand_pose_cost_sum": 0.11076479953044327,
+      "hand_pose_reward_sum": 0.0,
+      "action_saturation_sum": 0.0,
+      "action_near_bound_sum": 0.0,
+      "action_tanh_slope_sum": 590.6993103027344,
+      "action_tanh_slope_steps": 640,
+      "terminated": 0,
+      "timeouts": 64,
+      "successes": 0,
+      "drops": 0,
+      "completed_episode_goals": 0.0,
+      "task_samples": 40960,
+      "task_angle_sum_rad": 93762.57586669922,
+      "task_hand_center_distance_sum_m": 863.429612994194,
+      "task_stable_samples": 0,
+      "post_evaluation_samples": 16064,
+      "cost_joint_speed_sum": 0.0,
+      "cost_joint_speed_violations": 0,
+      "cost_joint_speed_max_ratio": 0.08455443382263184,
+      "cost_target_rate_sum": 0.0,
+      "cost_target_rate_violations": 0,
+      "cost_target_rate_max_ratio": 7.114780373740359e-07,
+      "cost_object_angular_speed_sum": 0.0,
+      "cost_object_angular_speed_violations": 0,
+      "cost_object_angular_speed_max_ratio": 0.11743562668561935,
+      "cost_object_linear_speed_sum": 0.0,
+      "cost_object_linear_speed_violations": 0,
+      "cost_object_linear_speed_max_ratio": 0.036147840321063995,
+      "cost_drop_sum": 0.0,
+      "cost_drop_violations": 0,
+      "cost_drop_max_ratio": 0.07034268975257874,
+      "object_hold_cost_gate_sum": 270.33262522378936,
+      "goals_per_completed_episode": 0.0,
+      "action_tanh_slope_mean": 0.9229676723480225,
+      "task_mean_angle_rad": 2.2891253873705866,
+      "task_mean_hand_center_distance_m": 0.021079824535991065,
+      "task_stable_fraction": 0.0,
+      "object_hold_cost_gate_mean": 0.00659991760800267
+    },
+    "model1500": {
+      "reward_sum": 15.392382921651006,
+      "hand_pose_cost_sum": 7166.827878475189,
+      "hand_pose_reward_sum": 0.0,
+      "action_saturation_sum": 0.0,
+      "action_near_bound_sum": 118.61235346179456,
+      "action_tanh_slope_sum": 202.41888120770454,
+      "action_tanh_slope_steps": 640,
+      "terminated": 22,
+      "timeouts": 50,
+      "successes": 0,
+      "drops": 22,
+      "completed_episode_goals": 0.0,
+      "task_samples": 40960,
+      "task_angle_sum_rad": 92555.64030456543,
+      "task_hand_center_distance_sum_m": 1023.0574620962143,
+      "task_stable_samples": 0,
+      "post_evaluation_samples": 14226,
+      "cost_joint_speed_sum": 3416077.9564971924,
+      "cost_joint_speed_violations": 40750,
+      "cost_joint_speed_max_ratio": 41.202579498291016,
+      "cost_target_rate_sum": 9197070.59640503,
+      "cost_target_rate_violations": 40752,
+      "cost_target_rate_max_ratio": 40.2270393371582,
+      "cost_object_angular_speed_sum": 1590.5075763250545,
+      "cost_object_angular_speed_violations": 12644,
+      "cost_object_angular_speed_max_ratio": 54.16502380371094,
+      "cost_object_linear_speed_sum": 311.7074648688981,
+      "cost_object_linear_speed_violations": 6300,
+      "cost_object_linear_speed_max_ratio": 51.312965393066406,
+      "cost_drop_sum": 0.5830532405670965,
+      "cost_drop_violations": 22,
+      "cost_drop_max_ratio": 1.2722294330596924,
+      "object_hold_cost_gate_sum": 51.9926747152349,
+      "goals_per_completed_episode": 0.0,
+      "action_tanh_slope_mean": 0.31627950188703835,
+      "task_mean_angle_rad": 2.2596591871231793,
+      "task_mean_hand_center_distance_m": 0.024976988820708357,
+      "task_stable_fraction": 0.0,
+      "object_hold_cost_gate_mean": 0.0012693524100399144
+    }
+  },
+  "gradients": {
+    "500": {
+      "cuda_allow_tf32": true,
+      "reward_tail_to_prefix_parameter_gradient_ratios": [
+        34.35644675534296,
+        13.054045742434191,
+        10.630437642022883
+      ],
+      "weighted_cost_to_reward_parameter_gradient_ratios": [
+        0.017743626609444618,
+        0.018133899196982384,
+        0.015747109428048134
+      ],
+      "max_objective_reproduction_error": 1.1175870895385742e-08,
+      "bootstrap_paths": [
+        {
+          "seed": 41,
+          "full_norm": 0.005740068852901459,
+          "physical_path_norm": 0.007363820448517799,
+          "direct_last_action_path_norm": 0.007532295770943165,
+          "direct_projection_fraction": 0.5380809903144836,
+          "physical_projection_fraction": 0.461924284696579,
+          "additivity_relative_error": 0.00020417994320754763
+        },
+        {
+          "seed": 42,
+          "full_norm": 0.005278344731777906,
+          "physical_path_norm": 0.006830618251115084,
+          "direct_last_action_path_norm": 0.007204948924481869,
+          "direct_projection_fraction": 0.5942960977554321,
+          "physical_projection_fraction": 0.40569424629211426,
+          "additivity_relative_error": 0.00023680537366083703
+        },
+        {
+          "seed": 43,
+          "full_norm": 0.006668244022876024,
+          "physical_path_norm": 0.009341951459646225,
+          "direct_last_action_path_norm": 0.010061037726700306,
+          "direct_projection_fraction": 0.656848669052124,
+          "physical_projection_fraction": 0.34317073225975037,
+          "additivity_relative_error": 0.0002234666254064698
+        }
+      ]
+    },
+    "1500": {
+      "cuda_allow_tf32": true,
+      "reward_tail_to_prefix_parameter_gradient_ratios": [
+        72.15742436319356,
+        308.03114679354576,
+        87.57111650278881
+      ],
+      "weighted_cost_to_reward_parameter_gradient_ratios": [
+        1.638810634613037,
+        0.7876916527748108,
+        3.3143320083618164
+      ],
+      "max_objective_reproduction_error": 9.313225746154785e-09,
+      "bootstrap_paths": [
+        {
+          "seed": 41,
+          "full_norm": 0.5119510293006897,
+          "physical_path_norm": 0.5420465469360352,
+          "direct_last_action_path_norm": 0.09910999238491058,
+          "direct_projection_fraction": -0.0416702963411808,
+          "physical_projection_fraction": 1.0417988300323486,
+          "additivity_relative_error": 0.0005813836451119865
+        },
+        {
+          "seed": 42,
+          "full_norm": 0.5338146686553955,
+          "physical_path_norm": 0.4714263081550598,
+          "direct_last_action_path_norm": 0.13157609105110168,
+          "direct_projection_fraction": 0.14034254848957062,
+          "physical_projection_fraction": 0.8595127463340759,
+          "additivity_relative_error": 0.00044955938957973515
+        },
+        {
+          "seed": 43,
+          "full_norm": 0.5939014554023743,
+          "physical_path_norm": 0.5671055912971497,
+          "direct_last_action_path_norm": 0.10312585532665253,
+          "direct_projection_fraction": 0.05892222374677658,
+          "physical_projection_fraction": 0.9408077001571655,
+          "additivity_relative_error": 0.0004220057325766988
+        }
+      ]
+    },
+    "1500_fp32": {
+      "cuda_allow_tf32": false,
+      "reward_tail_to_prefix_parameter_gradient_ratios": [
+        72.29074934704029,
+        308.13780902235993,
+        87.77042692474245
+      ],
+      "weighted_cost_to_reward_parameter_gradient_ratios": [
+        1.634982943534851,
+        0.7891026735305786,
+        3.3246877193450928
+      ],
+      "max_objective_reproduction_error": 1.1175870895385742e-08,
+      "bootstrap_paths": [
+        {
+          "seed": 41,
+          "full_norm": 0.5116328001022339,
+          "physical_path_norm": 0.5415329337120056,
+          "direct_last_action_path_norm": 0.09906379878520966,
+          "direct_projection_fraction": -0.04140346869826317,
+          "physical_projection_fraction": 1.0414035320281982,
+          "additivity_relative_error": 6.88763302711402e-07
+        },
+        {
+          "seed": 42,
+          "full_norm": 0.5345556139945984,
+          "physical_path_norm": 0.47227829694747925,
+          "direct_last_action_path_norm": 0.13148953020572662,
+          "direct_projection_fraction": 0.13996919989585876,
+          "physical_projection_fraction": 0.8600305914878845,
+          "additivity_relative_error": 3.4420920630877264e-07
+        },
+        {
+          "seed": 43,
+          "full_norm": 0.5958238840103149,
+          "physical_path_norm": 0.5693036317825317,
+          "direct_last_action_path_norm": 0.1031261757016182,
+          "direct_projection_fraction": 0.05849824473261833,
+          "physical_projection_fraction": 0.9415019154548645,
+          "additivity_relative_error": 2.856222458290144e-07
+        }
+      ]
+    }
+  },
+  "tf32_control": {
+    "ratio_relative_changes": [
+      0.0018476959928012755,
+      0.0003462709207314742,
+      0.002275983565280834
+    ]
+  },
+  "short_response": {
+    "artifact": "current_response_analysis/response.json",
+    "domain_worlds": 128,
+    "state_world_starts": 512,
+    "h8_symmetric_eligible_survivors": 400,
+    "h8_resolved_rotation_samples": 13,
+    "h8_rotation_relative_error_approx": 1.0024,
+    "near_static_samples": 90,
+    "near_static_false_response_samples": 81,
+    "h8_immediate_reward_sign_correct_total": [
+      7,
+      17
+    ],
+    "h8_prefix_reward_sign_correct_total": [
+      13,
+      21
+    ],
+    "q_qd_h1_cosine_approx": [
+      0.8744,
+      0.8841
+    ],
+    "q_qd_h8_cosine_approx": [
+      0.2984,
+      0.1986
+    ],
+    "h8_cosine_ci_approx": [
+      -0.343,
+      0.268
+    ],
+    "h8_rotation_cosine_mean_approx": -0.0375
+  },
+  "critic_home_calibration": {
+    "samples": 64,
+    "distinct_environments": 64,
+    "normalized_reward_rate_mean": 0.06413183361291885,
+    "normalized_reward_rate_range_median": 5.971698556095362e-05,
+    "normalized_reward_rate_range_max": 0.0034968554973602295,
+    "rate_range_relative_to_mean_p90": 0.007302830461412668,
+    "models": {
+      "critic": {
+        "reward_value_mean": 0.037164825946092606,
+        "drop_value_mean": 0.004530003294348717,
+        "reward_vs_constant_rate_proxy_mae": 0.0281516145914793,
+        "reward_vs_cold_start_toy_mae": 0.004685618449002504,
+        "cold_start_toy_mean": 0.04104146361351013,
+        "cold_start_toy_r2": 0.923941433429718,
+        "prefix_checks": {
+          "8": {
+            "real_prefix_mean": 0.004957837983965874,
+            "real_prefix_plus_universal_tail_bound_mean": 0.9277025461196899,
+            "fraction_below_real_prefix": 0.0,
+            "mean_amount_below_real_prefix": 0.0,
+            "mean_signed_value_minus_prefix": 0.03220698982477188
+          },
+          "32": {
+            "real_prefix_mean": 0.017644867300987244,
+            "real_prefix_plus_universal_tail_bound_mean": 0.7426252365112305,
+            "fraction_below_real_prefix": 0.0,
+            "mean_amount_below_real_prefix": 0.0,
+            "mean_signed_value_minus_prefix": 0.019519958645105362
+          },
+          "128": {
+            "real_prefix_mean": 0.04642109572887421,
+            "real_prefix_plus_universal_tail_bound_mean": 0.3226727843284607,
+            "fraction_below_real_prefix": 0.46875,
+            "mean_amount_below_real_prefix": 0.010881802067160606,
+            "mean_signed_value_minus_prefix": -0.009256269782781601
+          },
+          "256": {
+            "real_prefix_mean": 0.05924272909760475,
+            "real_prefix_plus_universal_tail_bound_mean": 0.13555771112442017,
+            "fraction_below_real_prefix": 0.65625,
+            "mean_amount_below_real_prefix": 0.022891277447342873,
+            "mean_signed_value_minus_prefix": -0.022077906876802444
+          }
+        }
+      },
+      "target_critic": {
+        "reward_value_mean": 0.03497367352247238,
+        "drop_value_mean": 0.0049030110239982605,
+        "reward_vs_constant_rate_proxy_mae": 0.030419958755373955,
+        "reward_vs_cold_start_toy_mae": 0.0050399755127727985,
+        "cold_start_toy_mean": 0.03914692625403404,
+        "cold_start_toy_r2": 0.9039398431777954,
+        "prefix_checks": {
+          "8": {
+            "real_prefix_mean": 0.004957837983965874,
+            "real_prefix_plus_universal_tail_bound_mean": 0.9277025461196899,
+            "fraction_below_real_prefix": 0.0,
+            "mean_amount_below_real_prefix": 0.0,
+            "mean_signed_value_minus_prefix": 0.030015837401151657
+          },
+          "32": {
+            "real_prefix_mean": 0.017644867300987244,
+            "real_prefix_plus_universal_tail_bound_mean": 0.7426252365112305,
+            "fraction_below_real_prefix": 0.0,
+            "mean_amount_below_real_prefix": 0.0,
+            "mean_signed_value_minus_prefix": 0.017328808084130287
+          },
+          "128": {
+            "real_prefix_mean": 0.04642109572887421,
+            "real_prefix_plus_universal_tail_bound_mean": 0.3226727843284607,
+            "fraction_below_real_prefix": 0.484375,
+            "mean_amount_below_real_prefix": 0.013081319630146027,
+            "mean_signed_value_minus_prefix": -0.01144742127507925
+          },
+          "256": {
+            "real_prefix_mean": 0.05924272909760475,
+            "real_prefix_plus_universal_tail_bound_mean": 0.13555771112442017,
+            "fraction_below_real_prefix": 0.65625,
+            "mean_amount_below_real_prefix": 0.025120874866843224,
+            "mean_signed_value_minus_prefix": -0.02426905743777752
+          }
+        }
+      }
+    }
+  },
+  "closed_loop": {
+    "artifact": "bootstrap/current_v31/tail_analysis.json",
+    "seed": 46,
+    "num_envs": 64,
+    "source_steps": [
+      64,
+      192
+    ],
+    "eligible_worlds": [
+      41,
+      55
+    ],
+    "branches_per_start": 8,
+    "steps": 256,
+    "remaining_discount_mass": 0.0763149839065938,
+    "long_reward_and_actual_s8_suffix_resolved_pairs": 0,
+    "long_term_value_direction_verdict": "unresolved because repeat noise masks small perturbations",
+    "only_complete_episode_direction_counterexample": "all eight branches fail at step8; not a general long-tail counterexample",
+    "collector_exit_code": 0
+  },
+  "limitations": [
+    "one training seed; evaluation seeds are not independent training replications",
+    "correlated starts within worlds; partial joint/direction coverage",
+    "finite1deg secants, not complete infinitesimal Jacobians",
+    "gradient norm dominance alone does not establish wrong direction",
+    "cold-start scalar model is an ideal benchmark; deterministic evaluation differs from noisy training behavior",
+    "bounded risk derivative attenuation is not total actor-gradient attenuation",
+    "no causal architecture/learning-rule ablations on current model",
+    "no long-horizon gradient accuracy verdict and no hardware test"
+  ],
+  "artifact_sha256": {
+    "run_manifest.json": "6e831abd155523a9f3b9f80903e65a35de099a045b8f20c0bdab6350992cf20a",
+    "current_v31_train/config.json": "5d0a8763aae22c185d1abcd1e100035e038e74f1e3f48818651171d3be83331b",
+    "current_v31_train/env.yaml": "75988a6b38bbfbc811effd5dd8d71e12503f98be56c1ece2020f0d56fea71bba",
+    "current_v31_train/validation.json": "ffdc7f6dd74234b3d2df3475d3e23862298e947a646ec2ac85d120e15954700e",
+    "current_v31_train/metrics.jsonl": "35a49529ab9e90e3bec094f547c3f71257aebc0d1b0d2d5603deb54ff4708d46",
+    "current_v31_train/stream_audit.jsonl": "6141a2639c0374d7aa766d0719a3cd69ee138ebef7265e0dcb884b0a3b874e48",
+    "current_v31_eval_seed43/evaluation.json": "2e3396902195954cd18eb26d617d1d1167fff5333c956df7eaf43670c9e0303e",
+    "current_v31_home_eval_seed43/evaluation.json": "8ec463c43e2a7e0c3e95ecf844dde994971232b3b3cdece894184e9872b82f07",
+    "current_gradients_500/gradient.json": "d22606877b1fee051799c0d6e07812f1a5e692df9fad7f9ff57f93111055ad4b",
+    "current_gradients_1500/gradient.json": "fb47aec7d7358b3936d70709ac8b05d0810bd031226c9153b8ea91dfb7761617",
+    "current_gradients_1500_fp32/gradient.json": "1410e7f8952f8ba57c81df3e4e6a2624535603112846de048aaa34c1eeae6c6b",
+    "current_v31_eval_seed43/absolute_probe.json": "603b573c1d7e65e1f9c1f3d6a153be75afddcd91cb9367429d25f2b37bb0d4ce",
+    "current_response_analysis/response.json": "14df95758433b8dcb2e72d65792680f7ce552b439eae73abf8137c8bccabbf68",
+    "current_response_analysis/sensitivity.json": "258ab2fc165db768ee56656359a91a1e5bd435cc4780560a421389720816a582",
+    "current_response_components/components.json": "3fbf9626801cb6c3751e22f171d524302b969b67d0d0bbb78b2b38918d237288",
+    "wm/current_training_timeline.json": "883fb1d45bc750d673500e9b2b8bcf5e75e4dd4038ca91459b55a2c3639e4f10",
+    "wm/current_eval_action_timing.json": "cd0146bfa86446aa7db04a2e2ac8c5d69b1827d3524f6ee98da17281c40b7d95",
+    "bootstrap/cold_start_scalar.json": "edbdc1b0d9ffb85cb4a85f59f57d1a8aa779feaaebe368b10db401ae2e1338cf",
+    "bootstrap/home_value_calibration.json": "33d24ad379e2865d0abd8b6ae9422dd26152cc6ca423ebf3d94219be3b6fadc0",
+    "bootstrap/current_v31/analysis.json": "f136d63e575e280dc3e3b7cbd9aed4e4f431f94ec9e4a4acac32b13178ee5b83",
+    "bootstrap/current_v31/risk_saturation.json": "ec4b837928159feeef28ee327655e678cfd6d17a6fc64ab1e432b42f14105f09",
+    "bootstrap/current_v31/tail_analysis.json": "7f4a8b998fb2f0c28ea55d39be126e14af6517cc46fc552471277e9d6aaaa8ef",
+    "data/goal_coverage.json": "c29325becfc720e34fa3a16723348ff8af795b86235f434f22895a5159cbf062",
+    "root/video_decode.json": "2ea1ec58585bad7ea2a7688cbcecec52c57d9c8c43721d25ee4664d3e1a33b54",
+    "root/tf32_comparison.json": "35d7b477ffd621ed9cbc0f6fdec2ee960a9e976c848d16e85eb34fb44f74cdeb",
+    "current_closedloop_seed46/closed_loop_branches/manifest.json": "03e3f8c1e4f0456085b2ffe2cb6fee8066f44eeabcc6cdad6726678088d83ecb"
+  },
+  "diagnostic_script_sha256": {
+    "bootstrap/analyze.py": "47cdf303405b5bfa57351311f48e113dfb00ad36f2dce48cc4f2143ce5a7c443",
+    "bootstrap/analyze_tail_branches.py": "078ff14c561b1dfce5eff78d0ee40d56ff2db025117a81909c4e532b67ddaaa9",
+    "bootstrap/calibrate_home_values.py": "6d91115007d2ad4440177da7b0416337752c8523dd2c147a85629f6d1cf2c32e",
+    "bootstrap/closed_loop_branches.py": "f4b46455be153bb1df942e98bb4ea193fb9413e63681ea97eb6c97154b487bb1",
+    "bootstrap/prepare_tail_eval.py": "b0739ecc3eece1b5ae669d2529aa478a9bebb72f9cab890142fc008c618a4fe1",
+    "bootstrap/risk_saturation.py": "41b91a2d5da80f8a757d1faeb3a334c5f5e239a3376e08d4d768563995a9bd1c",
+    "bootstrap/run_tail_eval.sh": "743ece89b5fce009fbdbffd78e57bf761b955bb3a61ec1dc90d89620cda7e823",
+    "bootstrap/train_tail_eval.py": "158fa12c8da92ceeedfb0084669f121e3efddbc75efd34fb55ecd122b222a380",
+    "data/analyze_current_response.py": "0c7713594806c4e307c957a00942b67837e9042952dd8773260f6ed14688441b",
+    "data/analyze_data.py": "ad53f8b3ff2a66fed7fd6bc936e55c1cbab7e390f523cfc993f856ae0db3c47a",
+    "data/analyze_response_components.py": "8f2c726e4bf0f6a5b8976108bce46f7871e94a650d48c0a0799b8f9abb7d1ae2",
+    "data/goal_coverage.py": "1f5749805d99d52ef52afc8a0cb358fa935b2d86bb7950ee728689bcdd9f3066",
+    "root/current_gradients.py": "196391fb87c9c9b0cd691815c8b867d6d998d2cc8ecaf50e07b159f537bef14f",
+    "root/current_gradients_fp32.py": "f9a192a291b7f5f275f5e3f5478c5f61f3ca7ccd63ea1904b35791ff1b5ae27d",
+    "root/finalize_report.py": "d7bc62ef28c91b410d6249384f0800d229c9cc85bcce2a152c90311f932b408e",
+    "root/history_and_numerics.py": "9dee714bc922eab98e6c0a0aac64846999b738753204afb6ebc207b5948905aa",
+    "root/run_current_v31.sh": "ab0d26e9acf051e69262690863a3b930df955ab49afbbddb60ce468757be5fb0",
+    "root/run_post_eval.sh": "8183d63fc0854845dc4dc306b4b84f025d6f993b63ff0642601bee20d3df5af4",
+    "root/run_snapshot.sh": "e021496814630d3ef83bb706a124128eea89c8184013d442628bd65baafd3759",
+    "root/run_tail_current.sh": "e7e34a039847de05dde4bee0d7558c8ec8b4c26374fdcb2d29340cef9e3945da",
+    "wm/audit_wm.py": "f2a093218b0716f24daced6d766924777745763c10d2638611e0a97f0e2e5370",
+    "wm/checkpoint_scales.py": "8b851817996dc13ba99f0a003f264d749aa54644381087d54c024f58e95b3e4d",
+    "wm/eval_action_timing.py": "7fed200408a1bc28d30f6046a43f4e05ad864490f7e4f1a7714d207a888758be",
+    "wm/prepare_capture.py": "e8bb4f0e6649ac1c9064d9a62fc053e96b20dfb6515bc1df48c9e0a805278aa5",
+    "wm/run_capture_eval.sh": "68b4995e1e46f3120439f17ef07e871d24ca1c0abe91112e85e829b0810ab87a",
+    "wm/training_timeline.py": "a01c1fccc5e95020f2b89be3d676350f2ed40950e581cd09f18a7d177f0cf919",
+    "wm/wm_capture_eval.py": "dd765ac96af8a59759e44558c2171fd026cd659ccb18123a87db398e6d53cf9d"
+  },
+  "existing_repo_diagnostic_script_sha256": {
+    "scripts/supermimic/diagnose_drops.py": "403ab65b6195bfaf77df49f08a758e3ecb6bc0b4d802fadcfd9b5869f283b459",
+    "scripts/supermimic/diagnose_v30_gradients.py": "f481d415bf6f2179caf820cbb01f9de6ee0b52572d9d6963052fb9f02b9a1fcf",
+    "scripts/supermimic/diagnose_v30_response.py": "61490600fc32f366ad94b8d82fe8df5a73515f72e0ff87d0d86fcf742f88bc46",
+    "scripts/supermimic/diagnose_v30_scale_bootstrap.py": "4e254c68485e07a391c5c1788aa4d85f63439b3cc6345dfabfbcaa1c8372ee89",
+    "scripts/supermimic/diagnose_v30_snapshot.py": "861acb9a7a34d04689ab844b762c67fe40da989140a9386181a0c9aceb026b2b",
+    "scripts/supermimic/diagnose_v30_values.py": "9c22c73fd14e1a868144716a97aa98e8aca1e80e42e69df7449bf2bbc0224b0a"
+  },
+  "checkpoint_sha256_from_video_manifests": {
+    "500": "17311c857e2f2357d03b0693f12f8bc2192e3755ad72afcaaa827627255e5cd7",
+    "1000": "a144150d2c13b8d0d5f36d7e84fa89c2a43ee47d37537228fff1a50022d2c741",
+    "1500": "78f40f3031f5402ff6b4eb1ac3a070d72020f937411b5540733f98d840e788e2"
+  },
+  "unit_test_scope": "No production code changed; prior109/77 tests not rerun or counted. This turn validates actual fresh training, branch capture, independent analyses, gradients, videos, and artifact/source integrity."
+}

@@ -1,0 +1,168 @@
+{
+  "status": "passed",
+  "formal_training_ready": false,
+  "formal_training_started": false,
+  "checkpoint_version": 31,
+  "scope": "Alignment fixes and bounded Newton validation, not task convergence",
+  "tests_unique_passed": 237,
+  "tests_detail": "233 passed + 4 skipped in broad suite; 10 GPU/CPU Replay tests rerun with explicit switch, covering all 4 skipped; support tests rerun after plane-step change",
+  "world_frames": {
+    "protocol": "world_xyzw_v2",
+    "samples": 4096,
+    "seed": 43,
+    "min_gap_m": 1.9601206681112625e-06,
+    "max_gap_m": 2.2039726296642743e-06,
+    "passed": true,
+    "full_evidence": "/home/brainco/reorientation/training/diagnostics/alignment_audit_20261105/world_frames_v2.json",
+    "full_evidence_sha256": "d62539c21276b3b2e08a1b06c5f5308a1fc3642c16507bbaa48e6431b31bdfe4"
+  },
+  "old_frame_repro": {
+    "samples": 256,
+    "penetration_gt_01mm": 46,
+    "air_gap_gt_01mm": 207,
+    "actual_gap_min_m": -0.010362096277416653,
+    "actual_gap_max_m": 0.017154500893742868
+  },
+  "delay_flag_repro": {
+    "critic_inputs_identical": true,
+    "wm_inputs_identical": true,
+    "target_rate_ratio": [
+      7.114780373740359e-07,
+      8.913439750671387
+    ],
+    "target_rate_raw_cost": [
+      0.0,
+      62.622528076171875
+    ]
+  },
+  "wm_valid_equivalence": {
+    "loss_max_abs": 0.0,
+    "gradient_max_abs": 0.0
+  },
+  "evaluation": {
+    "metrics": {
+      "reward_sum": 12.11915148049593,
+      "hand_pose_cost_sum": 0.09828208695398644,
+      "hand_pose_reward_sum": 0.0,
+      "action_saturation_sum": 0.0,
+      "action_near_bound_sum": 0.0,
+      "action_tanh_slope_sum": 461.48383617401123,
+      "terminated": 3,
+      "timeouts": 61,
+      "successes": 0,
+      "drops": 3,
+      "completed_episode_goals": 0.0,
+      "task_samples": 32000,
+      "task_angle_sum_rad": 70485.10304260254,
+      "task_hand_center_distance_sum_m": 777.9581602811813,
+      "task_stable_samples": 0,
+      "post_evaluation_samples": 16007,
+      "cost_joint_speed_sum": 0.0,
+      "cost_joint_speed_violations": 0,
+      "cost_joint_speed_max_ratio": 0.30976593494415283,
+      "cost_target_rate_sum": 0.0,
+      "cost_target_rate_violations": 0,
+      "cost_target_rate_max_ratio": 0.716095507144928,
+      "cost_object_angular_speed_sum": 6.843106322555659,
+      "cost_object_angular_speed_violations": 744,
+      "cost_object_angular_speed_max_ratio": 34.073509216308594,
+      "cost_object_linear_speed_sum": 69.67778721305835,
+      "cost_object_linear_speed_violations": 406,
+      "cost_object_linear_speed_max_ratio": 50.997100830078125,
+      "cost_drop_sum": 0.11010688566602767,
+      "cost_drop_violations": 3,
+      "cost_drop_max_ratio": 1.2798594236373901,
+      "object_hold_cost_gate_sum": 20.36450277431868,
+      "goals_per_completed_episode": 0.0,
+      "task_mean_angle_rad": 2.2026594700813296,
+      "task_mean_hand_center_distance_m": 0.024311192508786918,
+      "task_stable_fraction": 0.0,
+      "object_hold_cost_gate_mean": 0.0006363907116974588
+    },
+    "grasp_sampling": null,
+    "max_errors": {
+      "reward": 1.4901161193847656e-08,
+      "ema": 0.0,
+      "clean_student_observation": 0.0,
+      "convex_vertices_m": 0.0,
+      "convex_inertia_kg_m2": 1.4551915228366852e-11,
+      "fk_position_m": 9.238719940185547e-07,
+      "fk_linear_velocity_m_s": 3.175809979438782e-07,
+      "fk_angular_velocity_rad_s": 4.926696419715881e-07,
+      "fk_quaternion": 5.960464477539062e-07,
+      "hand_convex_vertices_m": 2.0862234596310534e-10,
+      "direct_observation": 3.5762786865234375e-07,
+      "hand_pose": 2.3283064365386963e-10,
+      "position_frame": 2.1606683731079102e-07,
+      "hold_counter": 0.0,
+      "orientation_frame": 1.1920928955078125e-06,
+      "success_boundary_disagreements": 0,
+      "terminal_reset_state_separation": 0.3419019281864166
+    },
+    "contact_peaks": {
+      "candidates": 3000,
+      "contacts": 360,
+      "constraints": 54
+    },
+    "object_support_reset": {
+      "protocol": "world_xyzw_v2",
+      "reset_count": 128,
+      "max_gap_m": 2.101777260164302e-06,
+      "min_gap_m": 1.9832782513506497e-06
+    },
+    "elapsed": 10.695831643999554
+  },
+  "joint_resume_validation": "joint_resume_validation.json",
+  "process_exit_codes": {
+    "video_preflight": 0,
+    "joint_resume": 0,
+    "home_eval_plane": 0,
+    "final_recorder": 0
+  },
+  "retained_failed_attempts": {
+    "joint_preflight": "requested periodic video for a check_joint_update debug checkpoint; recorder correctly rejected it after two updates",
+    "home_eval": "original Euclidean support cast hit 256-iteration limit; same seed passed after separating-plane fix",
+    "initial_test_invocations": "first worktree lacked generated USD paths; first broad test invocation lacked Isaac Lab PYTHONPATH; both rerun in configured runtime"
+  },
+  "video": "/home/brainco/reorientation/training/diagnostics/alignment_audit_20261105/v31_final_video/rollout.mp4",
+  "video_decode": {
+    "frames": 500,
+    "fps": 25.0,
+    "size": [
+      1280,
+      960
+    ],
+    "duration": 20.0
+  },
+  "actor_export": {
+    "version": 31,
+    "bitwise_equal": true,
+    "wm_input_dim": 165,
+    "critic_input_dim": 153,
+    "actor_observation_dim": 81
+  },
+  "source_sha256": {
+    "source/viserdex/viserdex/supermimic/support_placement.py": "d1de180203a4b88ef85c0fa16fa1ba04120623292287d85ea170def35bdc9539",
+    "source/viserdex/viserdex/supermimic/trainer.py": "2722a4c355742f4901e13a891dbabe082e47ec2972f168314da203bbe77edaa8",
+    "source/viserdex/viserdex/supermimic/core.py": "1f81d5141d004c75bfdf72d6484f8443f8bfe3fe05417c6f453484731398c48f",
+    "source/viserdex/viserdex/supermimic/inference.py": "b73f02641f29a477f7a87360770ffe750c45723131ec50341c40b725b88f638d",
+    "scripts/supermimic/train.py": "a8a3c784917372f2a61cc1cd12ec3807bf61fc669448813345255b99dc5c195e",
+    "scripts/supermimic/record_manual.py": "5dfe878a743dfac1a79e4872b205c8f2d8d9e9e4bca5e7d9f6c87fa0dc8eb99c",
+    "scripts/supermimic/audit_reset_frames.py": "c4f3b7313e4ea4a4eeba58708fc63d84b4bedba6163a9420b5195ee20ed3110f",
+    "tests/test_support_placement.py": "b12ceca3b36d6c135c19decd43687aaeb207325ad7d5fe34d8d741e26f962906",
+    "tests/test_reset_alignment.py": "17eb5b7062fcfab42d52c5fbd786c3443e5914d8f5ad7062a72b70a24bd9f8d0",
+    "tests/test_wm_task_supervision.py": "69b0c8149c9f4dc5cdc0bf0f4313b01cf63be83fa00e5ee69b24e716faf1aa85"
+  },
+  "limitations": [
+    "Not a guarantee of palm-interior support or static force closure",
+    "No new long-run policy learning result",
+    "WM action-response and bootstrap-gradient quality still require new-data validation"
+  ],
+  "evidence_files": [
+    "quaternion_repro.json",
+    "evaluation.json",
+    "joint_resume_validation.json",
+    "final_video_manifest.json",
+    "final_video_summary.json"
+  ]
+}

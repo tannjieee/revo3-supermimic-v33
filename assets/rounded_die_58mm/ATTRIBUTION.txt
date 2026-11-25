@@ -1,0 +1,4 @@
+Original die author: Glowbox 3D
+Source: https://sketchfab.com/3d-models/none-03c7f64e5fdd4786862b4828b9dbe9e8
+License recorded by the supplied asset: CC Attribution
+Modifications: uniformly scaled 70 mm to 58 mm, centered bounding box, yellow / midnight green 11501 display materials, 73.362112 g (estimated) rigid body and recomputed inertia. Original visual and collision topology retained.

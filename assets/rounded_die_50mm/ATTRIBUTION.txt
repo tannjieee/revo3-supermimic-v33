@@ -1,0 +1,11 @@
+rounded_die
+Author: Glowbox 3D
+Source: https://sketchfab.com/3d-models/none-03c7f64e5fdd4786862b4828b9dbe9e8
+License: CC Attribution
+Changes: normalized simulation mesh from v5. Die uses approved yellow/black v3 materials. Camera now uses a single opaque matte yellow material on all surfaces. Geometry and physics retained.
+
+camera
+Author: zhonghui
+Source: https://sketchfab.com/3d-models/none-dca9244fa57649cd9de728ad3a73ed02
+License: CC Attribution
+Changes: normalized simulation mesh from v5. Die uses approved yellow/black v3 materials. Camera now uses a single opaque matte yellow material on all surfaces. Geometry and physics retained.

@@ -1,0 +1,26 @@
+{
+  "task_id": "Isaac-ViserDex-Repose-Revo3-SuperMimic-RoundedDie-Smooth-v1",
+  "source_sha256": "61247de7fcae70e5ed65b9fef11080397808507b713e06fe6fd85b1ebd7a6a5e",
+  "training_started": false,
+  "initialization": "scratch_when_authorized",
+  "checkpoint_version": 14,
+  "control_hz": 20,
+  "ema_alpha": 0.5,
+  "total_num_envs": 4096,
+  "envs_per_gpu": 2048,
+  "observations_changed": false,
+  "randomization_changed": false,
+  "original_asset_unchanged": true,
+  "importer_override": "NewtonMeshCollisionAPI newton:maxHullVertices=200; wrapper only",
+  "gs_role": "asset supplied; current actor still uses simulated noisy pose, not GS image pixels",
+  "initial_object_position_m": [
+    0.02,
+    -0.01,
+    0.565
+  ],
+  "placement_offset_world_m": [
+    0,
+    -0.01,
+    0
+  ]
+}

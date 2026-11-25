@@ -1,0 +1,39 @@
+{
+  "checkpoint": "/home/brainco/reorientation/training/runs/flashsac_s1_repeat1_5m_20261106/checkpoints/final",
+  "observations": "/home/brainco/reorientation/training/runs/flashsac_s1_frozen_r16_seed166_20261106/policy_probe.pt",
+  "groups": {
+    "first_observation": {
+      "observations": 64,
+      "pre_tanh_std_mean": 0.846865177154541,
+      "pre_tanh_std_p95": 0.8830498456954956,
+      "local_mean_abs": 0.13480599224567413,
+      "deterministic_target_step_abs_deg": 0.32353436946868896,
+      "deterministic_home_offset_abs_deg": 0.323533833026886,
+      "local_entropy_mc": 13.019474029541016,
+      "target_entropy": -10.041810485305382,
+      "alpha": 0.00320459739305079,
+      "entropy_bonus_mean": 0.041722171008586884,
+      "reward_denominator": 16.795377731323242,
+      "target_q_mean": 3.9555587768554688,
+      "target_lower_edge_probability": 2.1880723011236114e-07,
+      "target_upper_edge_probability": 0.1864759474992752
+    },
+    "last_observation": {
+      "observations": 64,
+      "pre_tanh_std_mean": 0.8421051502227783,
+      "pre_tanh_std_p95": 0.8812203407287598,
+      "local_mean_abs": 0.10993890464305878,
+      "deterministic_target_step_abs_deg": 0.30704325437545776,
+      "deterministic_home_offset_abs_deg": 23.942916870117188,
+      "local_entropy_mc": 13.521296501159668,
+      "target_entropy": -10.041810485305382,
+      "alpha": 0.00320459739305079,
+      "entropy_bonus_mean": 0.04333031177520752,
+      "reward_denominator": 16.795377731323242,
+      "target_q_mean": 3.2978904247283936,
+      "target_lower_edge_probability": 8.110106864478439e-05,
+      "target_upper_edge_probability": 0.15905220806598663
+    }
+  },
+  "source_checkpoint_unchanged": true
+}

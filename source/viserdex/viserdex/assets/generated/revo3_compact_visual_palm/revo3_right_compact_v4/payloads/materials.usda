@@ -1,0 +1,195 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.3.2"
+    }
+    endTimeCode = 1000000
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    startTimeCode = 0
+    upAxis = "Z"
+)
+
+def Scope "Materials"
+{
+    def Material "right_revo3_aluminum"
+    {
+        color3f inputs:diffuseColor = (0.47699982, 0.50707865, 0.57048154)
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/right_revo3_aluminum/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/right_revo3_aluminum.inputs:diffuseColor>
+            prepend float inputs:metallic.connect = </Materials/right_revo3_aluminum.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/right_revo3_aluminum.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/right_revo3_aluminum.inputs:roughness>
+            token outputs:surface
+        }
+    }
+
+    def Material "right_revo3_silicone_2162u_approx"
+    {
+        color3f inputs:diffuseColor = (0.3185468, 0.33034378, 0.40644827)
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/right_revo3_silicone_2162u_approx/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/right_revo3_silicone_2162u_approx.inputs:diffuseColor>
+            prepend float inputs:metallic.connect = </Materials/right_revo3_silicone_2162u_approx.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/right_revo3_silicone_2162u_approx.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/right_revo3_silicone_2162u_approx.inputs:roughness>
+            token outputs:surface
+        }
+    }
+
+    def Material "right_revo3_white_pc"
+    {
+        color3f inputs:diffuseColor = (0.8688994, 0.8900055, 0.9331068)
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/right_revo3_white_pc/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/right_revo3_white_pc.inputs:diffuseColor>
+            prepend float inputs:metallic.connect = </Materials/right_revo3_white_pc.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/right_revo3_white_pc.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/right_revo3_white_pc.inputs:roughness>
+            token outputs:surface
+        }
+    }
+
+    def Material "screen"
+    {
+        asset inputs:ColorTexture = @../textures/revo3_screen.png@
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/screen/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/screen/ColorTexture.outputs:rgb>
+            prepend float inputs:metallic.connect = </Materials/screen.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/screen.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/screen.inputs:roughness>
+            token outputs:surface
+        }
+
+        def Shader "ColorTexture" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdUVTexture"
+            float4 inputs:fallback = (0.99999994, 1, 0.9999999, 1)
+            prepend asset inputs:file.connect = </Materials/screen.inputs:ColorTexture>
+            token inputs:sourceColorSpace = "auto"
+            prepend float2 inputs:st.connect = </Materials/screen/Primvar_st_float2.outputs:result>
+            token inputs:wrapS = "repeat"
+            prepend token inputs:wrapS.connect = </Materials/screen.inputs:wrapMode>
+            token inputs:wrapT = "repeat"
+            prepend token inputs:wrapT.connect = </Materials/screen.inputs:wrapMode>
+            float3 outputs:rgb
+        }
+
+        def Shader "Primvar_st_float2" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPrimvarReader_float2"
+            string inputs:varname = "st"
+            float2 outputs:result
+        }
+    }
+
+    def Material "right_revo3_polished_aluminum"
+    {
+        color3f inputs:diffuseColor = (0.7105666, 0.7484142, 0.82757086)
+        float inputs:metallic = 0
+        float inputs:opacity = 1
+        float inputs:roughness = 0.5
+        token inputs:wrapMode = "repeat"
+        token outputs:displacement (
+            displayGroup = "Outputs"
+        )
+        token outputs:surface (
+            displayGroup = "Outputs"
+        )
+        prepend token outputs:surface.connect = </Materials/right_revo3_polished_aluminum/PreviewSurface.outputs:surface>
+        token outputs:volume (
+            displayGroup = "Outputs"
+        )
+
+        def Shader "PreviewSurface" (
+            apiSchemas = ["NodeDefAPI"]
+        )
+        {
+            token info:id = "UsdPreviewSurface"
+            prepend color3f inputs:diffuseColor.connect = </Materials/right_revo3_polished_aluminum.inputs:diffuseColor>
+            prepend float inputs:metallic.connect = </Materials/right_revo3_polished_aluminum.inputs:metallic>
+            prepend float inputs:opacity.connect = </Materials/right_revo3_polished_aluminum.inputs:opacity>
+            prepend float inputs:roughness.connect = </Materials/right_revo3_polished_aluminum.inputs:roughness>
+            token outputs:surface
+        }
+    }
+}
+

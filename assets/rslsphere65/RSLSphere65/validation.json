@@ -1,0 +1,67 @@
+{
+  "usd_parser_version": [
+    0,
+    26,
+    11
+  ],
+  "default_prim": "/RSLSphere65",
+  "meters_per_unit": 1.0,
+  "up_axis": "Z",
+  "rigid_body": true,
+  "mass_kg": 0.07000000029802322,
+  "diagonal_inertia": [
+    2.957499964395538e-05,
+    2.957499964395538e-05,
+    2.957499964395538e-05
+  ],
+  "colliders": [
+    {
+      "path": "/RSLSphere65/collision",
+      "type": "Sphere",
+      "radius": 0.0325
+    }
+  ],
+  "visual_meshes": 6,
+  "visual_bounds_m": [
+    [
+      -0.032499998807907104,
+      -0.032499998807907104,
+      -0.032499998807907104
+    ],
+    [
+      0.032499998807907104,
+      0.032499998807907104,
+      0.032499998807907104
+    ]
+  ],
+  "radius_range_m": [
+    0.032499998807907104,
+    0.0325000025331974
+  ],
+  "unresolved_dependencies": [],
+  "runtime_simulation": "NOT RUN: Isaac Lab/Newton runtime absent",
+  "physics_material": "/RSLSphere65/ContactMaterial",
+  "mesh_materials": [
+    "/RSLSphere65/Looks/face0",
+    "/RSLSphere65/Looks/face1",
+    "/RSLSphere65/Looks/face2",
+    "/RSLSphere65/Looks/face3",
+    "/RSLSphere65/Looks/face4",
+    "/RSLSphere65/Looks/face5"
+  ],
+  "triangles": 49152,
+  "all_faces_outward": true,
+  "watertight_after_uv_seam_weld": true,
+  "glb_embedded_textures": 6,
+  "glb_length_valid": true,
+  "usdz_entries": [
+    "RSLSphere65.usda",
+    "0/texture6.png",
+    "0/texture5.png",
+    "0/texture4.png",
+    "0/texture3.png",
+    "0/texture2.png",
+    "0/texture1.png"
+  ],
+  "usdz_missing_dependencies": []
+}

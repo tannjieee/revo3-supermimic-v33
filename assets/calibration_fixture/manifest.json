@@ -1,0 +1,10 @@
+{
+  "source_server_port": 22031,
+  "source_path": "/home/zhangke/viserDex_revo3/outputs/hikrobot_calibrated_preview_20261022/calibration_fixture_visual.usda",
+  "source_sha256": "720c24ecf3203dec182cc906487c5afa2859ccdd113769bd355853622260008e",
+  "asset_sha256": "150c4279c4c94323e14722c537672a1f60674b7a3394fb6e09f3357d1ebec553",
+  "texture_sha256": "90106d4f71485140c0c8e07362fb34c97f6185d22cf1dfbbdb221794699ff773",
+  "change": "Only absolute texture reference relocated to sibling filename",
+  "physics_schema_present": false,
+  "placement": "Same initial transform as robot base"
+}

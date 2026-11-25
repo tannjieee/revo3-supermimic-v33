@@ -1,0 +1,148 @@
+"""Version 33: explicit encoder EMA memory and geometric, delay-free dynamics."""
+from pathlib import Path
+import hashlib
+import math
+import numpy as np
+import torch
+
+STATE_PROTOCOL = 'revo3_geometric_physics_encoder_ema_bias_wrench_v33'
+OBSERVATION_PROTOCOL = 'revo3_joint_tracking_error_relative_rot6d_history3_v33'
+EMA = slice(83, 104)
+ZERO = slice(104, 125)
+WRENCH = slice(125, 131)
+DEFAULT_PROFILE = Path(__file__).resolve().parents[4] / 'configs/supermimic_v33/control.yaml'
+
+
+def load_profile(path=DEFAULT_PROFILE):
+    import yaml
+    raw = Path(path).read_bytes()
+    profile = yaml.safe_load(raw)
+    validate_profile(profile)
+    return profile, hashlib.sha256(raw).hexdigest()
+
+
+def validate_profile(p):
+    from .revised_contract import HARDWARE_JOINT_NAMES, CENTER_REVISION, urdf_limits
+    if p['schema'] != 'revo3_ema_soft_limits_v33' or set(p['soft_limits_deg']) != set(HARDWARE_JOINT_NAMES):
+        raise ValueError('v33 needs exactly the 21 named Revo3 soft limits')
+    if p['history'] != 3 or p['fixed_encoder_bias_deg'] != 0 or not 0 < p['ema_alpha'] <= 1:
+        raise ValueError('v33 requires three frames, disabled fixed offset and a valid EMA')
+    bias = np.radians(p['zero_bias_deg'])
+    if bias.shape != (2,) or not np.isfinite(bias).all() or bias[0] > bias[1]:
+        raise ValueError('Invalid encoder zero randomization')
+    limits = np.radians([p['soft_limits_deg'][n] for n in HARDWARE_JOINT_NAMES])
+    _, asset = urdf_limits(CENTER_REVISION)
+    hard = np.array(asset['geometric_limits_rad'])
+    if (limits.shape != (21, 2) or not np.isfinite(limits).all() or (limits[:, 0] >= limits[:, 1]).any()
+            or (limits[:, 0]-bias[1] < hard[:, 0]-2e-7).any()
+            or (limits[:, 1]-bias[0] > hard[:, 1]+2e-7).any()):
+        raise ValueError('Soft targets minus every allowed zero offset must fit mechanical limits')
+    for name in ('wrench_force_max_N', 'wrench_torque_max_Nm', 'contact_loss_weight'):
+        if not math.isfinite(p[name]) or p[name] < 0:
+            raise ValueError(f'Invalid {name}')
+    if not 0 <= p['wrench_probability'] <= 1:
+        raise ValueError('Invalid wrench probability')
+    for name in ('target_slew_rate_deg_s', 'home_pose_weight', 'home_pose_deadband_deg', 'hold_target_motion_weight',
+                 'object_motion_angular_speed_rad_s', 'object_motion_linear_speed_m_s'):
+        if name in p and (not math.isfinite(p[name]) or p[name] < 0):
+            raise ValueError(f'Invalid {name}')
+    if 'home_pose_scale_deg' in p and (not math.isfinite(p['home_pose_scale_deg']) or p['home_pose_scale_deg'] <= 0):
+        raise ValueError('Invalid home_pose_scale_deg')
+    if bool(p.get('object_motion_angular_speed_rad_s', 0)) != bool(p.get('object_motion_linear_speed_m_s', 0)):
+        raise ValueError('Global object speed costs require both thresholds')
+    return limits, asset
+
+
+def home_pose_options(p):
+    return dict(home_pose_weight=p.get('home_pose_weight', 0.),
+                home_pose_deadband_rad=math.radians(p.get('home_pose_deadband_deg', 15.)),
+                home_pose_scale_rad=math.radians(p.get('home_pose_scale_deg', 30.)))
+
+
+def reward_options(p):
+    """Optional profile overrides shared by real reward and imagined reward.
+
+    An omitted quiet-target weight retains the existing quiet-hold defaults.
+    This is independent of the global target-rate cost and controller slew limit.
+    """
+    options = home_pose_options(p)
+    if 'hold_target_motion_weight' in p:
+        options['hold_target_motion_weight'] = p['hold_target_motion_weight']
+    return options
+
+
+def profile_options(p, digest):
+    limits, _ = validate_profile(p)
+    from .revised_contract import HARDWARE_JOINT_NAMES
+    return dict(dex_reference=True, state_protocol=STATE_PROTOCOL, observation_protocol=OBSERVATION_PROTOCOL,
+        control_profile=p, control_profile_sha256=digest, network_joint_limits=tuple(map(tuple, limits.tolist())),
+        encoder_bias_rad=(0.,)*21, ema_alpha=p['ema_alpha'], history=3, include_delay_ready=False,
+        grouped_physical_loss=False, contact_loss_weight=p['contact_loss_weight'],
+        contact_body_names=('world',)+tuple(n.replace('_joint', '_link') for n in HARDWARE_JOINT_NAMES),
+        zero_bias_range_rad=tuple(math.radians(v) for v in p['zero_bias_deg']),
+        wrench_probability=p['wrench_probability'], wrench_force_max=p['wrench_force_max_N'],
+        wrench_torque_max=p['wrench_torque_max_Nm'],
+        target_slew_rate_rad_s=math.radians(p.get('target_slew_rate_deg_s', 0.)),
+        object_motion_angular_speed_rad_s=p.get('object_motion_angular_speed_rad_s', 0.),
+        object_motion_linear_speed_m_s=p.get('object_motion_linear_speed_m_s', 0.),
+        **reward_options(p))
+
+
+def filter_target(previous, raw, alpha, max_delta=0.):
+    """Rate-limit the executed EMA command; preserve exact legacy math when off."""
+    encoded = alpha * raw + (1 - alpha) * previous
+    if max_delta:
+        encoded = previous + (encoded - previous).clamp(-max_delta, max_delta)
+    return encoded
+
+
+def target(state, action, limits, alpha, max_delta=0.):
+    from .policy_contract import absolute_joint_target
+    encoded = filter_target(state[..., EMA], absolute_joint_target(action, limits), alpha, max_delta)
+    return encoded-state[..., ZERO]
+
+
+def observation(joints_normalized, state, limits, position, orientation):
+    from .core import rotation_features, quat_mul, quat_conjugate
+    half = (limits[..., 1]-limits[..., 0])*.5
+    target_normalized = (state[..., EMA]-limits.mean(-1))/half
+    # Use the same noisy encoder reading for position and tracking error.
+    return torch.cat((joints_normalized, joints_normalized-target_normalized, state[..., 55:76],
+        position, state[..., 76:79], rotation_features(quat_mul(orientation, quat_conjugate(state[..., 79:83])))), -1)
+
+
+def sample_wrench(reference, cfg):
+    active = torch.rand(*reference.shape[:-1], 1, device=reference.device) < cfg.wrench_probability
+    unit = 2*torch.rand(*reference.shape[:-1], 6, device=reference.device)-1
+    # Scalar multiplies avoid constructing/copying a CPU constant during capture.
+    return torch.cat((unit[..., :3]*cfg.wrench_force_max,
+                      unit[..., 3:]*cfg.wrench_torque_max), -1)*active
+
+
+def configure_environment(env_cfg, p, digest):
+    from .revised_contract import configure_environment as configure_base, CENTER_REVISION
+    configure_base(env_cfg, CENTER_REVISION)
+    limits, _ = validate_profile(p)
+    action = env_cfg.actions.joint_pos
+    action.dex_reference_profile = p
+    action.training_limits_sha256 = digest
+    action.position_limits_rad = tuple(map(tuple, limits.tolist()))
+    action.encoder_bias_rad = (0.,)*21
+    action.alpha = p['ema_alpha']
+    for actuator in env_cfg.scene.robot.actuators.values():
+        actuator.min_delay = actuator.max_delay = 0
+
+
+def state_fields():
+    from .state_layout import fields
+    result = fields()
+    result.pop('actuator_delay_ready')
+    result.update(ema_encoder_target_rad=[83,104], episode_encoder_zero_rad=[104,125],
+                  current_object_wrench_base_N_Nm=[125,131])
+    return result
+
+
+def observation_fields():
+    return dict(joint_position_normalized=[0,21], measured_minus_previous_ema_normalized=[21,42],
+        last_raw_action=[42,63], object_position_base_m=[63,66], goal_position_base_m=[66,69],
+        relative_rotation_6d=[69,75])

@@ -1,0 +1,26 @@
+{
+  "reconstruct": {
+    "scan": "logs/scanning/my_object/capture",
+    "output": "logs/scanning/my_object/reconstruction",
+    "matcher": "auto",
+    "depth_max": 1.0
+  },
+  "prepare": {
+    "reconstruction": "logs/scanning/my_object/reconstruction",
+    "output": "logs/scanning/my_object/prepared",
+    "bounds": [-0.06, -0.06, 0.24, 0.06, 0.06, 0.36],
+    "voxel_size": 0.0015
+  },
+  "train": {
+    "dataset": "logs/scanning/my_object/prepared",
+    "output": "logs/scanning/my_object/training",
+    "iterations": 7000,
+    "max_gaussians": 50000
+  },
+  "import": {
+    "dataset": "logs/scanning/my_object/prepared",
+    "training": "logs/scanning/my_object/training",
+    "name": "MyScannedObject",
+    "mass_kg": 0.05
+  }
+}
