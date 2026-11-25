@@ -13,7 +13,8 @@ import torch
 class Replay:
     def __init__(self, capacity, num_envs, device, event_capacity=4096, event_fraction=0.25, event_window=8,
                  adaptive=False, uniform_fraction=.2, *, storage_device="cpu",
-                 wm_holdout_envs=0, sampling_mode="legacy", failure_sample_fraction=0.25):
+                 wm_holdout_envs=0, sampling_mode="legacy", failure_sample_fraction=0.25,
+                 recent_sample_fraction=0.0, recent_window_steps=150):
         self.capacity, self.num_envs, self.device = capacity, num_envs, device
         if capacity < 1 or num_envs < 1 or not 0 < uniform_fraction <= 1:
             raise ValueError("Invalid replay capacity/uniform floor")
@@ -23,10 +24,16 @@ class Replay:
             raise ValueError(f"Unknown replay sampling_mode: {sampling_mode}")
         if not 0 <= failure_sample_fraction <= 1:
             raise ValueError("failure_sample_fraction must be in [0, 1]")
+        if not 0 <= recent_sample_fraction <= 1:
+            raise ValueError("recent_sample_fraction must be in [0, 1]")
+        if recent_window_steps < 1:
+            raise ValueError("recent_window_steps must be positive")
         self.wm_holdout_envs = int(wm_holdout_envs)
         self.wm_train_envs = num_envs - self.wm_holdout_envs
         self.sampling_mode = sampling_mode
         self.failure_sample_fraction = float(failure_sample_fraction)
+        self.recent_sample_fraction = float(recent_sample_fraction)
+        self.recent_window_steps = int(recent_window_steps)
         self.storage_device = torch.device(storage_device)
         if self.storage_device.type not in ("cpu", "cuda"):
             raise ValueError("Replay storage_device must be CPU or CUDA")
@@ -76,7 +83,20 @@ class Replay:
             raise ValueError("Insufficient replay")
         if self.adaptive and window > 1 and prioritized:
             return self._sample_prioritized(batch, window)
-        logical = torch.randint(self.size - window + 1, (batch,), device=self.storage_device)
+        valid_starts = self.size - window + 1
+        logical = torch.randint(valid_starts, (batch,), device=self.storage_device)
+        use_events = (include_events or self.sampling_mode == "uniform_failure")
+        n_events = 0
+        if use_events and window == self.event_window and self.archive_size and self.event_fraction > 0:
+            n_events = min(batch, int(batch * self.event_fraction))
+        if self.recent_sample_fraction > 0 and valid_starts > 1:
+            n_recent = min(batch - n_events, int(batch * self.recent_sample_fraction))
+            if n_recent > 0:
+                span = min(valid_starts, self.recent_window_steps)
+                recent_lo = valid_starts - span
+                logical[n_events : n_events + n_recent] = torch.randint(
+                    recent_lo, valid_starts, (n_recent,), device=self.storage_device
+                )
         oldest = self.cursor if self.size == self.capacity else 0
         time = (logical[:, None] + oldest + torch.arange(window, device=self.storage_device)[None]) % self.capacity
         # Isolate WM training windows strictly to [0, wm_train_envs) when holdout is active.
@@ -93,17 +113,15 @@ class Replay:
             done = out["done"]
             out["mask"] = torch.cat((torch.ones(batch, 1, device=self.device), (~done[:, :-1]).float().cumprod(1)), 1)
         out["env_id"] = env.to(self.device)
-        use_events = (include_events or self.sampling_mode == "uniform_failure")
-        if use_events and window == self.event_window and self.archive_size and self.event_fraction > 0:
-            n = min(batch, int(batch * self.event_fraction))
-            if n > 0:
-                indices = torch.randint(self.archive_size, (n,), device=self.storage_device)
-                for key, values in self.archive.items():
-                    out[key][:n] = values[indices].to(self.device)
-                done_e = out["done"][:n]
-                out["mask"][:n] = torch.cat(
-                    (torch.ones(n, 1, device=self.device), (~done_e[:, :-1]).float().cumprod(1)), 1
-                )
+        if n_events > 0:
+            indices = torch.randint(self.archive_size, (n_events,), device=self.storage_device)
+            for key, values in self.archive.items():
+                out[key][:n_events] = values[indices].to(self.device)
+            done_e = out["done"][:n_events]
+            out["mask"][:n_events] = torch.cat(
+                (torch.ones(n_events, 1, device=self.device), (~done_e[:, :-1]).float().cumprod(1)),
+                1,
+            )
         return out
 
     def sample_holdout(self, batch, window):

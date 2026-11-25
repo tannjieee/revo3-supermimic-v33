@@ -50,6 +50,14 @@ def imagination_protocol(cfg):
             parts.append("c2")
         if cfg.ema_delta_penalty_weight or cfg.joint_speed_penalty_weight or cfg.cage_penalty_weight:
             parts.append("reg")
+        if cfg.orientation_progress_scale:
+            parts.append("prog")
+        if cfg.target_slew_ste:
+            parts.append("ste")
+        if cfg.actor_lambda_return:
+            parts.append("alam")
+        if cfg.goal_curriculum_enabled:
+            parts.append("curr")
         return "_".join(parts)
     if cfg.dex_reference:
         return "encoder_EMA_zero_bias_contacts_independent_failure_v33"
@@ -551,60 +559,64 @@ class Trainer:
     def policy_update(self, replay):
         cfg = self.cfg
         actor_chunk = cfg.actor_microbatch or cfg.microbatch
-        start = replay.sample(cfg.actor_batch, include_events=False) if cfg.stable_value_learning else replay.sample(cfg.actor_batch)
-        if cfg.uses_target_critic:
-            from .stable_values import fit_real_critic
-            critic_batch = (start if cfg.critic_td_steps == 1 else replay.sample(
-                cfg.actor_batch, window=cfg.critic_td_steps, include_events=False, prioritized=False))
-            real_metrics = fit_real_critic(self, critic_batch)
-        self.opt_wm.zero_grad(set_to_none=True)
-        self.opt_critic.zero_grad(set_to_none=True)
-        self.opt_actor.zero_grad(set_to_none=True)
-        datasets = []
-        cost_metrics = {}
-        objective = torch.zeros((), device=self.device, dtype=torch.float64)
-        gradient_metrics = {}
-        audit_policy_step = (cfg.absolute_policy_optimization
-                             and self.iteration % cfg.actor_gradient_audit_interval == 0)
-        if audit_policy_step:
-            # Fixed real histories isolate the optimizer's change from physics,
-            # exploration and normalization updates. No policy/action clipping.
-            with torch.no_grad():
-                audit_history = start['history'][:min(actor_chunk, 256)]
-                audit_action_before = self.actor(audit_history)
-                audit_scaled = self.actor.scaled_observation(audit_history)
-                audit_velocity = self.actor.obs_norm(audit_scaled)[..., 21:42]
-                gradient_metrics.update(
-                    actor_input_velocity_abs_p99=torch.quantile(audit_velocity.abs(), .99),
-                    actor_input_velocity_std_min=self.actor.obs_norm.std[21:42].min())
-        with frozen(self.wm, self.critic):
-            for begin in range(0, cfg.actor_batch, actor_chunk):
-                batch = {k: v[begin : begin + actor_chunk] for k, v in start.items()}
-                loss, states, targets, context, valid = self.imagine(batch)
-                if audit_policy_step and begin == 0:
-                    from .absolute_policy import objective_gradient_metrics
-                    gradient_metrics.update(objective_gradient_metrics(self.actor,
-                        {**self._actor_objective_terms, **self._actor_reward_components}))
-                    gradient_metrics['actor_gradient_audit_samples'] = len(batch['state'])
-                weight = len(batch["state"]) / cfg.actor_batch
-                (loss * weight).backward()
-                objective += loss.detach().to(torch.float64) * weight
-                if cfg.constraints_enabled:
-                    for name, value in self._cost_metrics.items():
-                        cost_metrics[name] = cost_metrics.get(name, 0.) + value * weight
-                if not cfg.uses_target_critic:
-                    datasets.append((states[valid], targets[valid], context[None].expand(cfg.horizon, -1, -1)[valid]))
-        gn = checked_step(self.actor, self.opt_actor, True, distributed=self.distributed, tensor_norm=True)
-        self.optimizer_steps["actor"] += 1
-        if audit_policy_step:
-            with torch.no_grad():
-                audit_limits = self.limits[start['env_id'][:len(audit_history)]]
-                half_range = (audit_limits.new_tensor(cfg.dex_action_residual_rad)
-                              if cfg.dex_action_residual_rad else (audit_limits[..., 1]-audit_limits[..., 0])/2)
-                delta = (self.actor(audit_history)-audit_action_before)*half_range
-                gradient_metrics.update(actor_update_target_rms_deg=delta.square().mean().sqrt()*(180/math.pi),
-                    actor_update_target_max_deg=delta.abs().max()*(180/math.pi),
-                    actor_update_audit_samples=len(audit_history))
+        n_actor_steps = getattr(cfg, "actor_updates", 1)
+        real_metrics = None
+        for actor_step in range(n_actor_steps):
+            start = replay.sample(cfg.actor_batch, include_events=False) if cfg.stable_value_learning else replay.sample(cfg.actor_batch)
+            if actor_step == 0 and cfg.uses_target_critic:
+                from .stable_values import fit_real_critic
+                critic_batch = (start if cfg.critic_td_steps == 1 else replay.sample(
+                    cfg.actor_batch, window=cfg.critic_td_steps, include_events=False, prioritized=False))
+                real_metrics = fit_real_critic(self, critic_batch)
+            self.opt_wm.zero_grad(set_to_none=True)
+            self.opt_critic.zero_grad(set_to_none=True)
+            self.opt_actor.zero_grad(set_to_none=True)
+            is_last = actor_step == n_actor_steps - 1
+            datasets = []
+            cost_metrics = {}
+            objective = torch.zeros((), device=self.device, dtype=torch.float64)
+            gradient_metrics = {}
+            audit_policy_step = (is_last and cfg.absolute_policy_optimization
+                                 and self.iteration % cfg.actor_gradient_audit_interval == 0)
+            if audit_policy_step:
+                # Fixed real histories isolate the optimizer's change from physics,
+                # exploration and normalization updates. No policy/action clipping.
+                with torch.no_grad():
+                    audit_history = start['history'][:min(actor_chunk, 256)]
+                    audit_action_before = self.actor(audit_history)
+                    audit_scaled = self.actor.scaled_observation(audit_history)
+                    audit_velocity = self.actor.obs_norm(audit_scaled)[..., 21:42]
+                    gradient_metrics.update(
+                        actor_input_velocity_abs_p99=torch.quantile(audit_velocity.abs(), .99),
+                        actor_input_velocity_std_min=self.actor.obs_norm.std[21:42].min())
+            with frozen(self.wm, self.critic):
+                for begin in range(0, cfg.actor_batch, actor_chunk):
+                    batch = {k: v[begin : begin + actor_chunk] for k, v in start.items()}
+                    loss, states, targets, context, valid = self.imagine(batch)
+                    if audit_policy_step and begin == 0:
+                        from .absolute_policy import objective_gradient_metrics
+                        gradient_metrics.update(objective_gradient_metrics(self.actor,
+                            {**self._actor_objective_terms, **self._actor_reward_components}))
+                        gradient_metrics['actor_gradient_audit_samples'] = len(batch['state'])
+                    weight = len(batch["state"]) / cfg.actor_batch
+                    (loss * weight).backward()
+                    objective += loss.detach().to(torch.float64) * weight
+                    if is_last and cfg.constraints_enabled:
+                        for name, value in self._cost_metrics.items():
+                            cost_metrics[name] = cost_metrics.get(name, 0.) + value * weight
+                    if is_last and not cfg.uses_target_critic:
+                        datasets.append((states[valid], targets[valid], context[None].expand(cfg.horizon, -1, -1)[valid]))
+            gn = checked_step(self.actor, self.opt_actor, True, distributed=self.distributed, tensor_norm=True)
+            self.optimizer_steps["actor"] += 1
+            if audit_policy_step:
+                with torch.no_grad():
+                    audit_limits = self.limits[start['env_id'][:len(audit_history)]]
+                    half_range = (audit_limits.new_tensor(cfg.dex_action_residual_rad)
+                                  if cfg.dex_action_residual_rad else (audit_limits[..., 1]-audit_limits[..., 0])/2)
+                    delta = (self.actor(audit_history)-audit_action_before)*half_range
+                    gradient_metrics.update(actor_update_target_rms_deg=delta.square().mean().sqrt()*(180/math.pi),
+                        actor_update_target_max_deg=delta.abs().max()*(180/math.pi),
+                        actor_update_audit_samples=len(audit_history))
         if cfg.uses_target_critic:
             metrics = real_metrics
             valid_fraction = cost_metrics['imagined_alive_mean']

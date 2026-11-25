@@ -206,6 +206,9 @@ def imagine_stable(trainer, batch):
     names = cost_names(cfg)
     running = torch.zeros(len(state), len(names), device=state.device)
     terminal = torch.zeros_like(running)
+    use_lam = bool(getattr(cfg, 'actor_lambda_return', False))
+    reward_boot_acc = torch.zeros_like(alive)
+    cost_boot_acc = torch.zeros_like(running)
     value_model = trainer.critic if cfg.paper_critic else trainer.target_critic
     cap_bounds = state.new_tensor(value_bounds(cfg)) if cfg.critic_value_cap else None
     init_value = value_model(state, context).detach()
@@ -244,7 +247,8 @@ def imagine_stable(trainer, batch):
                                  home=trainer._wm_home, residual_rad=trainer._wm_action_residual)
         continuation = torch.where(active, trainer.continuation(state, nxt), 0.)
         p = 1-continuation
-        discount_alive = cfg.gamma**t * alive
+        step_discount = (cfg.gamma * cfg.lam) ** t if use_lam else cfg.gamma ** t
+        discount_alive = step_discount * alive
         objective = objective + discount_alive * r
         running = running + discount_alive[:, None] * continuation[:, None] * running_risk(raw)
         terminal = terminal + discount_alive[:, None] * p[:, None] / (1-cfg.gamma)
@@ -263,14 +267,22 @@ def imagine_stable(trainer, batch):
                    for k, v in next_sensors.items()}
         raw_value = value_model(state, context)
         value = cap_values(raw_value, cap_bounds) if cap_bounds is not None else raw_value
+        if use_lam:
+            boot_weight = (cfg.gamma ** (t + 1)) * (cfg.lam ** t) * (1.0 if t == cfg.horizon - 1 else (1.0 - cfg.lam))
+            reward_boot_acc = reward_boot_acc + boot_weight * alive * value[:, 0]
+            cost_boot_acc = cost_boot_acc + boot_weight * alive[:, None] * value[:, 1:]
         immediate.append(torch.cat((r[:, None], cost), -1) * active[:, None])
         continuations.append(continuation[:, None].expand(-1, 1+len(names)))
         valid.append(active)
         states.append(state)
         values.append(value.detach())
     reward_rollout = (1-cfg.gamma) * objective.mean() / task_reward_bound(cfg)
-    reward_bootstrap = (1-cfg.gamma) * (cfg.gamma**cfg.horizon * alive * value[:, 0]).mean() / task_reward_bound(cfg)
-    bootstrap = cfg.gamma**cfg.horizon * alive[:, None] * value[:, 1:]
+    if use_lam:
+        reward_bootstrap = (1-cfg.gamma) * reward_boot_acc.mean() / task_reward_bound(cfg)
+        bootstrap = cost_boot_acc
+    else:
+        reward_bootstrap = (1-cfg.gamma) * (cfg.gamma**cfg.horizon * alive * value[:, 0]).mean() / task_reward_bound(cfg)
+        bootstrap = cfg.gamma**cfg.horizon * alive[:, None] * value[:, 1:]
     pieces = [(1-cfg.gamma)*part.mean(0) for part in (running, terminal, bootstrap)]
     normalized = sum(pieces)
     loss = -reward_rollout-reward_bootstrap + cfg.cost_penalty*normalized.sum()

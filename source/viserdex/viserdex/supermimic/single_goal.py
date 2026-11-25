@@ -6,8 +6,8 @@ from isaaclab.utils import configclass
 from isaaclab.utils.math import quat_error_magnitude, quat_apply, quat_mul
 from .hold_command import HoldReorientCommand, HoldReorientCommandCfg
 from .goal_hold import hold_transition, persistent_hold_transition
-from .core import sample_xy_goal
-from .orientation_reward import orientation_reward, validate_orientation_reward
+from .core import sample_xy_goal, sample_bounded_so3_goal
+from .orientation_reward import orientation_reward, orientation_progress_reward, validate_orientation_reward
 from .position_reward import position_reward, position_hold_valid, validate_position_reward
 from .stability_reward import stability_reward, validate_stability_reward
 from .quiet_hold import validate_quiet_hold, motion_penalty, dex_regularization_penalty
@@ -32,6 +32,21 @@ class SingleGoalCommand(HoldReorientCommand):
         self.default_pos_command_e = self.pos_command_e.clone()
         self.last_position_error = torch.zeros(self.num_envs, device=self.device)
         self.last_linear_speed = torch.zeros(self.num_envs, device=self.device)
+        self.prev_angle = torch.zeros(self.num_envs, device=self.device)
+        self._pre_step_snapshotted = -1
+        self.curriculum_max_angle_rad = (
+            math.radians(cfg.goal_curriculum_start_deg)
+            if getattr(cfg, 'goal_curriculum_enabled', False)
+            else math.pi
+        )
+
+    def set_curriculum_max_angle(self, max_angle_rad):
+        self.curriculum_max_angle_rad = float(max(0.05, min(math.pi, max_angle_rad)))
+
+    def snapshot_pre_step_angle(self):
+        """Capture exact pre-step geodesic orientation error before physics advances."""
+        self.prev_angle.copy_(quat_error_magnitude(self.object.data.root_quat_w.torch, self.quat_command_w))
+        self._pre_step_snapshotted = self._env.common_step_counter
 
     @property
     def elapsed_seconds(self):
@@ -42,6 +57,8 @@ class SingleGoalCommand(HoldReorientCommand):
         if self._evaluated_step == self._env.common_step_counter:
             return self.just_completed
         self._evaluated_step = self._env.common_step_counter
+        if hasattr(self, 'prev_angle') and getattr(self, '_pre_step_snapshotted', -1) != self._env.common_step_counter:
+            self.prev_angle.copy_(self.last_angle)
         self.last_angle.copy_(quat_error_magnitude(self.object.data.root_quat_w.torch, self.quat_command_w))
         self.last_speed.copy_(self.object.data.root_ang_vel_w.torch.norm(dim=-1))
         self.last_position_error.copy_((self.object.data.root_pos_w.torch - self.pos_command_w).norm(dim=-1))
@@ -84,7 +101,13 @@ class SingleGoalCommand(HoldReorientCommand):
             self._resample_command(ids, preserve_success=True)
 
     def _resample_command(self, env_ids, *, preserve_success=False):
-        self.quat_command_w[env_ids] = sample_xy_goal(self.quat_command_w[env_ids])
+        max_ang = getattr(self, 'curriculum_max_angle_rad', math.pi)
+        if max_ang < math.pi - 1e-4:
+            self.quat_command_w[env_ids] = sample_bounded_so3_goal(
+                self.object.data.root_quat_w.torch[env_ids], max_ang
+            )
+        else:
+            self.quat_command_w[env_ids] = sample_xy_goal(self.quat_command_w[env_ids])
         self.pos_command_e[env_ids] = self.default_pos_command_e[env_ids]
         self.pos_command_w[env_ids] = self.pos_command_e[env_ids] + self._env.scene.env_origins[env_ids]
         self._restart_goal(env_ids, preserve_success=preserve_success)
@@ -93,6 +116,10 @@ class SingleGoalCommand(HoldReorientCommand):
         self.goal_start_step[env_ids] = self._env.common_step_counter
         self.hold_ticks[env_ids] = 0
         self.just_completed[env_ids] = False
+        if hasattr(self, 'prev_angle'):
+            ang = quat_error_magnitude(self.object.data.root_quat_w.torch[env_ids], self.quat_command_w[env_ids])
+            self.last_angle[env_ids] = ang
+            self.prev_angle[env_ids] = ang
         if not preserve_success:
             self.metrics['consecutive_success'][env_ids] = 0
 
@@ -154,9 +181,13 @@ class SingleGoalCommandCfg(HoldReorientCommandCfg):
     cage_scale_m: float = 0.025
     orientation_reward_mode: str = "gaussian"
     orientation_reward_scale: float = 10.0
+    orientation_progress_scale: float = 0.0
+    orientation_progress_speed_rad_s: float = 2.0
     orientation_coarse_sigma_rad: float = math.pi / 2
     orientation_fine_sigma_rad: float = math.pi / 18
     orientation_coarse_fraction: float = 0.3
+    goal_curriculum_enabled: bool = False
+    goal_curriculum_start_deg: float = 60.0
     goal_position_base_m: tuple[float, float, float] | None = None
     position_reward_scale: float = 1.0
     position_tolerance_m: float = 0.01
@@ -168,7 +199,10 @@ class SingleGoalCommandCfg(HoldReorientCommandCfg):
 def dense_orientation_reward(env, command_name='object_pose'):
     command = env.command_manager.get_term(command_name)
     command.evaluate_step()
-    return orientation_reward(command.last_angle, command.cfg)
+    val = orientation_reward(command.last_angle, command.cfg)
+    if getattr(command.cfg, 'orientation_progress_scale', 0.0):
+        val = val + orientation_progress_reward(command.prev_angle, command.last_angle, env.step_dt, command.cfg)
+    return val
 
 
 def dense_position_reward(env, command_name='object_pose'):

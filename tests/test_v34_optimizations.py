@@ -383,3 +383,120 @@ def test_phase2_wm_cuda_graph_matches_eager():
     torch.testing.assert_close(phys_g, phys_e, atol=1e-5, rtol=1e-5)
     for (n, pe), (_, pg) in zip(eager.wm.named_parameters(), graph.wm.named_parameters()):
         torch.testing.assert_close(pg.grad, pe.grad, atol=1e-4, rtol=1e-4, msg=f"Grad mismatch on {n}")
+
+
+# ---------------------------------------------------------------------------
+# Phase 3: Fast-Convergence Optimizations (V35)
+# ---------------------------------------------------------------------------
+
+V35_P3_PROFILE = Path(__file__).resolve().parents[1] / "configs/supermimic_v34/control_opt_p3.yaml"
+
+
+def test_phase3_angular_progress_reward_bounds_symmetry_and_gradient():
+    from viserdex.supermimic.orientation_reward import orientation_progress_reward
+    from viserdex.supermimic.stability_reward import task_reward_bound
+    cfg = make_v34_cfg(profile_path=V35_P3_PROFILE, cost_penalty=0.25, horizon=8)
+    assert cfg.orientation_progress_scale == 4.0
+    assert math.isclose(task_reward_bound(cfg), 0.04 * (10.0 + 4.0 + 4.0), rel_tol=1e-6)
+
+    prev = torch.tensor([1.5, 1.5, 1.5])
+    nxt = torch.tensor([1.3, 1.5, 1.7], requires_grad=True)
+    prog = orientation_progress_reward(prev, nxt, cfg.control_dt, cfg)
+    assert prog[0] > 0.0 and abs(float(prog[1].detach())) < 1e-7 and prog[2] < 0.0
+    assert torch.allclose(prog[0], -prog[2], atol=1e-6)
+    assert prog.abs().max() < cfg.orientation_progress_scale
+    prog.sum().backward()
+    assert (nxt.grad < 0).all()  # smaller next error increases reward
+
+
+def test_phase3_ste_slew_limiter_exact_forward_and_nonzero_gradient():
+    from viserdex.supermimic.dex_reference import filter_target
+    prev = torch.zeros(4, 21)
+    raw = torch.full((4, 21), 1.0, requires_grad=True)
+    hard = filter_target(prev, raw, 0.51, max_delta=0.1, ste=False)
+    hard.sum().backward()
+    assert float(raw.grad.abs().max()) == 0.0  # hard clamp kills gradient
+
+    raw2 = torch.full((4, 21), 1.0, requires_grad=True)
+    ste = filter_target(prev, raw2, 0.51, max_delta=0.1, ste=True)
+    torch.testing.assert_close(ste, hard.detach(), atol=1e-7, rtol=1e-6)
+    ste.sum().backward()
+    torch.testing.assert_close(raw2.grad, torch.full_like(raw2, 0.51), atol=1e-6, rtol=1e-6)
+
+
+def test_phase3_recency_replay_and_bounded_so3_curriculum():
+    from viserdex.supermimic.core import sample_bounded_so3_goal, quat_mul, quat_conjugate, rotation_log
+    cfg = make_v34_cfg(profile_path=V35_P3_PROFILE, cost_penalty=0.25, horizon=8)
+    assert cfg.recent_sample_fraction == 0.50
+    assert cfg.failure_sample_fraction == 0.08
+    replay = Replay(
+        capacity=100, num_envs=20, device="cpu", event_window=8,
+        wm_holdout_envs=2, sampling_mode="uniform_failure",
+        failure_sample_fraction=0.08, recent_sample_fraction=0.50, recent_window_steps=15,
+    )
+    for step in range(80):
+        replay.add({
+            "state": torch.full((20, 4), float(step)),
+            "next_physical": torch.zeros(20, 4),
+            "action": torch.zeros(20, 2),
+            "done": torch.zeros(20, dtype=torch.bool),
+            "terminated": torch.zeros(20, dtype=torch.bool),
+            "reward": torch.zeros(20),
+        })
+    batch = replay.sample(1000, window=1, include_events=False)
+    steps = batch["state"][:, 0]
+    recent_frac = float((steps >= 65).float().mean())
+    # 50% forced from last 15 steps + ~50% * (15/80) from uniform = ~59%
+    assert recent_frac > 0.52
+
+    ref = torch.tensor([[0.0, 0.0, 0.0, 1.0]] * 256)
+    max_ang = math.radians(60.0)
+    goals = sample_bounded_so3_goal(ref, max_ang)
+    errs = rotation_log(quat_mul(goals, quat_conjugate(ref))).norm(dim=-1)
+    assert float(errs.min()) >= 0.25 * max_ang - 1e-4
+    assert float(errs.max()) <= max_ang + 1e-4
+
+
+def test_phase3_actor_lambda_return_and_multi_actor_updates():
+    cfg = make_v34_cfg(profile_path=V35_P3_PROFILE, cost_penalty=0.25, horizon=8)
+    assert cfg.actor_updates == 2
+    assert cfg.critic_epochs == 2
+    assert cfg.actor_lr_scale == 0.75
+    assert cfg.actor_ramp_iters == 150
+    assert cfg.actor_lambda_return is True
+    assert math.isclose(cfg.exploration_position_std_rad, math.radians(2.5), rel_tol=1e-6)
+    proto = imagination_protocol(cfg)
+    assert all(tag in proto for tag in ("_prog", "_ste", "_alam", "_curr"))
+
+    trainer, replay = populate_replay(cfg, n_envs=10, steps=14)
+    metrics = trainer.update(replay)
+    assert trainer.optimizer_steps["actor"] == 2
+    assert trainer.optimizer_steps["critic"] == cfg.critic_epochs * cfg.critic_minibatches
+    assert math.isfinite(metrics["actor_loss"])
+    assert math.isfinite(metrics["critic_loss"])
+    assert math.isfinite(metrics["wm_loss"])
+    assert "actor_reward_rollout" in metrics and "actor_reward_bootstrap" in metrics
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required for Phase 3 bf16 CUDA Graph check")
+def test_phase3_bf16_wm_cuda_graph_matches_eager():
+    cfg = make_v34_cfg(profile_path=V35_P3_PROFILE, cost_penalty=0.25, horizon=8, amp="bf16")
+    torch.manual_seed(789)
+    eager, replay = populate_replay(cfg, n_envs=10, steps=14, device="cuda")
+    graph = Trainer(cfg, eager.noise_cfg, eager.context, eager.limits, eager.base_inverse, "cuda", 250, wm_cuda_graph=True)
+    graph.wm.load_state_dict(eager.wm.state_dict())
+    batch = replay.sample(cfg.wm_batch, cfg.wm_window, include_events=False)
+
+    from viserdex.supermimic.wm_cuda_graph import CapturedWMLoss
+    captured = CapturedWMLoss(graph, batch)
+    eager.opt_wm.zero_grad(set_to_none=True)
+    eager.opt_failure.zero_grad(set_to_none=True)
+    loss_e, err_e, phys_e, _, _ = eager._wm_loss(batch)
+    loss_e.backward()
+    eager._independent_failure_loss.backward()
+    loss_g, err_g, phys_g, _, _ = captured(batch)
+    torch.testing.assert_close(loss_g, loss_e, atol=2e-3, rtol=2e-3)
+    torch.testing.assert_close(err_g, err_e, atol=2e-3, rtol=2e-3)
+    torch.testing.assert_close(phys_g, phys_e, atol=2e-3, rtol=2e-3)
+    for (n, pe), (_, pg) in zip(eager.wm.named_parameters(), graph.wm.named_parameters()):
+        torch.testing.assert_close(pg.grad, pe.grad, atol=5e-3, rtol=5e-3, msg=f"bf16 grad mismatch on {n}")

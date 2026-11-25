@@ -9,7 +9,7 @@ from .state_layout import layout, COMPACT, REFERENCE, STATE_PROTOCOL
 from . import dex_reference as dex
 from .goal_hold import hold_transition, persistent_hold_transition, hold_kwargs, required_steps
 from .policy_contract import LEGACY_OBSERVATION_PROTOCOL, DIRECT_OBSERVATION_PROTOCOL, absolute_joint_target
-from .orientation_reward import orientation_reward, validate_orientation_reward
+from .orientation_reward import orientation_reward, orientation_progress_reward, validate_orientation_reward
 from .position_reward import position_reward, position_hold_valid, validate_position_reward
 from .stability_reward import stability_reward, validate_stability_reward
 from dataclasses import dataclass
@@ -206,6 +206,19 @@ class Config:
     cage_penalty_weight: float = 0.0
     cage_safe_radius_m: float = 0.045
     cage_scale_m: float = 0.025
+    # V35 Phase 3 fast-convergence optimization flags (all opt-in, legacy defaults preserved).
+    orientation_progress_scale: float = 0.0
+    orientation_progress_speed_rad_s: float = 2.0
+    target_slew_ste: bool = False
+    actor_updates: int = 1
+    actor_lambda_return: bool = False
+    recent_sample_fraction: float = 0.0
+    recent_window_steps: int = 150
+    goal_curriculum_enabled: bool = False
+    goal_curriculum_start_deg: float = 60.0
+    goal_curriculum_step_deg: float = 15.0
+    goal_curriculum_threshold_ratio: float = 0.45
+    goal_curriculum_cooldown_iters: int = 100
 
     @property
     def uses_v34_optimizations(self):
@@ -228,6 +241,12 @@ class Config:
             or self.ema_delta_penalty_weight > 0.0
             or self.joint_speed_penalty_weight > 0.0
             or self.cage_penalty_weight > 0.0
+            or self.orientation_progress_scale > 0.0
+            or self.target_slew_ste
+            or self.actor_updates != 1
+            or self.actor_lambda_return
+            or self.recent_sample_fraction > 0.0
+            or self.goal_curriculum_enabled
             or (self.wm_task_losses and min(
                 self.wm_reward_loss_weight, self.wm_observation_loss_weight, self.wm_cost_loss_weight) == 0.0)
         )
@@ -263,6 +282,13 @@ class Config:
                 'dex_action_residual_rad', 'sequential_goals', 'compact_critic_costs',
                 'ema_delta_penalty_weight', 'joint_speed_penalty_weight',
                 'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m',
+                'orientation_progress_scale', 'orientation_progress_speed_rad_s',
+                'target_slew_ste', 'actor_lr_scale', 'actor_ramp_iters', 'actor_updates',
+                'critic_epochs', 'actor_lambda_return', 'recent_sample_fraction',
+                'recent_window_steps', 'exploration_position_std_rad',
+                'goal_curriculum_enabled', 'goal_curriculum_start_deg',
+                'goal_curriculum_step_deg', 'goal_curriculum_threshold_ratio',
+                'goal_curriculum_cooldown_iters',
             }
             for name, value in expected.items():
                 if name in v34_ablation_fields:
@@ -351,9 +377,28 @@ class Config:
             raise ValueError('failure_sample_fraction must be in [0, 1]')
         for name in ('deterministic_imagination', 'target_rate_pre_slew_cost',
                      'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
-                     'sequential_goals', 'compact_critic_costs'):
+                     'sequential_goals', 'compact_critic_costs',
+                     'target_slew_ste', 'actor_lambda_return', 'goal_curriculum_enabled'):
             if type(getattr(self, name)) is not bool:
                 raise ValueError(f'{name} must be boolean')
+        if not math.isfinite(self.orientation_progress_scale) or self.orientation_progress_scale < 0:
+            raise ValueError('orientation_progress_scale must be finite and nonnegative')
+        if not math.isfinite(self.orientation_progress_speed_rad_s) or self.orientation_progress_speed_rad_s <= 0:
+            raise ValueError('orientation_progress_speed_rad_s must be finite and positive')
+        if type(self.actor_updates) is not int or self.actor_updates < 1:
+            raise ValueError('actor_updates must be a positive integer')
+        if not math.isfinite(self.recent_sample_fraction) or not 0 <= self.recent_sample_fraction <= 1:
+            raise ValueError('recent_sample_fraction must be in [0, 1]')
+        if type(self.recent_window_steps) is not int or self.recent_window_steps < 1:
+            raise ValueError('recent_window_steps must be a positive integer')
+        if not math.isfinite(self.goal_curriculum_start_deg) or not 5.0 <= self.goal_curriculum_start_deg <= 180.0:
+            raise ValueError('goal_curriculum_start_deg must be in [5, 180]')
+        if not math.isfinite(self.goal_curriculum_step_deg) or not 1.0 <= self.goal_curriculum_step_deg <= 180.0:
+            raise ValueError('goal_curriculum_step_deg must be in [1, 180]')
+        if not math.isfinite(self.goal_curriculum_threshold_ratio) or not 0 < self.goal_curriculum_threshold_ratio < 1:
+            raise ValueError('goal_curriculum_threshold_ratio must be in (0, 1)')
+        if type(self.goal_curriculum_cooldown_iters) is not int or self.goal_curriculum_cooldown_iters < 0:
+            raise ValueError('goal_curriculum_cooldown_iters must be a nonnegative integer')
         if self.dex_action_residual_rad:
             if not self.dex_reference:
                 raise ValueError('dex_action_residual_rad requires dex_reference')
@@ -595,7 +640,7 @@ def action_target(s, action, limits, cfg, *, home=None, residual_rad=None):
         h = home if home is not None else (cfg.action_home if res is not None else None)
         return dex.target(
             s, action, limits, cfg.ema_alpha, cfg.target_slew_rate_rad_s * cfg.control_dt,
-            home=h, residual_rad=res,
+            home=h, residual_rad=res, ste=cfg.target_slew_ste,
         )
     if cfg.action_mode == "direct_limits":
         return absolute_joint_target(action, limits)
@@ -666,8 +711,13 @@ def reward_from_orientation_error(s, physical_next, action, error, dt=1 / 30, su
             from .quiet_hold import imagined_dex_regularization
             reg_penalty = imagined_dex_regularization(
                 s, physical_next, action, distance, hold_cfg, limits=limits, home=home, residual_rad=residual_rad)
+        progress = (
+            orientation_progress_reward(angle_error(s), error, dt, hold_cfg)
+            if getattr(hold_cfg, 'orientation_progress_scale', 0.0)
+            else 0.0
+        )
         return dt * (
-            orientation_reward(error, hold_cfg) + position_reward(distance, hold_cfg)
+            orientation_reward(error, hold_cfg) + progress + position_reward(distance, hold_cfg)
             + stability_reward(error, distance, physical_next[..., OMEGA].norm(dim=-1),
                                physical_next[..., VEL].norm(dim=-1), hold_cfg)
             - quiet_penalty
@@ -702,6 +752,20 @@ def sample_xy_goal(reference):
     x[..., 0] = angles[..., 0]
     y[..., 1] = angles[..., 1]
     return quat_mul(rotation_vector_quat(x), rotation_vector_quat(y))
+
+
+def sample_bounded_so3_goal(reference, max_angle_rad):
+    """Sample a random SO(3) target within [0.25 * max_angle_rad, max_angle_rad] of reference."""
+    if max_angle_rad >= math.pi - 1e-4:
+        return sample_xy_goal(reference)
+    axis = torch.randn(*reference.shape[:-1], 3, device=reference.device, dtype=reference.dtype)
+    norm = axis.norm(dim=-1, keepdim=True)
+    fallback = torch.zeros_like(axis)
+    fallback[..., 2] = 1.0
+    axis = torch.where(norm > 1e-6, axis / norm.clamp_min(1e-6), fallback)
+    lo = 0.25 * max_angle_rad
+    angle = lo + (max_angle_rad - lo) * torch.rand(*reference.shape[:-1], 1, device=reference.device, dtype=reference.dtype)
+    return quat_unique(quat_mul(rotation_vector_quat(axis * angle), reference))
 
 
 def advance(s, physical_next, action, target, sampled_goal_base, episode_steps=600, *, hold_cfg=None, event_override=None):

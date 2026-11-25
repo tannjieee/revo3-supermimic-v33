@@ -18,6 +18,27 @@ def validate_orientation_reward(cfg):
         raise ValueError('orientation_fine_sigma_rad must not exceed the coarse scale')
     if not 0 <= cfg.orientation_coarse_fraction <= 1:
         raise ValueError('orientation_coarse_fraction must be in [0, 1]')
+    prog_scale = getattr(cfg, 'orientation_progress_scale', 0.0)
+    prog_speed = getattr(cfg, 'orientation_progress_speed_rad_s', 2.0)
+    if not math.isfinite(prog_scale) or prog_scale < 0:
+        raise ValueError('orientation_progress_scale must be finite and nonnegative')
+    if not math.isfinite(prog_speed) or prog_speed <= 0:
+        raise ValueError('orientation_progress_speed_rad_s must be finite and positive')
+
+
+def orientation_progress_reward(prev_error_rad, error_rad, dt, cfg):
+    """Smooth bounded angular progress rate reward (per second).
+
+    Pays +scale * tanh((theta_t - theta_{t+1}) / (dt * speed)) so turning toward
+    the target yields immediate dense rollout credit inside short imagination
+    horizons while remaining strictly bounded in [-scale, +scale] and telescoping
+    to zero under symmetric oscillation.
+    """
+    scale = getattr(cfg, 'orientation_progress_scale', 0.0)
+    if not scale:
+        return torch.zeros_like(error_rad)
+    speed = getattr(cfg, 'orientation_progress_speed_rad_s', 2.0)
+    return scale * torch.tanh((prev_error_rad - error_rad) / (dt * speed))
 
 
 def orientation_reward(error_rad, cfg):

@@ -181,6 +181,10 @@ class Adapter:
                     raise ValueError(f'Single-goal reward/command mismatch: {name}')
             if getattr(command_cfg, 'orientation_reward_mode', 'gaussian') != self.hold_cfg.orientation_reward_mode:
                 raise ValueError('Single-goal reward/command mismatch: orientation_reward_mode')
+            if getattr(command_cfg, 'orientation_progress_scale', 0.0) != self.hold_cfg.orientation_progress_scale:
+                raise ValueError('Single-goal reward/command mismatch: orientation_progress_scale')
+            if getattr(command_cfg, 'orientation_progress_speed_rad_s', 2.0) != self.hold_cfg.orientation_progress_speed_rad_s:
+                raise ValueError('Single-goal reward/command mismatch: orientation_progress_speed_rad_s')
             if getattr(command_cfg, 'sequential_goals', False) != self.hold_cfg.sequential_goals:
                 raise ValueError('Single-goal reward/command mismatch: sequential_goals')
             for name in DEX_REG_CONFIG_FIELDS:
@@ -646,6 +650,8 @@ class Adapter:
             self.physics_health.begin(state, action)
             self._check_physical_health(state[:, :55], 'before_step')
         command = self.env.command_manager.get_term("object_pose")
+        if hasattr(command, 'snapshot_pre_step_angle'):
+            command.snapshot_pre_step_angle()
         previous_hold = command.hold_ticks.clone()
         previous_completed = command.metrics["consecutive_success"].clone() > 0
         obs, actual_reward, terminated, truncated, info = self.env.step(action)

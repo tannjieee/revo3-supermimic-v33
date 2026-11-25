@@ -76,13 +76,36 @@ def validate_profile(p):
         raise ValueError('Invalid failure_sample_fraction')
     for name in ('grouped_physical_loss', 'deterministic_imagination', 'target_rate_pre_slew_cost',
                  'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
-                 'sequential_goals', 'compact_critic_costs'):
+                 'sequential_goals', 'compact_critic_costs',
+                 'target_slew_ste', 'actor_lambda_return', 'goal_curriculum_enabled'):
         if name in p and type(p[name]) is not bool:
             raise ValueError(f'{name} must be boolean')
     if 'orientation_reward_mode' in p and p['orientation_reward_mode'] not in ('gaussian', 'linear_fine'):
         raise ValueError(f"Invalid orientation_reward_mode: {p['orientation_reward_mode']}")
     if 'orientation_tolerance_deg' in p and (not math.isfinite(p['orientation_tolerance_deg']) or not 0 <= p['orientation_tolerance_deg'] < 180):
         raise ValueError('Invalid orientation_tolerance_deg')
+    if 'orientation_progress_scale' in p and (not math.isfinite(p['orientation_progress_scale']) or p['orientation_progress_scale'] < 0):
+        raise ValueError('Invalid orientation_progress_scale')
+    if 'orientation_progress_speed_rad_s' in p and (not math.isfinite(p['orientation_progress_speed_rad_s']) or p['orientation_progress_speed_rad_s'] <= 0):
+        raise ValueError('Invalid orientation_progress_speed_rad_s')
+    if 'actor_lr_scale' in p and (not math.isfinite(p['actor_lr_scale']) or not 0 < p['actor_lr_scale'] <= 1):
+        raise ValueError('Invalid actor_lr_scale')
+    for name in ('actor_ramp_iters', 'goal_curriculum_cooldown_iters'):
+        if name in p and (type(p[name]) is not int or p[name] < 0):
+            raise ValueError(f'Invalid {name}')
+    for name in ('actor_updates', 'critic_epochs', 'recent_window_steps'):
+        if name in p and (type(p[name]) is not int or p[name] < 1):
+            raise ValueError(f'Invalid {name}')
+    if 'recent_sample_fraction' in p and (not math.isfinite(p['recent_sample_fraction']) or not 0 <= p['recent_sample_fraction'] <= 1):
+        raise ValueError('Invalid recent_sample_fraction')
+    if 'exploration_position_std_deg' in p and (not math.isfinite(p['exploration_position_std_deg']) or p['exploration_position_std_deg'] <= 0):
+        raise ValueError('Invalid exploration_position_std_deg')
+    if 'goal_curriculum_start_deg' in p and (not math.isfinite(p['goal_curriculum_start_deg']) or not 5.0 <= p['goal_curriculum_start_deg'] <= 180.0):
+        raise ValueError('Invalid goal_curriculum_start_deg')
+    if 'goal_curriculum_step_deg' in p and (not math.isfinite(p['goal_curriculum_step_deg']) or not 1.0 <= p['goal_curriculum_step_deg'] <= 180.0):
+        raise ValueError('Invalid goal_curriculum_step_deg')
+    if 'goal_curriculum_threshold_ratio' in p and (not math.isfinite(p['goal_curriculum_threshold_ratio']) or not 0 < p['goal_curriculum_threshold_ratio'] < 1):
+        raise ValueError('Invalid goal_curriculum_threshold_ratio')
     if 'action_residual_deg' in p:
         res = p['action_residual_deg']
         if isinstance(res, (int, float)):
@@ -139,7 +162,8 @@ def reward_options(p):
     if 'orientation_tolerance_deg' in p:
         options['orientation_tolerance_rad'] = math.radians(p['orientation_tolerance_deg'])
     for key in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight',
-                'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m', 'sequential_goals'):
+                'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m', 'sequential_goals',
+                'orientation_progress_scale', 'orientation_progress_speed_rad_s'):
         if key in p:
             options[key] = p[key]
     return options
@@ -164,9 +188,15 @@ def profile_options(p, digest):
                 'contact_loss_reduction', 'wm_reward_loss_weight', 'wm_observation_loss_weight',
                 'wm_cost_loss_weight', 'wm_holdout_fraction', 'replay_sampling_mode',
                 'failure_sample_fraction', 'deterministic_imagination', 'target_rate_pre_slew_cost',
-                'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss', 'compact_critic_costs'):
+                'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss', 'compact_critic_costs',
+                'target_slew_ste', 'actor_lr_scale', 'actor_ramp_iters', 'actor_updates',
+                'critic_epochs', 'actor_lambda_return', 'recent_sample_fraction', 'recent_window_steps',
+                'goal_curriculum_enabled', 'goal_curriculum_start_deg', 'goal_curriculum_step_deg',
+                'goal_curriculum_threshold_ratio', 'goal_curriculum_cooldown_iters'):
         if key in p:
             options[key] = p[key]
+    if 'exploration_position_std_deg' in p:
+        options['exploration_position_std_rad'] = math.radians(p['exploration_position_std_deg'])
     if 'wm_bryson_scales' in p:
         options['wm_bryson_scales'] = tuple(float(v) for v in p['wm_bryson_scales'])
     residual = action_residual_vector_rad(p)
@@ -186,17 +216,22 @@ def raw_encoder_target(action, limits, *, home=None, residual_rad=None):
     return (home_t + res_t * action).clamp(lower, upper)
 
 
-def filter_target(previous, raw, alpha, max_delta=0.):
-    """Rate-limit the executed EMA command; preserve exact legacy math when off."""
+def filter_target(previous, raw, alpha, max_delta=0., *, ste=False):
+    """Rate-limit the executed EMA command; preserve exact legacy math when off.
+
+    When ste=True, the forward command is identically rate-limited while the
+    backward pass preserves straight-through gradients through the clamp.
+    """
     encoded = alpha * raw + (1 - alpha) * previous
     if max_delta:
-        encoded = previous + (encoded - previous).clamp(-max_delta, max_delta)
+        clipped = previous + (encoded - previous).clamp(-max_delta, max_delta)
+        encoded = encoded + (clipped - encoded).detach() if ste else clipped
     return encoded
 
 
-def target(state, action, limits, alpha, max_delta=0., *, home=None, residual_rad=None):
+def target(state, action, limits, alpha, max_delta=0., *, home=None, residual_rad=None, ste=False):
     raw = raw_encoder_target(action, limits, home=home, residual_rad=residual_rad)
-    encoded = filter_target(state[..., EMA], raw, alpha, max_delta)
+    encoded = filter_target(state[..., EMA], raw, alpha, max_delta, ste=ste)
     return encoded-state[..., ZERO]
 
 

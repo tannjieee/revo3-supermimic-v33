@@ -1,0 +1,107 @@
+# Revo3 SuperMimic V35 Phase 3 Fast-Convergence Optimization Profile
+# Builds on Phase 0+1+2 and removes all 6 measured convergence bottlenecks:
+#   1. Unblocks Actor UTD/LR: actor_lr_scale 0.25->0.75, actor_ramp_iters 1000->150,
+#      actor_updates 1->2, critic_epochs 5->2 (paired with wm_only_iters=150 in launcher).
+#   2. Dense bounded angular progress reward (+4.0/s * tanh(dtheta / (dt * 2.0))) +
+#      lightened early smoothness penalties (ema_delta 0.35->0.08, joint_speed 0.15->0.04)
+#      to eliminate the 84% negative rollout-vs-bootstrap gradient cosine.
+#   3. Differentiable all-step lambda-return Actor objective (actor_lambda_return: true)
+#      with aligned horizon H=8 == wm_window=8 (eliminating OOD steps 9..12).
+#   4. STE slew-rate limiter (target_slew_ste: true) + faster gait limit (240 deg/s) so
+#      rapid finger lifting never zeros BPTT gradients.
+#   5. Recency-biased replay (50% recent 150 steps + 42% uniform + 8% drop archive)
+#      paired with buffer_steps=600 and RTX 5090 bf16 Tensor Core acceleration.
+#   6. Richer contact exploration (2.5 deg AR(1) std) + automatic SO(3) angle curriculum
+#      (60 deg -> +15 deg -> 180 deg full SO(3)).
+schema: revo3_ema_soft_limits_v33
+ema_alpha: 0.51
+zero_bias_deg: [-1.0, 1.0]
+fixed_encoder_bias_deg: 0.0
+history: 3
+contact_loss_weight: 0.1
+contact_loss_reduction: mean
+wrench_probability: 0.02
+wrench_force_max_N: 0.1
+wrench_torque_max_Nm: 0.001
+soft_limits_deg:
+  right_thumb_CMP_joint: [4, 106]
+  right_thumb_CMR_joint: [4, 100]
+  right_thumb_MCP_joint: [4, 71]
+  right_thumb_PIP_joint: [0, 85]
+  right_thumb_DIP_joint: [0, 85]
+  right_index_MPR_joint: [-9, 29]
+  right_index_MCP_joint: [0, 85]
+  right_index_PIP_joint: [0, 85]
+  right_index_DIP_joint: [0, 85]
+  right_middle_MPR_joint: [-19, 24]
+  right_middle_MCP_joint: [0, 85]
+  right_middle_PIP_joint: [0, 85]
+  right_middle_DIP_joint: [0, 85]
+  right_ring_MPR_joint: [-24, 19]
+  right_ring_MCP_joint: [0, 85]
+  right_ring_PIP_joint: [0, 85]
+  right_ring_DIP_joint: [0, 85]
+  right_little_MPR_joint: [-29, 9]
+  right_little_MCP_joint: [0, 85]
+  right_little_PIP_joint: [0, 85]
+  right_little_DIP_joint: [0, 85]
+target_slew_rate_deg_s: 240.0
+target_slew_ste: true
+home_pose_weight: 0.0
+home_pose_deadband_deg: 15.0
+home_pose_scale_deg: 30.0
+object_motion_angular_speed_rad_s: 1.0
+object_motion_linear_speed_m_s: 0.05
+hold_target_motion_weight: 0.0
+
+# --- Phase 0 + Phase 1 ---
+wm_dynamics_mode: velocity_integrated
+wm_integration_coeff: 0.55
+wm_loss_normalization: bryson
+wm_bryson_scales: [0.05, 1.5, 0.005, 0.03, 0.10, 0.50]
+grouped_physical_loss: true
+wm_activation: gelu
+wm_reward_loss_weight: 0.0
+wm_observation_loss_weight: 0.0
+wm_cost_loss_weight: 0.0
+wm_holdout_fraction: 0.10
+replay_sampling_mode: uniform_failure
+failure_sample_fraction: 0.08
+recent_sample_fraction: 0.50
+recent_window_steps: 150
+deterministic_imagination: true
+target_rate_pre_slew_cost: true
+critic_layer_norm: true
+critic_value_cap: true
+critic_mean_loss: true
+orientation_reward_mode: linear_fine
+orientation_tolerance_deg: 0.0
+
+# --- Phase 2 ---
+action_residual_deg:
+  default: 42.0
+  right_thumb_CMP_joint: 55.0
+  right_thumb_CMR_joint: 55.0
+  right_thumb_MCP_joint: 50.0
+sequential_goals: true
+compact_critic_costs: true
+ema_delta_penalty_weight: 0.08
+joint_speed_penalty_weight: 0.04
+cage_penalty_weight: 2.0
+cage_safe_radius_m: 0.045
+cage_scale_m: 0.025
+
+# --- Phase 3: Fast Convergence ---
+orientation_progress_scale: 4.0
+orientation_progress_speed_rad_s: 2.0
+actor_lr_scale: 0.75
+actor_ramp_iters: 150
+actor_updates: 2
+critic_epochs: 2
+actor_lambda_return: true
+exploration_position_std_deg: 2.5
+goal_curriculum_enabled: true
+goal_curriculum_start_deg: 60.0
+goal_curriculum_step_deg: 15.0
+goal_curriculum_threshold_ratio: 0.45
+goal_curriculum_cooldown_iters: 100

@@ -328,6 +328,9 @@ def configure(cfg):
             from viserdex.supermimic.quiet_hold import validate_quiet_hold
             for name, value in reward_options(profile).items():
                 setattr(cfg.commands.object_pose, name, value)
+            for name in ('goal_curriculum_enabled', 'goal_curriculum_start_deg'):
+                if name in profile:
+                    setattr(cfg.commands.object_pose, name, profile[name])
         if args.orientation_reward_mode is not None:
             cfg.commands.object_pose.orientation_reward_mode = args.orientation_reward_mode
         if args.orientation_tolerance_deg is not None:
@@ -426,6 +429,8 @@ def main():
     if args.policy_variant == 'manual_convex':
         for name in ('goal_evaluation_s', *STABILITY_CONFIG_FIELDS, *QUIET_HOLD_CONFIG_FIELDS, *DEX_REG_CONFIG_FIELDS,
                      'sequential_goals', 'hold_duration',
+                     'orientation_progress_scale', 'orientation_progress_speed_rad_s',
+                     'goal_curriculum_enabled', 'goal_curriculum_start_deg',
                      'orientation_coarse_sigma_rad', 'orientation_fine_sigma_rad',
                      'orientation_coarse_fraction', 'orientation_reward_mode', 'orientation_reward_scale', *POSITION_CONFIG_FIELDS):
             goal_options[name] = getattr(app.cfg.commands.object_pose, name)
@@ -509,6 +514,7 @@ def main():
         cfg.wm_batch = 32
         cfg.actor_batch = 32
         cfg.wm_updates = 1
+        cfg.actor_updates = 1
         cfg.wm_only_iters = 0
         cfg.warmup_steps = 16
         cfg.buffer_steps = 64
@@ -823,7 +829,9 @@ def main():
                           storage_device=env.device if args.replay_storage == 'cuda' else 'cpu',
                           wm_holdout_envs=holdout_env_count(env.num_envs, cfg.wm_holdout_fraction),
                           sampling_mode=cfg.replay_sampling_mode,
-                          failure_sample_fraction=cfg.failure_sample_fraction)
+                          failure_sample_fraction=cfg.failure_sample_fraction,
+                          recent_sample_fraction=cfg.recent_sample_fraction,
+                          recent_window_steps=cfg.recent_window_steps)
         replay = new_replay()
         stream_audit = StreamAudit(rank_dir / "stream_audit.jsonl", adapter.context, adapter.limits,
                                    cfg, adapter.geometry_spec, args.audit_interval)
@@ -1102,6 +1110,9 @@ def main():
             from viserdex.supermimic.execution_benchmark import benchmark_execution
             benchmark_execution(trainer, replay, metadata, rank_dir)
             return
+        curriculum_max_deg = cfg.goal_curriculum_start_deg if cfg.goal_curriculum_enabled else 180.0
+        curriculum_ema_deg = None
+        curriculum_last_step_iter = cfg.wm_only_iters
         with (rank_dir / "metrics.jsonl").open("a", buffering=1) as log:
             while trainer.iteration < args.iterations and not distributed.any(stopping[0]):
                 trainer.step_credit += 1 / cfg.utd
@@ -1118,6 +1129,23 @@ def main():
                     holdout_every = min(args.audit_interval, 50) if args.audit_interval > 0 else 50
                     if trainer.iteration == 1 or trainer.iteration % holdout_every == 0:
                         metrics.update(trainer.evaluate_wm_holdout(replay))
+                if cfg.goal_curriculum_enabled and real.get("task_mean_angle_rad") is not None:
+                    if trainer.iteration > cfg.wm_only_iters:
+                        ang_deg = math.degrees(real["task_mean_angle_rad"])
+                        curriculum_ema_deg = (
+                            ang_deg if curriculum_ema_deg is None else 0.95 * curriculum_ema_deg + 0.05 * ang_deg
+                        )
+                        if (curriculum_max_deg < 180.0
+                                and (trainer.iteration - curriculum_last_step_iter) >= cfg.goal_curriculum_cooldown_iters
+                                and curriculum_ema_deg <= cfg.goal_curriculum_threshold_ratio * curriculum_max_deg):
+                            curriculum_max_deg = min(180.0, curriculum_max_deg + cfg.goal_curriculum_step_deg)
+                            command_term = env.command_manager.get_term("object_pose")
+                            if hasattr(command_term, "set_curriculum_max_angle"):
+                                command_term.set_curriculum_max_angle(math.radians(curriculum_max_deg))
+                            curriculum_last_step_iter = trainer.iteration
+                    metrics["curriculum_max_goal_angle_deg"] = curriculum_max_deg
+                    if curriculum_ema_deg is not None:
+                        metrics["curriculum_ema_angle_deg"] = curriculum_ema_deg
                 metrics.update(real)
                 metrics.update(
                     iteration=trainer.iteration,
