@@ -70,6 +70,14 @@ def imagination_protocol(cfg):
             parts.append("cema")
         if cfg.critic_huber_delta > 0:
             parts.append("chuber")
+        if cfg.wm_step_decay < 1.0:
+            parts.append("wdec")
+        if cfg.wm_input_noise_std > 0:
+            parts.append("wnoise")
+        if cfg.actor_layer_norm:
+            parts.append("aln")
+        if cfg.actor_failure_sample_fraction > 0:
+            parts.append("afail")
         return "_".join(parts)
     if cfg.dex_reference:
         return "encoder_EMA_zero_bias_contacts_independent_failure_v33"
@@ -215,12 +223,16 @@ class Trainer:
         wm_parameters = (p for n, p in self.wm.named_parameters()
                          if not cfg.dex_reference or not n.startswith("termination_net."))
         if cfg.weight_decay > 0.0:
-            self.opt_wm = torch.optim.AdamW(wm_parameters, lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
+            use_fused = torch.device(device).type == "cuda"
+            self.opt_wm = torch.optim.AdamW(
+                wm_parameters, lr=cfg.learning_rate, weight_decay=cfg.weight_decay, fused=use_fused
+            )
             self.opt_actor = torch.optim.AdamW(
-                self.actor.parameters(), lr=cfg.learning_rate, betas=(0.9, 0.95), weight_decay=cfg.weight_decay
+                self.actor.parameters(), lr=cfg.learning_rate, betas=(0.9, 0.95),
+                weight_decay=cfg.weight_decay, fused=use_fused,
             )
             self.opt_critic = torch.optim.AdamW(
-                self.critic.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay
+                self.critic.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay, fused=use_fused
             )
         else:
             self.opt_wm = torch.optim.Adam(wm_parameters, lr=cfg.learning_rate)
@@ -256,6 +268,11 @@ class Trainer:
             if cfg.dex_action_residual_rad else None
         )
         self._wm_hand_center = torch.tensor(cfg.hand_center_base_m, device=self.device)
+        if cfg.wm_step_decay < 1.0:
+            raw_w = torch.tensor([cfg.wm_step_decay ** t for t in range(cfg.wm_window)], device=self.device)
+            self._wm_step_weights = raw_w * (cfg.wm_window / raw_w.sum())
+        else:
+            self._wm_step_weights = None
 
     def arm_resume_actor_ramp(self, duration):
         """Start an explicit Actor-only LR ramp on the next normal update.
@@ -325,9 +342,9 @@ class Trainer:
                 s = torch.cat((s[..., :125], real_state[..., 125:131]), -1)
             target = action_target(s, action, limits, cfg, home=self._wm_home, residual_rad=self._wm_action_residual)
             if cfg.dex_reference:
-                pred, contact_logits = self.wm.predict(s, target, context)
+                pred, contact_logits = self.wm.predict(s, target, context, input_noise_std=cfg.wm_input_noise_std)
             else:
-                pred = self.wm(s, target, context)
+                pred = self.wm.predict(s, target, context, input_noise_std=cfg.wm_input_noise_std)[0]
             # Error in physical coordinates, including SO(3) orientation residual.
             error = physical_delta(real_next, pred) / scale
             if cfg.wm_huber_delta > 0.0:
@@ -369,7 +386,8 @@ class Trainer:
                 geometry_totals += (geometric.detach() * (w['mask'][:, t] * weights)[:, None]).sum(0) / cfg.wm_batch
             masked = step_loss * w["mask"][:, t]
             sequence_error += masked.detach()
-            loss = loss + (masked * weights).sum() / cfg.wm_batch
+            step_w = self._wm_step_weights[t] if self._wm_step_weights is not None else 1.0
+            loss = loss + step_w * (masked * weights).sum() / cfg.wm_batch
             # No intermediate physical teacher forcing. The pending last command and reset flag enter the delayed-actuator WM.
             advanced = (advance(s, pred, action, target, s[:, layout(s).goal_rot], self.episode_steps, hold_cfg=cfg)
                         if cfg.compact_state else torch.cat((pred, target, s[:, 76:]), -1))
@@ -593,8 +611,18 @@ class Trainer:
         actor_chunk = cfg.actor_microbatch or cfg.microbatch
         n_actor_steps = getattr(cfg, "actor_updates", 1)
         real_metrics = None
+        actor_keys = None
+        if cfg.paper_critic and cfg.stable_value_learning and hasattr(replay, "data"):
+            actor_keys = tuple(
+                k for k in replay.data
+                if k in ("state", "history", "exploration_noise_rad") or k.startswith("sensor/")
+            )
         for actor_step in range(n_actor_steps):
-            start = replay.sample(cfg.actor_batch, include_events=False) if cfg.stable_value_learning else replay.sample(cfg.actor_batch)
+            if cfg.stable_value_learning:
+                start = (replay.sample(cfg.actor_batch, include_events=False, keys=actor_keys)
+                         if actor_keys is not None else replay.sample(cfg.actor_batch, include_events=False))
+            else:
+                start = replay.sample(cfg.actor_batch)
             if actor_step == 0 and cfg.uses_target_critic:
                 from .stable_values import fit_real_critic
                 critic_batch = (start if cfg.critic_td_steps == 1 else replay.sample(

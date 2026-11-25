@@ -209,15 +209,11 @@ def imagine_stable(trainer, batch):
     running = torch.zeros(len(state), len(names), device=state.device)
     terminal = torch.zeros_like(running)
     use_lam = bool(getattr(cfg, 'actor_lambda_return', False))
-    reward_boot_acc = torch.zeros_like(alive)
-    cost_boot_acc = torch.zeros_like(running)
     actor_value_model = trainer.critic if cfg.paper_critic else trainer.target_critic
     target_value_model = trainer.target_critic if cfg.has_target_critic else trainer.critic
     cap_bounds = state.new_tensor(value_bounds(cfg)) if cfg.critic_value_cap else None
-    init_value = target_value_model(state, context).detach()
-    if cap_bounds is not None:
-        init_value = cap_values(init_value, cap_bounds)
-    states, values = [state], [init_value]
+    init_state = state
+    post_states, post_alives = [], []
     immediate, continuations, valid, alive_history = [], [], [], []
     regularization = torch.zeros_like(alive)
     if cfg.absolute_policy_optimization:
@@ -268,25 +264,28 @@ def imagine_stable(trainer, batch):
         history = torch.where(survives[:, None, None], push_history(history, obs), history)
         sensors = {k: torch.where(survives.reshape(-1, *([1]*(v.ndim-1))), v, sensors[k])
                    for k, v in next_sensors.items()}
-        raw_value = actor_value_model(state, context)
-        value = cap_values(raw_value, cap_bounds) if cap_bounds is not None else raw_value
-        if target_value_model is actor_value_model:
-            target_value = value.detach()
-        else:
-            with torch.no_grad():
-                tv = target_value_model(state, context)
-                target_value = cap_values(tv, cap_bounds) if cap_bounds is not None else tv
-        if use_lam:
-            boot_weight = (cfg.gamma ** (t + 1)) * (cfg.lam ** t) * (1.0 if t == cfg.horizon - 1 else (1.0 - cfg.lam))
-            reward_boot_acc = reward_boot_acc + boot_weight * alive * value[:, 0]
-            cost_boot_acc = cost_boot_acc + boot_weight * alive[:, None] * value[:, 1:]
+        post_states.append(state)
+        post_alives.append(alive)
         immediate.append(torch.cat((r[:, None], cost), -1) * active[:, None])
         continuations.append(continuation[:, None].expand(-1, 1+len(names)))
         valid.append(active)
-        states.append(state)
-        values.append(target_value)
+    # Single fused Critic forward over all H post-transition imagined states (exact equivalence, 8x fewer launches).
+    H, B = cfg.horizon, len(context)
+    stacked_post = torch.stack(post_states)
+    flat_post = stacked_post.reshape(H * B, -1)
+    flat_ctx = context[None].expand(H, -1, -1).reshape(H * B, -1)
+    all_raw_values = actor_value_model(flat_post, flat_ctx).reshape(H, B, -1)
+    all_values = cap_values(all_raw_values, cap_bounds) if cap_bounds is not None else all_raw_values
+    raw_value = all_raw_values[-1]
+    value = all_values[-1]
     reward_rollout = (1-cfg.gamma) * objective.mean() / task_reward_bound(cfg)
     if use_lam:
+        alives_t = torch.stack(post_alives)
+        t_idx = torch.arange(H, device=state.device, dtype=state.dtype)
+        boot_w = (cfg.gamma ** (t_idx + 1)) * (cfg.lam ** t_idx) * torch.where(t_idx == H - 1, 1.0, 1.0 - cfg.lam)
+        w_alive = boot_w[:, None] * alives_t
+        reward_boot_acc = (w_alive * all_values[..., 0]).sum(0)
+        cost_boot_acc = (w_alive[..., None] * all_values[..., 1:]).sum(0)
         reward_bootstrap = (1-cfg.gamma) * reward_boot_acc.mean() / task_reward_bound(cfg)
         bootstrap = cost_boot_acc
     else:
@@ -301,10 +300,22 @@ def imagine_stable(trainer, batch):
         trainer._actor_reward_components = dict(reward_rollout=-reward_rollout, reward_bootstrap=-reward_bootstrap)
         loss = loss + regularization.mean()
     with torch.no_grad():
+        if target_value_model is actor_value_model:
+            init_v = actor_value_model(init_state, context)
+            if cap_bounds is not None:
+                init_v = cap_values(init_v, cap_bounds)
+            all_target_values = torch.cat((init_v[None], all_values.detach()), dim=0)
+        else:
+            all_s = torch.cat((init_state[None], stacked_post.detach()), dim=0)
+            flat_all_s = all_s.reshape((H + 1) * B, -1)
+            flat_all_c = context[None].expand(H + 1, -1, -1).reshape((H + 1) * B, -1)
+            tv = target_value_model(flat_all_s, flat_all_c).reshape(H + 1, B, -1)
+            all_target_values = cap_values(tv, cap_bounds) if cap_bounds is not None else tv
         targets = lambda_returns(torch.stack(immediate), torch.stack(continuations),
-                                 torch.stack(values), cfg.gamma, cfg.lam)
+                                 all_target_values, cfg.gamma, cfg.lam)
         if cap_bounds is not None:
             targets = cap_values(targets, cap_bounds)
+    states_for_critic = torch.cat((init_state[None], stacked_post[:-1]), dim=0).detach()
     metrics = dict(actor_reward_rollout=reward_rollout.detach(), actor_reward_bootstrap=reward_bootstrap.detach(),
                    imagined_alive_mean=torch.stack(alive_history).mean(),
                    imagined_terminal_probability=(1-alive).mean().detach(),
@@ -321,4 +332,4 @@ def imagine_stable(trainer, batch):
                        actor_cost_weight=cfg.cost_penalty,
                        actor_weighted_cost=(cfg.cost_penalty*normalized.sum()).detach())
     trainer._cost_metrics = metrics
-    return loss, torch.stack(states[:-1]).detach(), targets.detach(), context, torch.stack(valid)
+    return loss, states_for_critic, targets.detach(), context, torch.stack(valid)

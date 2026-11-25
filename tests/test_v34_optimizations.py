@@ -531,19 +531,25 @@ def test_phase4_twin_conservative_critic_ema_huber_and_residual_wm():
     assert cfg.identified_hand_profile == "revo3_sysid_fresh50hz_v1"
     assert cfg.wm_huber_delta == 2.0
     assert cfg.wm_residual is True
-    assert cfg.weight_decay == 0.0001
-    assert cfg.wm_updates == 8
+    assert cfg.wm_step_decay == 0.85
+    assert cfg.wm_input_noise_std == 0.02
+    assert cfg.weight_decay == 0.0002
+    assert cfg.wm_updates == 6
+    assert cfg.actor_layer_norm is True and cfg.actor_activation == "gelu"
+    assert cfg.actor_failure_sample_fraction == 0.08
     assert cfg.critic_ensemble_size == 2
     assert cfg.critic_ema_tau == 0.05
     assert cfg.critic_huber_delta == 0.5
     assert cfg.has_target_critic is True and cfg.uses_paper_target_critic is True
     assert cfg.lr_decay_iters == 30000 and cfg.lr_min_ratio == 0.15
     proto = imagination_protocol(cfg)
-    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber"):
+    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber", "_wdec", "_wnoise", "_aln", "_afail"):
         assert tag in proto, f"Missing {tag} in {proto}"
 
     trainer, replay = populate_replay(cfg, n_envs=10, steps=14)
     assert any(isinstance(m, ResBlock) for m in trainer.wm.net.modules())
+    assert any(isinstance(m, torch.nn.LayerNorm) for m in trainer.actor.net.modules())
+    assert any(isinstance(m, torch.nn.GELU) for m in trainer.actor.net.modules())
     assert isinstance(trainer.opt_wm, torch.optim.AdamW)
     assert isinstance(trainer.opt_actor, torch.optim.AdamW)
     assert isinstance(trainer.opt_critic, torch.optim.AdamW)
@@ -571,10 +577,32 @@ def test_phase4_twin_conservative_critic_ema_huber_and_residual_wm():
     assert math.isfinite(metrics["critic_loss"])
     assert math.isfinite(metrics["actor_loss"])
     # Polyak EMA moved target_critic toward critic without copying 100%.
-    diffs_prev = [float((p - b).abs().max()) for p, b in zip(trainer.target_critic.parameters(), target_before)]
-    diffs_live = [float((p - c).abs().max()) for p, c in zip(trainer.target_critic.parameters(), trainer.critic.parameters())]
+    diffs_prev = [float((p - b).detach().abs().max()) for p, b in zip(trainer.target_critic.parameters(), target_before)]
+    diffs_live = [float((p - c).detach().abs().max()) for p, c in zip(trainer.target_critic.parameters(), trainer.critic.parameters())]
     assert max(diffs_prev) > 0.0
     assert max(diffs_live) > 0.0
+
+    # Verify pre-drop recovery start-state sampling populates valid pre-drop indices.
+    replay_fail = Replay(
+        32, 10, torch.device("cpu"), event_capacity=64, event_window=8,
+        sampling_mode="uniform_failure", failure_sample_fraction=0.08,
+        actor_failure_sample_fraction=0.25, pre_drop_lead_steps=5,
+    )
+    for step in range(12):
+        s_step = torch.full((10, cfg.state_dim), float(step))
+        tr = dict(
+            state=s_step, next_physical=torch.zeros(10, 55), action=torch.zeros(10, 21),
+            done=torch.full((10,), step == 9, dtype=torch.bool),
+            terminated=torch.full((10,), step == 9, dtype=torch.bool),
+            reward=torch.zeros(10), contact=torch.zeros(10, len(cfg.contact_body_names), dtype=torch.bool),
+            history=torch.zeros(10, cfg.history, cfg.observation_dim),
+            exploration_noise_rad=torch.zeros(10, 21),
+        )
+        replay_fail.add(tr)
+    assert replay_fail.pre_drop_size > 0
+    actor_batch = replay_fail.sample(400, window=1, include_events=False)
+    pre_drop_hits = int((actor_batch["state"][:, 0] == 4.0).sum())  # step 9 - 5 = step 4
+    assert pre_drop_hits >= 90, f"Expected >= 90 pre-drop start states, got {pre_drop_hits}"
 
     # Verify cosine exploration annealing schedule.
     assert math.isclose(scheduled_exploration_std_rad(cfg, 0), math.radians(2.5), rel_tol=1e-6)
@@ -586,7 +614,8 @@ def test_phase4_twin_conservative_critic_ema_huber_and_residual_wm():
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required for Phase 4 bf16 CUDA Graph check")
 def test_phase4_huber_resmlp_bf16_wm_cuda_graph_matches_eager():
-    cfg = make_v34_cfg(profile_path=V36_P4_PROFILE, cost_penalty=0.35, horizon=8, amp="bf16")
+    # Disable random input jitter for deterministic eager-vs-graph numerical parity, then also test with jitter on.
+    cfg = make_v34_cfg(profile_path=V36_P4_PROFILE, cost_penalty=0.35, horizon=8, amp="bf16", wm_input_noise_std=0.0)
     torch.manual_seed(901)
     eager, replay = populate_replay(cfg, n_envs=10, steps=14, device="cuda")
     graph = Trainer(cfg, eager.noise_cfg, eager.context, eager.limits, eager.base_inverse, "cuda", 250, wm_cuda_graph=True)
@@ -606,3 +635,11 @@ def test_phase4_huber_resmlp_bf16_wm_cuda_graph_matches_eager():
     torch.testing.assert_close(phys_g, phys_e, atol=2e-3, rtol=2e-3)
     for (n, pe), (_, pg) in zip(eager.wm.named_parameters(), graph.wm.named_parameters()):
         torch.testing.assert_close(pg.grad, pe.grad, atol=5e-3, rtol=5e-3, msg=f"bf16 grad mismatch on {n}")
+
+    # Also verify CUDA Graph capture + replay runs cleanly with wm_input_noise_std=0.02 and advances RNG.
+    cfg_noisy = make_v34_cfg(profile_path=V36_P4_PROFILE, cost_penalty=0.35, horizon=8, amp="bf16")
+    noisy_trainer, noisy_replay = populate_replay(cfg_noisy, n_envs=10, steps=14, device="cuda")
+    noisy_trainer.wm_cuda_graph = True
+    m1 = noisy_trainer.wm_update(noisy_replay)
+    m2 = noisy_trainer.wm_update(noisy_replay)
+    assert math.isfinite(m1["wm_loss"]) and math.isfinite(m2["wm_loss"])

@@ -833,7 +833,8 @@ def main():
                           sampling_mode=cfg.replay_sampling_mode,
                           failure_sample_fraction=cfg.failure_sample_fraction,
                           recent_sample_fraction=cfg.recent_sample_fraction,
-                          recent_window_steps=cfg.recent_window_steps)
+                          recent_window_steps=cfg.recent_window_steps,
+                          actor_failure_sample_fraction=cfg.actor_failure_sample_fraction)
         replay = new_replay()
         stream_audit = StreamAudit(rank_dir / "stream_audit.jsonl", adapter.context, adapter.limits,
                                    cfg, adapter.geometry_spec, args.audit_interval)

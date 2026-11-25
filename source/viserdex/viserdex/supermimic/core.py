@@ -230,6 +230,11 @@ class Config:
     exploration_min_std_rad: float = 0.0
     exploration_decay_iters: int = 0
     lr_min_ratio: float = 0.03
+    wm_step_decay: float = 1.0
+    wm_input_noise_std: float = 0.0
+    actor_layer_norm: bool = False
+    actor_activation: str = "elu"
+    actor_failure_sample_fraction: float = 0.0
 
     @property
     def uses_v34_optimizations(self):
@@ -267,6 +272,11 @@ class Config:
             or self.critic_huber_delta > 0.0
             or self.exploration_min_std_rad > 0.0
             or self.lr_min_ratio != 0.03
+            or self.wm_step_decay < 1.0
+            or self.wm_input_noise_std > 0.0
+            or self.actor_layer_norm
+            or self.actor_activation != "elu"
+            or self.actor_failure_sample_fraction > 0.0
             or (self.wm_task_losses and min(
                 self.wm_reward_loss_weight, self.wm_observation_loss_weight, self.wm_cost_loss_weight) == 0.0)
         )
@@ -321,6 +331,8 @@ class Config:
                 'critic_ensemble_size', 'critic_ema_tau', 'critic_huber_delta',
                 'exploration_min_std_rad', 'exploration_decay_iters',
                 'lr_decay_iters', 'lr_min_ratio', 'wm_updates',
+                'wm_step_decay', 'wm_input_noise_std', 'actor_layer_norm', 'actor_activation',
+                'actor_failure_sample_fraction',
             }
             for name, value in expected.items():
                 if name in v34_ablation_fields:
@@ -411,15 +423,22 @@ class Config:
                      'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
                      'sequential_goals', 'compact_critic_costs',
                      'target_slew_ste', 'actor_lambda_return', 'goal_curriculum_enabled',
-                     'wm_residual'):
+                     'wm_residual', 'actor_layer_norm'):
             if type(getattr(self, name)) is not bool:
                 raise ValueError(f'{name} must be boolean')
         from .identified_hand import SUPPORTED_PROFILES
         if self.identified_hand_profile not in SUPPORTED_PROFILES:
             raise ValueError(f'Unknown identified_hand_profile: {self.identified_hand_profile}')
-        for name in ('wm_huber_delta', 'weight_decay', 'critic_huber_delta', 'exploration_min_std_rad'):
+        if self.actor_activation not in ('elu', 'silu', 'gelu'):
+            raise ValueError(f'Unknown actor_activation: {self.actor_activation}')
+        for name in ('wm_huber_delta', 'weight_decay', 'critic_huber_delta', 'exploration_min_std_rad',
+                     'wm_input_noise_std'):
             if not math.isfinite(getattr(self, name)) or getattr(self, name) < 0:
                 raise ValueError(f'{name} must be finite and nonnegative')
+        if not math.isfinite(self.wm_step_decay) or not 0 < self.wm_step_decay <= 1:
+            raise ValueError('wm_step_decay must be in (0, 1]')
+        if not math.isfinite(self.actor_failure_sample_fraction) or not 0 <= self.actor_failure_sample_fraction <= 0.5:
+            raise ValueError('actor_failure_sample_fraction must be in [0, 0.5]')
         if not math.isfinite(self.critic_ema_tau) or not 0 <= self.critic_ema_tau <= 1:
             raise ValueError('critic_ema_tau must be in [0, 1]')
         if self.critic_ema_tau > 0 and not self.paper_critic:

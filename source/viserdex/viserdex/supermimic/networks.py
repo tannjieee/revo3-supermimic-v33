@@ -57,9 +57,9 @@ def input_normalizer(cfg, dim):
 
 
 class ResBlock(nn.Module):
-    """Residual block for equal-width hidden layers: x + act(LN(Linear(x)))."""
+    """Residual block with learnable LayerScale: x + gamma * act(LN(Linear(x)))."""
 
-    def __init__(self, width, layer_norm=False, activation="silu"):
+    def __init__(self, width, layer_norm=False, activation="silu", layer_scale_init=0.2):
         super().__init__()
         act_cls = nn.GELU if activation == "gelu" else nn.SiLU
         layers = [nn.Linear(width, width)]
@@ -68,9 +68,10 @@ class ResBlock(nn.Module):
         else:
             layers.append(nn.ELU())
         self.block = nn.Sequential(*layers)
+        self.gamma = nn.Parameter(torch.full((width,), float(layer_scale_init)))
 
     def forward(self, x):
-        return x + self.block(x)
+        return x + self.gamma * self.block(x)
 
 
 def mlp(input_dim, hidden, output_dim, layer_norm=False, activation="silu", residual=False):
@@ -200,8 +201,11 @@ class Dynamics(nn.Module):
             result = result * self.input_scale + self.input_offset
         return result
 
-    def predict(self, s, target, context):
-        output = run_mlp(self.net, self.input_norm(self.inputs(s, target, context)), self.amp)
+    def predict(self, s, target, context, *, input_noise_std=0.0):
+        x = self.input_norm(self.inputs(s, target, context))
+        if input_noise_std > 0.0:
+            x = x + input_noise_std * torch.randn_like(x)
+        output = run_mlp(self.net, x, self.amp)
         if self.dynamics_mode == "velocity_integrated":
             delta_vel = output[..., :27] * self.velocity_delta_scale
             physical = integrate_velocity_physical(s, delta_vel, self.control_dt, self.integration_coeff)
@@ -224,7 +228,11 @@ class Actor(nn.Module):
             self.register_buffer('observation_scale', scale)
             if cfg.network_revision == 'hardware_center25_v3':
                 self.register_buffer('observation_offset', offset)
-        self.net = mlp(cfg.observation_dim * cfg.history, cfg.actor_hidden, 21)
+        self.net = mlp(
+            cfg.observation_dim * cfg.history, cfg.actor_hidden, 21,
+            layer_norm=cfg.actor_layer_norm,
+            activation=cfg.actor_activation if cfg.actor_layer_norm else "silu",
+        )
         with torch.no_grad():
             self.net[-1].weight.mul_(0.01)
             self.net[-1].bias.zero_()

@@ -78,16 +78,24 @@ def validate_profile(p):
                  'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
                  'sequential_goals', 'compact_critic_costs',
                  'target_slew_ste', 'actor_lambda_return', 'goal_curriculum_enabled',
-                 'wm_residual'):
+                 'wm_residual', 'actor_layer_norm'):
         if name in p and type(p[name]) is not bool:
             raise ValueError(f'{name} must be boolean')
     if 'identified_hand_profile' in p:
         from .identified_hand import SUPPORTED_PROFILES
         if p['identified_hand_profile'] not in SUPPORTED_PROFILES:
             raise ValueError(f"Invalid identified_hand_profile: {p['identified_hand_profile']}")
-    for name in ('wm_huber_delta', 'weight_decay', 'critic_huber_delta', 'exploration_min_std_deg'):
+    if 'actor_activation' in p and p['actor_activation'] not in ('elu', 'silu', 'gelu'):
+        raise ValueError(f"Invalid actor_activation: {p['actor_activation']}")
+    for name in ('wm_huber_delta', 'weight_decay', 'critic_huber_delta', 'exploration_min_std_deg',
+                 'wm_input_noise_std'):
         if name in p and (not math.isfinite(p[name]) or p[name] < 0):
             raise ValueError(f'Invalid {name}')
+    if 'wm_step_decay' in p and (not math.isfinite(p['wm_step_decay']) or not 0 < p['wm_step_decay'] <= 1):
+        raise ValueError('Invalid wm_step_decay')
+    if 'actor_failure_sample_fraction' in p and (
+            not math.isfinite(p['actor_failure_sample_fraction']) or not 0 <= p['actor_failure_sample_fraction'] <= 0.5):
+        raise ValueError('Invalid actor_failure_sample_fraction')
     if 'critic_ema_tau' in p and (not math.isfinite(p['critic_ema_tau']) or not 0 <= p['critic_ema_tau'] <= 1):
         raise ValueError('Invalid critic_ema_tau')
     if 'lr_min_ratio' in p and (not math.isfinite(p['lr_min_ratio']) or not 0 < p['lr_min_ratio'] <= 1):
@@ -212,7 +220,9 @@ def profile_options(p, digest):
                 'goal_curriculum_threshold_ratio', 'goal_curriculum_cooldown_iters',
                 'identified_hand_profile', 'wm_huber_delta', 'wm_residual', 'weight_decay',
                 'critic_ensemble_size', 'critic_ema_tau', 'critic_huber_delta',
-                'exploration_decay_iters', 'lr_decay_iters', 'lr_min_ratio', 'wm_updates'):
+                'exploration_decay_iters', 'lr_decay_iters', 'lr_min_ratio', 'wm_updates',
+                'wm_step_decay', 'wm_input_noise_std', 'actor_layer_norm', 'actor_activation',
+                'actor_failure_sample_fraction'):
         if key in p:
             options[key] = p[key]
     if 'exploration_position_std_deg' in p:

@@ -14,7 +14,8 @@ class Replay:
     def __init__(self, capacity, num_envs, device, event_capacity=4096, event_fraction=0.25, event_window=8,
                  adaptive=False, uniform_fraction=.2, *, storage_device="cpu",
                  wm_holdout_envs=0, sampling_mode="legacy", failure_sample_fraction=0.25,
-                 recent_sample_fraction=0.0, recent_window_steps=150):
+                 recent_sample_fraction=0.0, recent_window_steps=150,
+                 actor_failure_sample_fraction=0.0, pre_drop_lead_steps=5):
         self.capacity, self.num_envs, self.device = capacity, num_envs, device
         if capacity < 1 or num_envs < 1 or not 0 < uniform_fraction <= 1:
             raise ValueError("Invalid replay capacity/uniform floor")
@@ -26,14 +27,18 @@ class Replay:
             raise ValueError("failure_sample_fraction must be in [0, 1]")
         if not 0 <= recent_sample_fraction <= 1:
             raise ValueError("recent_sample_fraction must be in [0, 1]")
-        if recent_window_steps < 1:
-            raise ValueError("recent_window_steps must be positive")
+        if not 0 <= actor_failure_sample_fraction <= 0.5:
+            raise ValueError("actor_failure_sample_fraction must be in [0, 0.5]")
+        if recent_window_steps < 1 or pre_drop_lead_steps < 1:
+            raise ValueError("recent_window_steps and pre_drop_lead_steps must be positive")
         self.wm_holdout_envs = int(wm_holdout_envs)
         self.wm_train_envs = num_envs - self.wm_holdout_envs
         self.sampling_mode = sampling_mode
         self.failure_sample_fraction = float(failure_sample_fraction)
         self.recent_sample_fraction = float(recent_sample_fraction)
         self.recent_window_steps = int(recent_window_steps)
+        self.actor_failure_sample_fraction = float(actor_failure_sample_fraction)
+        self.pre_drop_lead_steps = int(pre_drop_lead_steps)
         self.storage_device = torch.device(storage_device)
         if self.storage_device.type not in ("cpu", "cuda"):
             raise ValueError("Replay storage_device must be CPU or CUDA")
@@ -56,6 +61,13 @@ class Replay:
         self.event_window = event_window
         self.archive = {}
         self.archive_size = self.archive_cursor = 0
+        self.pre_drop_slot = (torch.zeros(self.event_capacity, dtype=torch.long, device=self.storage_device)
+                              if self.event_capacity else None)
+        self.pre_drop_env = (torch.zeros(self.event_capacity, dtype=torch.long, device=self.storage_device)
+                             if self.event_capacity else None)
+        self.pre_drop_gen = (torch.zeros(self.event_capacity, dtype=torch.long, device=self.storage_device)
+                             if self.event_capacity else None)
+        self.pre_drop_size = self.pre_drop_cursor = 0
         self.data = {}
         self.cursor = 0
         self.size = 0
@@ -78,7 +90,7 @@ class Replay:
         self.size = min(self.size + 1, self.capacity)
         self._archive_events()
 
-    def sample(self, batch, window=1, *, include_events=True, prioritized=True):
+    def sample(self, batch, window=1, *, include_events=True, prioritized=True, keys=None):
         if self.size < window:
             raise ValueError("Insufficient replay")
         if self.adaptive and window > 1 and prioritized:
@@ -89,25 +101,45 @@ class Replay:
         n_events = 0
         if use_events and window == self.event_window and self.archive_size and self.event_fraction > 0:
             n_events = min(batch, int(batch * self.event_fraction))
+        n_actor_fail = 0
+        if window == 1 and self.actor_failure_sample_fraction > 0 and self.pre_drop_size > 0:
+            n_actor_fail = min(batch, int(batch * self.actor_failure_sample_fraction))
+        reserved = n_events if window > 1 else n_actor_fail
         if self.recent_sample_fraction > 0 and valid_starts > 1:
-            n_recent = min(batch - n_events, int(batch * self.recent_sample_fraction))
+            n_recent = min(batch - reserved, int(batch * self.recent_sample_fraction))
             if n_recent > 0:
                 span = min(valid_starts, self.recent_window_steps)
                 recent_lo = valid_starts - span
-                logical[n_events : n_events + n_recent] = torch.randint(
+                logical[reserved : reserved + n_recent] = torch.randint(
                     recent_lo, valid_starts, (n_recent,), device=self.storage_device
                 )
         oldest = self.cursor if self.size == self.capacity else 0
-        time = (logical[:, None] + oldest + torch.arange(window, device=self.storage_device)[None]) % self.capacity
         # Isolate WM training windows strictly to [0, wm_train_envs) when holdout is active.
         env_limit = self.wm_train_envs if window > 1 else self.num_envs
         env = torch.randint(env_limit, (batch,), device=self.storage_device)
         if window == 1:
-            out = {k: v[time[:, 0], env].to(self.device) for k, v in self.data.items()}
+            slot = (logical + oldest) % self.capacity
+            if n_actor_fail > 0:
+                pick = torch.randint(self.pre_drop_size, (n_actor_fail,), device=self.storage_device)
+                cand_slot = self.pre_drop_slot[pick]
+                cand_env = self.pre_drop_env[pick]
+                ok = self.generation[cand_slot] == self.pre_drop_gen[pick]
+                slot[:n_actor_fail] = torch.where(ok, cand_slot, slot[:n_actor_fail])
+                env[:n_actor_fail] = torch.where(ok, cand_env, env[:n_actor_fail])
+            flat = slot * self.num_envs + env
+            selected = self.data.keys() if keys is None else [k for k in keys if k in self.data]
+            out = {
+                k: self.data[k].reshape(-1, *self.data[k].shape[2:]).index_select(0, flat).to(self.device)
+                for k in selected
+            }
         else:
+            time = (logical[:, None] + oldest + torch.arange(window, device=self.storage_device)[None]) % self.capacity
+            flat = (time * self.num_envs + env[:, None]).reshape(-1)
             # Real WM/TD windows need no ten-frame policy histories.
             out = {
-                k: self.data[k][time, env[:, None]].to(self.device)
+                k: self.data[k].reshape(-1, *self.data[k].shape[2:]).index_select(0, flat).reshape(
+                    batch, window, *self.data[k].shape[2:]
+                ).to(self.device)
                 for k in self._wm_keys()
             }
             done = out["done"]
@@ -277,10 +309,22 @@ class Replay:
                 self.archive[k][self.archive_cursor].copy_(v[j])
             self.archive_cursor = (self.archive_cursor + 1) % self.event_capacity
             self.archive_size = min(self.archive_size + 1, self.event_capacity)
+        if self.sampling_mode == "uniform_failure" and self.pre_drop_slot is not None:
+            lead = min(self.pre_drop_lead_steps, w - 1)
+            pre_slot = times[w - 1 - lead]
+            pre_gen = self.generation[pre_slot]
+            for j in range(len(ids)):
+                self.pre_drop_slot[self.pre_drop_cursor] = pre_slot
+                self.pre_drop_env[self.pre_drop_cursor] = ids[j]
+                self.pre_drop_gen[self.pre_drop_cursor] = pre_gen
+                self.pre_drop_cursor = (self.pre_drop_cursor + 1) % self.event_capacity
+                self.pre_drop_size = min(self.pre_drop_size + 1, self.event_capacity)
 
     @property
     def allocated_bytes(self):
         tensors = [*self.data.values(), *self.archive.values(), self.priority, self.generation]
+        if self.pre_drop_slot is not None:
+            tensors.extend((self.pre_drop_slot, self.pre_drop_env, self.pre_drop_gen))
         if self._priority_scratch is not None:
             tensors.append(self._priority_scratch)
         if isinstance(self.max_priority, torch.Tensor):
