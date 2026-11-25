@@ -1,0 +1,14 @@
+{
+  "profile": "revo3_sysid_fresh50hz_v1",
+  "source_bundle": "/home/brainco/revo3-sysid/results/fresh50hz_v1",
+  "source_repo": "/home/brainco/revo3-sysid",
+  "source_commit": "b6fbbc5",
+  "model": "revo3_sysid_fresh50hz_v1",
+  "heldout_rmse_deg": 0.338,
+  "scope": "Canonical revo3-sysid Fresh-50Hz 21-DOF closed-loop identification (0.338 deg held-out RMSE, MIT kp=2.0/kd=0.2).",
+  "sha256": {
+    "isaaclab_actuator_params.json": "4d4f79dbf5088fc9fac6c68735394ba013c2d3b657fdde6c08733795548567dd",
+    "revo3_right_identified.json": "c44ac1bddafc25edf136f4d9d93c7ab9821c7cf3975b13a8428728555f7a41c2",
+    "evaluation_summary.json": "09bc70d6f68b1977310de6f87a6221923b47f0762100e2068cd95faa40cb6fc6"
+  }
+}

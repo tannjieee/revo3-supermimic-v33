@@ -52,8 +52,10 @@ def sync_value_buffers(trainer):
 
 @torch.no_grad()
 def update_target(trainer):
+    tau = (trainer.cfg.critic_ema_tau if trainer.cfg.uses_paper_target_critic
+           else trainer.cfg.critic_target_tau)
     for target, current in zip(trainer.target_critic.parameters(), trainer.critic.parameters()):
-        target.lerp_(current, trainer.cfg.critic_target_tau)
+        target.lerp_(current, tau)
     sync_value_buffers(trainer)
 
 
@@ -209,9 +211,10 @@ def imagine_stable(trainer, batch):
     use_lam = bool(getattr(cfg, 'actor_lambda_return', False))
     reward_boot_acc = torch.zeros_like(alive)
     cost_boot_acc = torch.zeros_like(running)
-    value_model = trainer.critic if cfg.paper_critic else trainer.target_critic
+    actor_value_model = trainer.critic if cfg.paper_critic else trainer.target_critic
+    target_value_model = trainer.target_critic if cfg.has_target_critic else trainer.critic
     cap_bounds = state.new_tensor(value_bounds(cfg)) if cfg.critic_value_cap else None
-    init_value = value_model(state, context).detach()
+    init_value = target_value_model(state, context).detach()
     if cap_bounds is not None:
         init_value = cap_values(init_value, cap_bounds)
     states, values = [state], [init_value]
@@ -265,8 +268,14 @@ def imagine_stable(trainer, batch):
         history = torch.where(survives[:, None, None], push_history(history, obs), history)
         sensors = {k: torch.where(survives.reshape(-1, *([1]*(v.ndim-1))), v, sensors[k])
                    for k, v in next_sensors.items()}
-        raw_value = value_model(state, context)
+        raw_value = actor_value_model(state, context)
         value = cap_values(raw_value, cap_bounds) if cap_bounds is not None else raw_value
+        if target_value_model is actor_value_model:
+            target_value = value.detach()
+        else:
+            with torch.no_grad():
+                tv = target_value_model(state, context)
+                target_value = cap_values(tv, cap_bounds) if cap_bounds is not None else tv
         if use_lam:
             boot_weight = (cfg.gamma ** (t + 1)) * (cfg.lam ** t) * (1.0 if t == cfg.horizon - 1 else (1.0 - cfg.lam))
             reward_boot_acc = reward_boot_acc + boot_weight * alive * value[:, 0]
@@ -275,7 +284,7 @@ def imagine_stable(trainer, batch):
         continuations.append(continuation[:, None].expand(-1, 1+len(names)))
         valid.append(active)
         states.append(state)
-        values.append(value.detach())
+        values.append(target_value)
     reward_rollout = (1-cfg.gamma) * objective.mean() / task_reward_bound(cfg)
     if use_lam:
         reward_bootstrap = (1-cfg.gamma) * reward_boot_acc.mean() / task_reward_bound(cfg)

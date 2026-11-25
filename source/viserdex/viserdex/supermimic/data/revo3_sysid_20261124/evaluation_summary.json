@@ -1,0 +1,220 @@
+{
+  "val_all_rmse_deg": 0.4571,
+  "heldout_all_rmse_deg": 0.3501,
+  "per_joint_val_rmse_deg": {
+    "J00": 0.5063,
+    "J01": 0.6345,
+    "J02": 0.4383,
+    "J03": 0.3985,
+    "J04": 0.334,
+    "J05": 0.3557,
+    "J06": 0.5244,
+    "J07": 0.5268,
+    "J08": 0.4028,
+    "J09": 0.5599,
+    "J10": 0.41,
+    "J11": 0.3992,
+    "J12": 0.5389,
+    "J13": 0.4166,
+    "J14": 0.5607,
+    "J15": 0.4161,
+    "J16": 0.603,
+    "J17": 0.3092,
+    "J18": 0.4734,
+    "J19": 0.4574,
+    "J20": 0.3331
+  },
+  "per_joint_heldout_rmse_deg": {
+    "J00": 0.2488,
+    "J01": 0.4399,
+    "J02": 0.4315,
+    "J03": 0.4367,
+    "J04": 0.2547,
+    "J05": 0.2878,
+    "J06": 0.3451,
+    "J07": 0.3943,
+    "J08": 0.3017,
+    "J09": 0.3916,
+    "J10": 0.3965,
+    "J11": 0.3117,
+    "J12": 0.3435,
+    "J13": 0.319,
+    "J14": 0.4764,
+    "J15": 0.3703,
+    "J16": 0.3442,
+    "J17": 0.291,
+    "J18": 0.3839,
+    "J19": 0.3049,
+    "J20": 0.2781
+  },
+  "by_gain": [
+    {
+      "id": "planC_kp0p5_kd0p05",
+      "plan": "planC",
+      "kp": 0.5,
+      "kd": 0.05,
+      "gain_role": "train",
+      "rmse_deg": 0.7239
+    },
+    {
+      "id": "planC_kp1_kd0p1",
+      "plan": "planC",
+      "kp": 1.0,
+      "kd": 0.1,
+      "gain_role": "train",
+      "rmse_deg": 0.4607
+    },
+    {
+      "id": "planC_kp1p5_kd0p2",
+      "plan": "planC",
+      "kp": 1.5,
+      "kd": 0.2,
+      "gain_role": "train",
+      "rmse_deg": 0.4097
+    },
+    {
+      "id": "planC_kp2_kd0p2",
+      "plan": "planC",
+      "kp": 2.0,
+      "kd": 0.2,
+      "gain_role": "heldout_gain",
+      "rmse_deg": 0.3593
+    },
+    {
+      "id": "planC_kp3_kd0p1",
+      "plan": "planC",
+      "kp": 3.0,
+      "kd": 0.1,
+      "gain_role": "train",
+      "rmse_deg": 0.3408
+    },
+    {
+      "id": "planC_kp3p5_kd0p2",
+      "plan": "planC",
+      "kp": 3.5,
+      "kd": 0.2,
+      "gain_role": "train",
+      "rmse_deg": 0.3322
+    },
+    {
+      "id": "planC_kp4_kd0p05",
+      "plan": "planC",
+      "kp": 4.0,
+      "kd": 0.05,
+      "gain_role": "train",
+      "rmse_deg": 0.3281
+    },
+    {
+      "id": "planD_kp0p5_kd0p05",
+      "plan": "planD",
+      "kp": 0.5,
+      "kd": 0.05,
+      "gain_role": "train",
+      "rmse_deg": 0.6671
+    },
+    {
+      "id": "planD_kp1_kd0p1",
+      "plan": "planD",
+      "kp": 1.0,
+      "kd": 0.1,
+      "gain_role": "train",
+      "rmse_deg": 0.5639
+    },
+    {
+      "id": "planD_kp1p5_kd0p2",
+      "plan": "planD",
+      "kp": 1.5,
+      "kd": 0.2,
+      "gain_role": "train",
+      "rmse_deg": 0.3363
+    },
+    {
+      "id": "planD_kp2_kd0p2",
+      "plan": "planD",
+      "kp": 2.0,
+      "kd": 0.2,
+      "gain_role": "heldout_gain",
+      "rmse_deg": 0.3397
+    },
+    {
+      "id": "planD_kp3_kd0p1",
+      "plan": "planD",
+      "kp": 3.0,
+      "kd": 0.1,
+      "gain_role": "train",
+      "rmse_deg": 0.3092
+    },
+    {
+      "id": "planD_kp3p5_kd0p2",
+      "plan": "planD",
+      "kp": 3.5,
+      "kd": 0.2,
+      "gain_role": "train",
+      "rmse_deg": 0.3263
+    },
+    {
+      "id": "planD_kp4_kd0p05",
+      "plan": "planD",
+      "kp": 4.0,
+      "kd": 0.05,
+      "gain_role": "train",
+      "rmse_deg": 0.3404
+    },
+    {
+      "id": "planT_kp0p5_kd0p05",
+      "plan": "planT",
+      "kp": 0.5,
+      "kd": 0.05,
+      "gain_role": "train",
+      "rmse_deg": 0.62
+    },
+    {
+      "id": "planT_kp1_kd0p1",
+      "plan": "planT",
+      "kp": 1.0,
+      "kd": 0.1,
+      "gain_role": "train",
+      "rmse_deg": 0.3717
+    },
+    {
+      "id": "planT_kp1p5_kd0p2",
+      "plan": "planT",
+      "kp": 1.5,
+      "kd": 0.2,
+      "gain_role": "train",
+      "rmse_deg": 0.2528
+    },
+    {
+      "id": "planT_kp2_kd0p2",
+      "plan": "planT",
+      "kp": 2.0,
+      "kd": 0.2,
+      "gain_role": "heldout_gain",
+      "rmse_deg": 0.2915
+    },
+    {
+      "id": "planT_kp3_kd0p1",
+      "plan": "planT",
+      "kp": 3.0,
+      "kd": 0.1,
+      "gain_role": "train",
+      "rmse_deg": 0.3042
+    },
+    {
+      "id": "planT_kp3p5_kd0p2",
+      "plan": "planT",
+      "kp": 3.5,
+      "kd": 0.2,
+      "gain_role": "train",
+      "rmse_deg": 0.2744
+    },
+    {
+      "id": "planT_kp4_kd0p05",
+      "plan": "planT",
+      "kp": 4.0,
+      "kd": 0.05,
+      "gain_role": "train",
+      "rmse_deg": 0.4098
+    }
+  ]
+}

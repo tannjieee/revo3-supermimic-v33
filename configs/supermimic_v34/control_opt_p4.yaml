@@ -1,0 +1,125 @@
+# Revo3 SuperMimic V36 Phase 4: Latest Hardware SysID + Stability & Sample-Efficiency Profile
+# Builds on V35 Phase 3 fast-convergence and upgrades both sim-to-real fidelity and training stability:
+#   1. Latest 2026-11-24 revo3-sysid Fresh-50Hz 21-DOF closed-loop hardware identification
+#      (`revo3_sysid_fresh50hz_v1`, 0.338 deg held-out RMSE, per-joint Kp/Kd/armature/friction/viscous/peak torque).
+#   2. World Model stability & generalization:
+#      - Scaled Huber loss (delta=2.0, exact x^2 inside |x|<=2, linear beyond) to eliminate
+#        contact-impact gradient spikes (35-45 -> controlled) without weakening normal accuracy.
+#      - Residual MLP skip connections (`wm_residual: true`) across the 3x2048 WM layers.
+#      - AdamW decoupled weight decay (`weight_decay: 1e-4`) across WM/Actor/Critic.
+#      - Balanced WM UTD (`wm_updates: 8`) for higher policy-to-WM efficiency and faster wall time.
+#   3. Value & Policy stability:
+#      - Twin Conservative Critic (`critic_ensemble_size: 2`: min reward, max drop/cost risk).
+#      - Polyak EMA Target Critic (`critic_ema_tau: 0.05`) for stationary TD lambda-return targets.
+#      - Critic Huber loss (`critic_huber_delta: 0.5`) to prevent rare drop-spike value overshoot.
+#   4. Sample-efficiency & precision refinement:
+#      - Cosine exploration annealing (`2.5 deg -> 0.5 deg` over 15,000 joint iters) for fast
+#        early contact discovery + low-drop high-precision late holding.
+#      - Properly scoped cosine LR (`lr_decay_iters: 30000`, `lr_min_ratio: 0.15`).
+#      - Tighter in-hand safety cage (`cage_safe_radius_m: 0.038`) paired with `--actor_cost_weight 0.35`.
+schema: revo3_ema_soft_limits_v33
+identified_hand_profile: revo3_sysid_fresh50hz_v1
+ema_alpha: 0.51
+zero_bias_deg: [-1.0, 1.0]
+fixed_encoder_bias_deg: 0.0
+history: 3
+contact_loss_weight: 0.1
+contact_loss_reduction: mean
+wrench_probability: 0.02
+wrench_force_max_N: 0.1
+wrench_torque_max_Nm: 0.001
+soft_limits_deg:
+  right_thumb_CMP_joint: [4, 106]
+  right_thumb_CMR_joint: [4, 100]
+  right_thumb_MCP_joint: [4, 71]
+  right_thumb_PIP_joint: [0, 85]
+  right_thumb_DIP_joint: [0, 85]
+  right_index_MPR_joint: [-9, 29]
+  right_index_MCP_joint: [0, 85]
+  right_index_PIP_joint: [0, 85]
+  right_index_DIP_joint: [0, 85]
+  right_middle_MPR_joint: [-19, 24]
+  right_middle_MCP_joint: [0, 85]
+  right_middle_PIP_joint: [0, 85]
+  right_middle_DIP_joint: [0, 85]
+  right_ring_MPR_joint: [-24, 19]
+  right_ring_MCP_joint: [0, 85]
+  right_ring_PIP_joint: [0, 85]
+  right_ring_DIP_joint: [0, 85]
+  right_little_MPR_joint: [-29, 9]
+  right_little_MCP_joint: [0, 85]
+  right_little_PIP_joint: [0, 85]
+  right_little_DIP_joint: [0, 85]
+target_slew_rate_deg_s: 240.0
+target_slew_ste: true
+home_pose_weight: 0.0
+home_pose_deadband_deg: 15.0
+home_pose_scale_deg: 30.0
+object_motion_angular_speed_rad_s: 1.0
+object_motion_linear_speed_m_s: 0.05
+hold_target_motion_weight: 0.0
+
+# --- Phase 0 + Phase 1 ---
+wm_dynamics_mode: velocity_integrated
+wm_integration_coeff: 0.55
+wm_loss_normalization: bryson
+wm_bryson_scales: [0.05, 1.5, 0.005, 0.03, 0.10, 0.50]
+grouped_physical_loss: true
+wm_activation: gelu
+wm_reward_loss_weight: 0.0
+wm_observation_loss_weight: 0.0
+wm_cost_loss_weight: 0.0
+wm_holdout_fraction: 0.10
+replay_sampling_mode: uniform_failure
+failure_sample_fraction: 0.08
+recent_sample_fraction: 0.50
+recent_window_steps: 150
+deterministic_imagination: true
+target_rate_pre_slew_cost: true
+critic_layer_norm: true
+critic_value_cap: true
+critic_mean_loss: true
+orientation_reward_mode: linear_fine
+orientation_tolerance_deg: 0.0
+
+# --- Phase 2 ---
+action_residual_deg:
+  default: 42.0
+  right_thumb_CMP_joint: 55.0
+  right_thumb_CMR_joint: 55.0
+  right_thumb_MCP_joint: 50.0
+sequential_goals: true
+compact_critic_costs: true
+ema_delta_penalty_weight: 0.08
+joint_speed_penalty_weight: 0.04
+cage_penalty_weight: 2.0
+cage_safe_radius_m: 0.038
+cage_scale_m: 0.025
+
+# --- Phase 3: Fast Convergence ---
+orientation_progress_scale: 4.0
+orientation_progress_speed_rad_s: 2.0
+actor_lr_scale: 0.75
+actor_ramp_iters: 150
+actor_updates: 2
+critic_epochs: 2
+actor_lambda_return: true
+exploration_position_std_deg: 2.5
+goal_curriculum_enabled: true
+goal_curriculum_start_deg: 60.0
+goal_curriculum_step_deg: 15.0
+goal_curriculum_threshold_ratio: 0.45
+goal_curriculum_cooldown_iters: 100
+
+# --- Phase 4: Stability & Sample Efficiency ---
+wm_huber_delta: 2.0
+wm_residual: true
+wm_updates: 8
+weight_decay: 0.0001
+critic_ensemble_size: 2
+critic_ema_tau: 0.05
+critic_huber_delta: 0.5
+exploration_min_std_deg: 0.5
+exploration_decay_iters: 15000
+lr_decay_iters: 30000
+lr_min_ratio: 0.15

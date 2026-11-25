@@ -1,0 +1,14 @@
+{
+  "profile": "revo3_sysid_20261124",
+  "source_bundle": "/home/brainco/revo3-sysid/outputs/revo3_fit_20261124_034052",
+  "source_repo": "/home/brainco/revo3-sysid",
+  "source_commit": "b6fbbc5",
+  "model": "revo3_sysid_20261124",
+  "heldout_rmse_deg": 0.3501,
+  "scope": "2026-11-24 hardware capture revo3-sysid 21-DOF closed-loop identification (0.350 deg held-out RMSE, MIT kp=2.0/kd=0.2).",
+  "sha256": {
+    "isaaclab_actuator_params.json": "e1b9f63a6a92a4589b1e34597b862b61da4cf73fede203d13e586eeb1aa5fe55",
+    "revo3_right_identified.json": "60bb236693c50ddfe72c3f925d12d5db57a0c48b742ffad8e68cc6481e6bfca7",
+    "evaluation_summary.json": "322c70fe9e4126beeb3d020b79715285496c70044d87b8ac0c19bf553bf522b4"
+  }
+}

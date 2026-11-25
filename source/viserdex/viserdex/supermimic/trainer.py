@@ -58,6 +58,18 @@ def imagination_protocol(cfg):
             parts.append("alam")
         if cfg.goal_curriculum_enabled:
             parts.append("curr")
+        if cfg.identified_hand_profile != "fit_03":
+            parts.append("sysid")
+        if cfg.wm_huber_delta > 0:
+            parts.append("huber")
+        if cfg.wm_residual:
+            parts.append("wres")
+        if cfg.critic_ensemble_size > 1:
+            parts.append(f"twin{cfg.critic_ensemble_size}")
+        if cfg.critic_ema_tau > 0:
+            parts.append("cema")
+        if cfg.critic_huber_delta > 0:
+            parts.append("chuber")
         return "_".join(parts)
     if cfg.dex_reference:
         return "encoder_EMA_zero_bias_contacts_independent_failure_v33"
@@ -173,7 +185,7 @@ class Trainer:
     @property
     def sync_models(self):
         models = (self.wm, self.actor, self.critic)
-        return models + ((self.target_critic,) if self.cfg.uses_target_critic else ())
+        return models + ((self.target_critic,) if self.cfg.has_target_critic else ())
 
     def __init__(self, cfg, noise_cfg, context, limits, base_inverse, device, episode_steps=600, distributed=None, geometry_spec=None, wm_cuda_graph=False):
         self.cfg, self.noise_cfg = cfg, noise_cfg
@@ -198,15 +210,24 @@ class Trainer:
             self.wm.context_scale.copy_(scale)
             self.critic.context_scale.copy_(scale)
         self.distributed.broadcast_models(self.wm, self.actor, self.critic)
-        if cfg.uses_target_critic:
+        if cfg.has_target_critic:
             self.target_critic = copy.deepcopy(self.critic).eval().requires_grad_(False)
         wm_parameters = (p for n, p in self.wm.named_parameters()
                          if not cfg.dex_reference or not n.startswith("termination_net."))
-        self.opt_wm = torch.optim.Adam(wm_parameters, lr=cfg.learning_rate)
+        if cfg.weight_decay > 0.0:
+            self.opt_wm = torch.optim.AdamW(wm_parameters, lr=cfg.learning_rate, weight_decay=cfg.weight_decay)
+            self.opt_actor = torch.optim.AdamW(
+                self.actor.parameters(), lr=cfg.learning_rate, betas=(0.9, 0.95), weight_decay=cfg.weight_decay
+            )
+            self.opt_critic = torch.optim.AdamW(
+                self.critic.parameters(), lr=cfg.learning_rate, weight_decay=cfg.weight_decay
+            )
+        else:
+            self.opt_wm = torch.optim.Adam(wm_parameters, lr=cfg.learning_rate)
+            self.opt_actor = torch.optim.Adam(self.actor.parameters(), lr=cfg.learning_rate, betas=(0.9, 0.95))
+            self.opt_critic = torch.optim.Adam(self.critic.parameters(), lr=cfg.learning_rate)
         if cfg.dex_reference:
             self.opt_failure = torch.optim.Adam(self.wm.termination_net.parameters(), lr=cfg.learning_rate)
-        self.opt_actor = torch.optim.Adam(self.actor.parameters(), lr=cfg.learning_rate, betas=(0.9, 0.95))
-        self.opt_critic = torch.optim.Adam(self.critic.parameters(), lr=cfg.learning_rate)
         self.iteration = 0
         self.resume_actor_ramp = None
         self.step_credit = 0.0
@@ -272,7 +293,7 @@ class Trainer:
         if policy_statistics:
             self.actor.obs_norm.update(self.actor.scaled_observation(observation), self.distributed)
             self.critic.input_norm.update(self.critic.inputs(state, self.context), self.distributed)
-            if self.cfg.uses_target_critic:
+            if self.cfg.has_target_critic:
                 from .stable_values import sync_value_buffers
                 sync_value_buffers(self)
 
@@ -309,8 +330,14 @@ class Trainer:
                 pred = self.wm(s, target, context)
             # Error in physical coordinates, including SO(3) orientation residual.
             error = physical_delta(real_next, pred) / scale
-            groups = torch.stack([part.square().mean(-1) for part in error.split((21, 21, 3, 3, 3, 3), -1)], -1)
-            physical_loss = groups.mean(-1) if cfg.grouped_physical_loss else error.square().mean(-1)
+            if cfg.wm_huber_delta > 0.0:
+                from torch.nn import functional as F
+                # 2 * Huber matches exact x^2 inside |x| <= delta and bounds impact-outlier gradients linearly.
+                elem_err = 2.0 * F.huber_loss(error, torch.zeros_like(error), reduction="none", delta=cfg.wm_huber_delta)
+            else:
+                elem_err = error.square()
+            groups = torch.stack([part.mean(-1) for part in elem_err.split((21, 21, 3, 3, 3, 3), -1)], -1)
+            physical_loss = groups.mean(-1) if cfg.grouped_physical_loss else elem_err.mean(-1)
             step_loss = physical_loss
             if cfg.wm_task_losses:
                 auxiliary, components = task_losses(self, s, pred, real_state,
@@ -445,8 +472,13 @@ class Trainer:
             target = action_target(s, action, limits, cfg, home=self._wm_home, residual_rad=self._wm_action_residual)
             pred = self.wm(s, target, context)
             error = physical_delta(real_next, pred) / scale
-            groups = torch.stack([part.square().mean(-1) for part in error.split((21, 21, 3, 3, 3, 3), -1)], -1)
-            step_phys = groups.mean(-1) if cfg.grouped_physical_loss else error.square().mean(-1)
+            if cfg.wm_huber_delta > 0.0:
+                from torch.nn import functional as F
+                elem_err = 2.0 * F.huber_loss(error, torch.zeros_like(error), reduction="none", delta=cfg.wm_huber_delta)
+            else:
+                elem_err = error.square()
+            groups = torch.stack([part.mean(-1) for part in elem_err.split((21, 21, 3, 3, 3, 3), -1)], -1)
+            step_phys = groups.mean(-1) if cfg.grouped_physical_loss else elem_err.mean(-1)
             m = w["mask"][:, t]
             loss_total += (step_phys * m).sum()
             physical_totals += (groups * m[:, None]).sum(0)
@@ -670,6 +702,9 @@ class Trainer:
                 counts = self.distributed.reduce(states.new_tensor([len(states), rollout_count]), 'sum')
                 time_scale = counts[0] / counts[1]
         updates = 0
+        from torch.nn import functional as F
+        huber_delta = self.cfg.critic_huber_delta
+        ensemble = self.critic.ensemble_size
         for _ in range(self.cfg.critic_epochs):
             splits = torch.tensor_split(torch.randperm(len(states), device=self.device),
                                         self.cfg.critic_minibatches)
@@ -677,21 +712,34 @@ class Trainer:
                 self.opt_critic.zero_grad(set_to_none=True)
                 denominator = self.distributed.batch_denominator(len(idx)) * head_divisor
                 for chunk in idx.split(self.cfg.critic_microbatch or self.cfg.microbatch):
-                    loss = ((self.critic(states[chunk], context[chunk]) - targets[chunk]) / target_scale).square().sum() / denominator * time_scale
+                    if ensemble > 1:
+                        preds = self.critic.forward_all(states[chunk], context[chunk])
+                        err = (preds - targets[chunk].unsqueeze(0)) / target_scale
+                    else:
+                        err = (self.critic(states[chunk], context[chunk]) - targets[chunk]) / target_scale
+                    elem = (
+                        2.0 * F.huber_loss(err, torch.zeros_like(err), reduction="none", delta=huber_delta)
+                        if huber_delta > 0.0 else err.square()
+                    )
+                    loss = elem.sum() / denominator * time_scale
                     loss.backward()
-                    loss_total += loss.detach()
+                    loss_total += loss.detach() / ensemble
                 if not len(idx):
-                    (self.critic(states[:1], context[:1]).sum() * 0).backward()
+                    (self.critic.forward_all(states[:1], context[:1]).sum() * 0).backward()
                 # Keep the per-step nonfinite check and clipping; the norm is
                 # unused, so do not copy it to the CPU for every minibatch.
                 checked_step(self.critic, self.opt_critic, distributed=self.distributed, tensor_norm=True)
                 self.optimizer_steps["critic"] += 1
                 updates += 1
+        if self.cfg.uses_paper_target_critic:
+            from .stable_values import update_target
+            update_target(self)
         return scalar_metrics({"critic_loss": loss_total / updates})
 
     def update(self, replay):
         fraction = min(self.iteration / self.cfg.lr_decay_iters, 1.0)
-        lr = self.cfg.learning_rate * (0.03 + 0.97 * 0.5 * (1 + math.cos(math.pi * fraction)))
+        min_ratio = self.cfg.lr_min_ratio
+        lr = self.cfg.learning_rate * (min_ratio + (1.0 - min_ratio) * 0.5 * (1 + math.cos(math.pi * fraction)))
         for optimizer in (self.opt_wm, self.opt_actor, self.opt_critic) + ((self.opt_failure,) if self.cfg.dex_reference else ()):
             for group in optimizer.param_groups:
                 group["lr"] = lr
@@ -744,7 +792,7 @@ class Trainer:
             payload[name] = getattr(self, name).state_dict()
         if self.cfg.dex_reference:
             payload["opt_failure"] = self.opt_failure.state_dict()
-        if self.cfg.uses_target_critic:
+        if self.cfg.has_target_critic:
             payload['target_critic'] = self.target_critic.state_dict()
         path = Path(path)
         tmp = path.with_suffix(".tmp")
@@ -818,7 +866,7 @@ class Trainer:
             getattr(self, name).load_state_dict(payload[name])
         if self.cfg.dex_reference:
             self.opt_failure.load_state_dict(payload["opt_failure"])
-        if self.cfg.uses_target_critic:
+        if self.cfg.has_target_critic:
             self.target_critic.load_state_dict(payload['target_critic'], strict=True)
         for name in ("iteration", "real_steps", "step_credit", "optimizer_steps"):
             setattr(self, name, payload[name])

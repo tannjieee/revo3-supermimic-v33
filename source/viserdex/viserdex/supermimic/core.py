@@ -219,6 +219,17 @@ class Config:
     goal_curriculum_step_deg: float = 15.0
     goal_curriculum_threshold_ratio: float = 0.45
     goal_curriculum_cooldown_iters: int = 100
+    # V36 Phase 4 hardware-identification, stability & sample-efficiency flags (all legacy defaults).
+    identified_hand_profile: str = "fit_03"
+    wm_huber_delta: float = 0.0
+    wm_residual: bool = False
+    weight_decay: float = 0.0
+    critic_ensemble_size: int = 1
+    critic_ema_tau: float = 0.0
+    critic_huber_delta: float = 0.0
+    exploration_min_std_rad: float = 0.0
+    exploration_decay_iters: int = 0
+    lr_min_ratio: float = 0.03
 
     @property
     def uses_v34_optimizations(self):
@@ -247,6 +258,15 @@ class Config:
             or self.actor_lambda_return
             or self.recent_sample_fraction > 0.0
             or self.goal_curriculum_enabled
+            or self.identified_hand_profile != "fit_03"
+            or self.wm_huber_delta > 0.0
+            or self.wm_residual
+            or self.weight_decay > 0.0
+            or self.critic_ensemble_size > 1
+            or self.critic_ema_tau > 0.0
+            or self.critic_huber_delta > 0.0
+            or self.exploration_min_std_rad > 0.0
+            or self.lr_min_ratio != 0.03
             or (self.wm_task_losses and min(
                 self.wm_reward_loss_weight, self.wm_observation_loss_weight, self.wm_cost_loss_weight) == 0.0)
         )
@@ -254,6 +274,14 @@ class Config:
     @property
     def uses_target_critic(self):
         return self.stable_value_learning and not self.paper_critic
+
+    @property
+    def uses_paper_target_critic(self):
+        return self.paper_critic and self.critic_ema_tau > 0.0
+
+    @property
+    def has_target_critic(self):
+        return self.uses_target_critic or self.uses_paper_target_critic
 
     def __post_init__(self):
         for name in ('target_slew_rate_rad_s', 'object_motion_angular_speed_rad_s', 'object_motion_linear_speed_m_s'):
@@ -289,6 +317,10 @@ class Config:
                 'goal_curriculum_enabled', 'goal_curriculum_start_deg',
                 'goal_curriculum_step_deg', 'goal_curriculum_threshold_ratio',
                 'goal_curriculum_cooldown_iters',
+                'identified_hand_profile', 'wm_huber_delta', 'wm_residual', 'weight_decay',
+                'critic_ensemble_size', 'critic_ema_tau', 'critic_huber_delta',
+                'exploration_min_std_rad', 'exploration_decay_iters',
+                'lr_decay_iters', 'lr_min_ratio', 'wm_updates',
             }
             for name, value in expected.items():
                 if name in v34_ablation_fields:
@@ -378,9 +410,29 @@ class Config:
         for name in ('deterministic_imagination', 'target_rate_pre_slew_cost',
                      'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
                      'sequential_goals', 'compact_critic_costs',
-                     'target_slew_ste', 'actor_lambda_return', 'goal_curriculum_enabled'):
+                     'target_slew_ste', 'actor_lambda_return', 'goal_curriculum_enabled',
+                     'wm_residual'):
             if type(getattr(self, name)) is not bool:
                 raise ValueError(f'{name} must be boolean')
+        from .identified_hand import SUPPORTED_PROFILES
+        if self.identified_hand_profile not in SUPPORTED_PROFILES:
+            raise ValueError(f'Unknown identified_hand_profile: {self.identified_hand_profile}')
+        for name in ('wm_huber_delta', 'weight_decay', 'critic_huber_delta', 'exploration_min_std_rad'):
+            if not math.isfinite(getattr(self, name)) or getattr(self, name) < 0:
+                raise ValueError(f'{name} must be finite and nonnegative')
+        if not math.isfinite(self.critic_ema_tau) or not 0 <= self.critic_ema_tau <= 1:
+            raise ValueError('critic_ema_tau must be in [0, 1]')
+        if self.critic_ema_tau > 0 and not self.paper_critic:
+            raise ValueError('critic_ema_tau applies to paper_critic mode')
+        if type(self.critic_ensemble_size) is not int or self.critic_ensemble_size < 1:
+            raise ValueError('critic_ensemble_size must be a positive integer')
+        if type(self.exploration_decay_iters) is not int or self.exploration_decay_iters < 0:
+            raise ValueError('exploration_decay_iters must be a nonnegative integer')
+        if self.exploration_min_std_rad > 0 and (
+                self.exploration_min_std_rad > self.exploration_position_std_rad or self.exploration_decay_iters < 1):
+            raise ValueError('Exploration annealing requires 0 < min_std <= start_std and decay_iters >= 1')
+        if not math.isfinite(self.lr_min_ratio) or not 0 < self.lr_min_ratio <= 1:
+            raise ValueError('lr_min_ratio must be in (0, 1]')
         if not math.isfinite(self.orientation_progress_scale) or self.orientation_progress_scale < 0:
             raise ValueError('orientation_progress_scale must be finite and nonnegative')
         if not math.isfinite(self.orientation_progress_speed_rad_s) or self.orientation_progress_speed_rad_s <= 0:

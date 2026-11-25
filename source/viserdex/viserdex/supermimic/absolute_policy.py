@@ -8,7 +8,19 @@ import math
 import torch
 
 
-def explore_absolute(action, previous_noise_rad, limits, cfg, *, innovation=None):
+def scheduled_exploration_std_rad(cfg, iteration):
+    """Cosine-anneal exploration std from exploration_position_std_rad to exploration_min_std_rad."""
+    start = cfg.exploration_position_std_rad
+    end = getattr(cfg, 'exploration_min_std_rad', 0.0)
+    decay = getattr(cfg, 'exploration_decay_iters', 0)
+    if end <= 0.0 or decay <= 0 or end >= start:
+        return start
+    joint_iter = max(0, int(iteration) - cfg.wm_only_iters)
+    frac = min(joint_iter / decay, 1.0)
+    return end + (start - end) * 0.5 * (1.0 + math.cos(math.pi * frac))
+
+
+def explore_absolute(action, previous_noise_rad, limits, cfg, *, innovation=None, std_rad=None):
     """AR(1) angle perturbation, reflected at encoder limits without clipping.
 
     sigma is the stationary physical-angle standard deviation before reflection;
@@ -22,7 +34,8 @@ def explore_absolute(action, previous_noise_rad, limits, cfg, *, innovation=None
     if innovation.shape != action.shape:
         raise ValueError('Exploration innovation must match the action shape')
     rho = math.exp(-cfg.control_dt / cfg.exploration_correlation_s)
-    noise = rho * previous_noise_rad + cfg.exploration_position_std_rad * math.sqrt(1-rho*rho) * innovation
+    sigma = cfg.exploration_position_std_rad if std_rad is None else std_rad
+    noise = rho * previous_noise_rad + sigma * math.sqrt(1-rho*rho) * innovation
     lower, upper = limits[..., 0], limits[..., 1]
     if getattr(cfg, 'dex_action_residual_rad', ()):
         half = action.new_tensor(cfg.dex_action_residual_rad)

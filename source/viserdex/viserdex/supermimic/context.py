@@ -10,6 +10,18 @@ FIXED_PALM_BODY = 'world'
 MOVING_HAND_BODIES_PATTERN = r'^(?!world$).+'
 
 
+def env_identified_profile(env):
+    cfg = getattr(env, 'cfg', None)
+    if cfg is None:
+        return 'fit_03'
+    actions = getattr(cfg, 'actions', None)
+    joint_pos = getattr(actions, 'joint_pos', None) if actions is not None else None
+    dex_profile = getattr(joint_pos, 'dex_reference_profile', None)
+    if isinstance(dex_profile, dict) and dex_profile.get('identified_hand_profile'):
+        return dex_profile['identified_hand_profile']
+    return 'fit_03'
+
+
 def moving_hand_body_indices(body_names, is_fixed_base):
     """This audited asset's palm is the world-fixed articulation root."""
     if not is_fixed_base or list(body_names).count(FIXED_PALM_BODY) != 1:
@@ -104,15 +116,17 @@ def compact_context(env, fields):
             ranges[name] = list(gain[parameter])
     variable['joint_limits'] = False
     context, schema, fixed = pack_context(fields, variable)
-    p, info = load_identified_hand()
+    p, info = load_identified_hand(env_identified_profile(env))
     # Fixed identified parameters remain reproducible without redundant network inputs.
     manifest = dict(protocol='configured_random_moving_bodies_v2', fixed=fixed,
                                  derived=derived, ranges=ranges, excluded_bodies=excluded, identified_fixed=p,
                                  identified_source=info, schema=schema)
-    if getattr(env.cfg.actions.joint_pos, 'dex_reference_profile', None) is not None:
+    env_cfg = getattr(env, 'cfg', None)
+    dex_profile = getattr(getattr(getattr(env_cfg, 'actions', None), 'joint_pos', None), 'dex_reference_profile', None)
+    if dex_profile is not None:
         manifest['identified_fixed'] = dict(p, delay_s=0., encoder_bias_rad=[0.]*21)
         manifest['control_override'] = dict(protocol='v33', delay_steps=0, fixed_encoder_compensation=False,
-                                           profile=env.cfg.actions.joint_pos.dex_reference_profile)
+                                           profile=dex_profile)
     from .output_limits import environment_output_limits
     limits = environment_output_limits(env)
     if limits is not None:
@@ -161,7 +175,7 @@ def audit_delay_memory(ready):
 
 def audit_identified_actuator(env, robot, ids, fields, joint_names=None):
     from isaaclab.actuators.newton import read_group_parameter
-    p, info = load_identified_hand()
+    p, info = load_identified_hand(env_identified_profile(env))
     from .output_limits import environment_output_limits
     limits = environment_output_limits(env)
     if joint_names is not None:

@@ -500,3 +500,109 @@ def test_phase3_bf16_wm_cuda_graph_matches_eager():
     torch.testing.assert_close(phys_g, phys_e, atol=2e-3, rtol=2e-3)
     for (n, pe), (_, pg) in zip(eager.wm.named_parameters(), graph.wm.named_parameters()):
         torch.testing.assert_close(pg.grad, pe.grad, atol=5e-3, rtol=5e-3, msg=f"bf16 grad mismatch on {n}")
+
+
+V36_P4_PROFILE = Path(__file__).resolve().parents[1] / "configs/supermimic_v34/control_opt_p4.yaml"
+
+
+def test_phase4_identified_hand_profiles_and_checksums():
+    from viserdex.supermimic.identified_hand import SUPPORTED_PROFILES, load_identified_hand
+    assert set(SUPPORTED_PROFILES) == {"fit_03", "revo3_sysid_fresh50hz_v1", "revo3_sysid_20261124"}
+    p_fit, info_fit = load_identified_hand("fit_03")
+    p_v1, info_v1 = load_identified_hand("revo3_sysid_fresh50hz_v1")
+    p_24, info_24 = load_identified_hand("revo3_sysid_20261124")
+    assert info_fit["model"] == "fit_03"
+    assert info_v1["model"] == "revo3_sysid_fresh50hz_v1"
+    assert info_24["model"] == "revo3_sysid_20261124"
+    for p in (p_v1, p_24):
+        assert len(p["effective_kp_Nm_rad"]) == 21
+        assert len(p["effective_kd_Nm_s_rad"]) == 21
+        assert len(p["armature_kg_m2"]) == 21
+        assert len(p["effective_effort_limit_Nm"]) == 21
+        assert min(p["effective_kp_Nm_rad"]) > 3.0 and max(p["effective_kp_Nm_rad"]) < 10.0
+        assert min(p["effective_effort_limit_Nm"]) >= 0.5 and max(p["effective_effort_limit_Nm"]) <= 1.2
+    assert p_v1["effective_kp_Nm_rad"] != p_fit["effective_kp_Nm_rad"]
+
+
+def test_phase4_twin_conservative_critic_ema_huber_and_residual_wm():
+    from viserdex.supermimic.networks import ResBlock
+    from viserdex.supermimic.absolute_policy import scheduled_exploration_std_rad
+    cfg = make_v34_cfg(profile_path=V36_P4_PROFILE, cost_penalty=0.35, horizon=8)
+    assert cfg.identified_hand_profile == "revo3_sysid_fresh50hz_v1"
+    assert cfg.wm_huber_delta == 2.0
+    assert cfg.wm_residual is True
+    assert cfg.weight_decay == 0.0001
+    assert cfg.wm_updates == 8
+    assert cfg.critic_ensemble_size == 2
+    assert cfg.critic_ema_tau == 0.05
+    assert cfg.critic_huber_delta == 0.5
+    assert cfg.has_target_critic is True and cfg.uses_paper_target_critic is True
+    assert cfg.lr_decay_iters == 30000 and cfg.lr_min_ratio == 0.15
+    proto = imagination_protocol(cfg)
+    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber"):
+        assert tag in proto, f"Missing {tag} in {proto}"
+
+    trainer, replay = populate_replay(cfg, n_envs=10, steps=14)
+    assert any(isinstance(m, ResBlock) for m in trainer.wm.net.modules())
+    assert isinstance(trainer.opt_wm, torch.optim.AdamW)
+    assert isinstance(trainer.opt_actor, torch.optim.AdamW)
+    assert isinstance(trainer.opt_critic, torch.optim.AdamW)
+    assert hasattr(trainer, "target_critic") and hasattr(trainer.critic, "nets") and len(trainer.critic.nets) == 2
+
+    # Verify conservative aggregation: reward = min across heads, costs = max across heads.
+    batch = replay.sample(8, include_events=False)
+    s, ctx = batch["state"], trainer.context[batch["env_id"]]
+    with torch.no_grad():
+        trainer.critic.nets[0][-1].bias.copy_(torch.tensor([5.0, 1.0]))
+        trainer.critic.nets[1][-1].bias.copy_(torch.tensor([3.0, 4.0]))
+        all_v = trainer.critic.forward_all(s, ctx)
+        agg_v = trainer.critic(s, ctx)
+        assert all_v.shape == (2, 8, 2)
+        torch.testing.assert_close(agg_v[:, 0], torch.minimum(all_v[0, :, 0], all_v[1, :, 0]))
+        torch.testing.assert_close(agg_v[:, 1:], torch.maximum(all_v[0, :, 1:], all_v[1, :, 1:]))
+        # Reset bias before running update + Polyak EMA check.
+        for net in trainer.critic.nets:
+            net[-1].bias.zero_()
+        trainer.target_critic.load_state_dict(trainer.critic.state_dict())
+
+    target_before = [p.clone() for p in trainer.target_critic.parameters()]
+    metrics = trainer.update(replay)
+    assert math.isfinite(metrics["wm_loss"])
+    assert math.isfinite(metrics["critic_loss"])
+    assert math.isfinite(metrics["actor_loss"])
+    # Polyak EMA moved target_critic toward critic without copying 100%.
+    diffs_prev = [float((p - b).abs().max()) for p, b in zip(trainer.target_critic.parameters(), target_before)]
+    diffs_live = [float((p - c).abs().max()) for p, c in zip(trainer.target_critic.parameters(), trainer.critic.parameters())]
+    assert max(diffs_prev) > 0.0
+    assert max(diffs_live) > 0.0
+
+    # Verify cosine exploration annealing schedule.
+    assert math.isclose(scheduled_exploration_std_rad(cfg, 0), math.radians(2.5), rel_tol=1e-6)
+    mid = scheduled_exploration_std_rad(cfg, cfg.wm_only_iters + cfg.exploration_decay_iters // 2)
+    assert math.isclose(mid, math.radians(1.5), rel_tol=1e-4)
+    end = scheduled_exploration_std_rad(cfg, cfg.wm_only_iters + cfg.exploration_decay_iters + 500)
+    assert math.isclose(end, math.radians(0.5), rel_tol=1e-6)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required for Phase 4 bf16 CUDA Graph check")
+def test_phase4_huber_resmlp_bf16_wm_cuda_graph_matches_eager():
+    cfg = make_v34_cfg(profile_path=V36_P4_PROFILE, cost_penalty=0.35, horizon=8, amp="bf16")
+    torch.manual_seed(901)
+    eager, replay = populate_replay(cfg, n_envs=10, steps=14, device="cuda")
+    graph = Trainer(cfg, eager.noise_cfg, eager.context, eager.limits, eager.base_inverse, "cuda", 250, wm_cuda_graph=True)
+    graph.wm.load_state_dict(eager.wm.state_dict())
+    batch = replay.sample(cfg.wm_batch, cfg.wm_window, include_events=False)
+
+    from viserdex.supermimic.wm_cuda_graph import CapturedWMLoss
+    captured = CapturedWMLoss(graph, batch)
+    eager.opt_wm.zero_grad(set_to_none=True)
+    eager.opt_failure.zero_grad(set_to_none=True)
+    loss_e, err_e, phys_e, _, _ = eager._wm_loss(batch)
+    loss_e.backward()
+    eager._independent_failure_loss.backward()
+    loss_g, err_g, phys_g, _, _ = captured(batch)
+    torch.testing.assert_close(loss_g, loss_e, atol=2e-3, rtol=2e-3)
+    torch.testing.assert_close(err_g, err_e, atol=2e-3, rtol=2e-3)
+    torch.testing.assert_close(phys_g, phys_e, atol=2e-3, rtol=2e-3)
+    for (n, pe), (_, pg) in zip(eager.wm.named_parameters(), graph.wm.named_parameters()):
+        torch.testing.assert_close(pg.grad, pe.grad, atol=5e-3, rtol=5e-3, msg=f"bf16 grad mismatch on {n}")

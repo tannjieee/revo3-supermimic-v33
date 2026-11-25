@@ -40,6 +40,8 @@ def configure(cfg):
     if revision in ('urdf_little_v2', 'hardware_center25_v3'):
         from viserdex.supermimic.revised_contract import configure_environment
         configure_environment(cfg, revision)
+        from viserdex.supermimic.dex_reference import prepare_saved_identified_hand
+        prepare_saved_identified_hand(cfg, binding.saved)
     from viserdex.supermimic.position_boundary import prepare_saved_boundary
     prepare_saved_boundary(cfg, binding.saved)
     binding.configure(cfg, args)

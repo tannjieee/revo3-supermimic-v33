@@ -256,6 +256,8 @@ def configure(cfg):
             if revision in ('urdf_little_v2', 'hardware_center25_v3'):
                 from viserdex.supermimic.revised_contract import configure_environment
                 configure_environment(cfg, revision)
+                from viserdex.supermimic.dex_reference import prepare_saved_identified_hand
+                prepare_saved_identified_hand(cfg, binding.saved)
         from viserdex.supermimic.position_boundary import prepare_saved_boundary
         prepare_saved_boundary(cfg, binding.saved)
         binding.configure(cfg, args)
@@ -887,10 +889,12 @@ def main():
                         exploration_noise = torch.zeros_like(exploration_noise)
                         previous_exploration_noise = exploration_noise
                     elif cfg.absolute_policy_optimization:
-                        from viserdex.supermimic.absolute_policy import explore_absolute
+                        from viserdex.supermimic.absolute_policy import explore_absolute, scheduled_exploration_std_rad
+                        exp_std_rad = scheduled_exploration_std_rad(cfg, trainer.iteration)
+                        result['exploration_std_deg'] = math.degrees(exp_std_rad)
                         policy_action = trainer.actor(adapter.history)
                         action, exploration_noise = explore_absolute(policy_action,
-                            exploration_noise, adapter.limits, cfg)
+                            exploration_noise, adapter.limits, cfg, std_rad=exp_std_rad)
                     else:
                         action = trainer.actor.sample(adapter.history, cfg.exploration)
                         # Historical exploration is before tanh, so the sampled

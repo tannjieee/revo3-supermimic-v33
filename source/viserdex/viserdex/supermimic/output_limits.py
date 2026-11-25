@@ -38,7 +38,7 @@ def _values(value):
     return None
 
 
-def configured_output_limits(cfg):
+def configured_output_limits(cfg, profile='fit_03'):
     """Identify the new profile or the exact historical frozen-fit profile.
 
 Reading a saved environment must keep its original dynamics: legacy profiles
@@ -46,7 +46,7 @@ remain readable and receive no additional metadata keys. Partial/mixed changes
 are rejected instead of being mislabeled as a validated profile.
     """
     from .identified_hand import load_identified_hand
-    fit, _ = load_identified_hand()
+    fit, _ = load_identified_hand(profile)
     effort = _values(cfg.actuator_effort_limit)
     solver_effort = _values(cfg.joint_effort_limit)
     velocity = _values(cfg.actuator_velocity_limit)
@@ -64,4 +64,7 @@ are rejected instead of being mislabeled as a validated profile.
 def environment_output_limits(env):
     # Lightweight context unit fixtures do not construct a simulation config.
     cfg = getattr(env, 'cfg', None)
-    return None if cfg is None else configured_output_limits(cfg.scene.robot.actuators['fingers'])
+    if cfg is None:
+        return None
+    from .context import env_identified_profile
+    return configured_output_limits(cfg.scene.robot.actuators['fingers'], profile=env_identified_profile(env))

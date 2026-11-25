@@ -77,9 +77,26 @@ def validate_profile(p):
     for name in ('grouped_physical_loss', 'deterministic_imagination', 'target_rate_pre_slew_cost',
                  'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
                  'sequential_goals', 'compact_critic_costs',
-                 'target_slew_ste', 'actor_lambda_return', 'goal_curriculum_enabled'):
+                 'target_slew_ste', 'actor_lambda_return', 'goal_curriculum_enabled',
+                 'wm_residual'):
         if name in p and type(p[name]) is not bool:
             raise ValueError(f'{name} must be boolean')
+    if 'identified_hand_profile' in p:
+        from .identified_hand import SUPPORTED_PROFILES
+        if p['identified_hand_profile'] not in SUPPORTED_PROFILES:
+            raise ValueError(f"Invalid identified_hand_profile: {p['identified_hand_profile']}")
+    for name in ('wm_huber_delta', 'weight_decay', 'critic_huber_delta', 'exploration_min_std_deg'):
+        if name in p and (not math.isfinite(p[name]) or p[name] < 0):
+            raise ValueError(f'Invalid {name}')
+    if 'critic_ema_tau' in p and (not math.isfinite(p['critic_ema_tau']) or not 0 <= p['critic_ema_tau'] <= 1):
+        raise ValueError('Invalid critic_ema_tau')
+    if 'lr_min_ratio' in p and (not math.isfinite(p['lr_min_ratio']) or not 0 < p['lr_min_ratio'] <= 1):
+        raise ValueError('Invalid lr_min_ratio')
+    for name in ('critic_ensemble_size', 'lr_decay_iters', 'wm_updates'):
+        if name in p and (type(p[name]) is not int or p[name] < 1):
+            raise ValueError(f'Invalid {name}')
+    if 'exploration_decay_iters' in p and (type(p['exploration_decay_iters']) is not int or p['exploration_decay_iters'] < 0):
+        raise ValueError('Invalid exploration_decay_iters')
     if 'orientation_reward_mode' in p and p['orientation_reward_mode'] not in ('gaussian', 'linear_fine'):
         raise ValueError(f"Invalid orientation_reward_mode: {p['orientation_reward_mode']}")
     if 'orientation_tolerance_deg' in p and (not math.isfinite(p['orientation_tolerance_deg']) or not 0 <= p['orientation_tolerance_deg'] < 180):
@@ -192,11 +209,16 @@ def profile_options(p, digest):
                 'target_slew_ste', 'actor_lr_scale', 'actor_ramp_iters', 'actor_updates',
                 'critic_epochs', 'actor_lambda_return', 'recent_sample_fraction', 'recent_window_steps',
                 'goal_curriculum_enabled', 'goal_curriculum_start_deg', 'goal_curriculum_step_deg',
-                'goal_curriculum_threshold_ratio', 'goal_curriculum_cooldown_iters'):
+                'goal_curriculum_threshold_ratio', 'goal_curriculum_cooldown_iters',
+                'identified_hand_profile', 'wm_huber_delta', 'wm_residual', 'weight_decay',
+                'critic_ensemble_size', 'critic_ema_tau', 'critic_huber_delta',
+                'exploration_decay_iters', 'lr_decay_iters', 'lr_min_ratio', 'wm_updates'):
         if key in p:
             options[key] = p[key]
     if 'exploration_position_std_deg' in p:
         options['exploration_position_std_rad'] = math.radians(p['exploration_position_std_deg'])
+    if 'exploration_min_std_deg' in p:
+        options['exploration_min_std_rad'] = math.radians(p['exploration_min_std_deg'])
     if 'wm_bryson_scales' in p:
         options['wm_bryson_scales'] = tuple(float(v) for v in p['wm_bryson_scales'])
     residual = action_residual_vector_rad(p)
@@ -263,6 +285,12 @@ def configure_environment(env_cfg, p, digest):
     from .revised_contract import configure_environment as configure_base, CENTER_REVISION
     configure_base(env_cfg, CENTER_REVISION)
     limits, _ = validate_profile(p)
+    hand_profile = p.get('identified_hand_profile', 'fit_03')
+    if hand_profile != 'fit_03':
+        from .identified_hand import actuator_config
+        env_cfg.scene.robot.actuators = {
+            'fingers': actuator_config(profile=hand_profile, use_identified_effort_limits=True)
+        }
     action = env_cfg.actions.joint_pos
     action.dex_reference_profile = p
     action.training_limits_sha256 = digest
@@ -271,6 +299,20 @@ def configure_environment(env_cfg, p, digest):
     action.alpha = p['ema_alpha']
     for actuator in env_cfg.scene.robot.actuators.values():
         actuator.min_delay = actuator.max_delay = 0
+
+
+def prepare_saved_identified_hand(env_cfg, saved):
+    """Instantiate non-default identified actuator schema before from_dict merge on resume/playback."""
+    dex_profile = saved.get('actions', {}).get('joint_pos', {}).get('dex_reference_profile')
+    if isinstance(dex_profile, dict):
+        hand_profile = dex_profile.get('identified_hand_profile', 'fit_03')
+        if hand_profile != 'fit_03':
+            from .identified_hand import actuator_config
+            env_cfg.scene.robot.actuators = {
+                'fingers': actuator_config(profile=hand_profile, use_identified_effort_limits=True)
+            }
+            for actuator in env_cfg.scene.robot.actuators.values():
+                actuator.min_delay = actuator.max_delay = 0
 
 
 def state_fields():

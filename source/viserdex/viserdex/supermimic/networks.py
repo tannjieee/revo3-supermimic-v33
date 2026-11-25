@@ -56,15 +56,35 @@ def input_normalizer(cfg, dim):
     return RunningNorm(dim, std_floor=floor)
 
 
-def mlp(input_dim, hidden, output_dim, layer_norm=False, activation="silu"):
-    layers = []
-    act_cls = nn.GELU if activation == "gelu" else nn.SiLU
-    for width in hidden:
-        layers.append(nn.Linear(input_dim, width))
+class ResBlock(nn.Module):
+    """Residual block for equal-width hidden layers: x + act(LN(Linear(x)))."""
+
+    def __init__(self, width, layer_norm=False, activation="silu"):
+        super().__init__()
+        act_cls = nn.GELU if activation == "gelu" else nn.SiLU
+        layers = [nn.Linear(width, width)]
         if layer_norm:
             layers.extend((nn.LayerNorm(width), act_cls()))
         else:
             layers.append(nn.ELU())
+        self.block = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return x + self.block(x)
+
+
+def mlp(input_dim, hidden, output_dim, layer_norm=False, activation="silu", residual=False):
+    layers = []
+    act_cls = nn.GELU if activation == "gelu" else nn.SiLU
+    for i, width in enumerate(hidden):
+        if residual and i > 0 and width == input_dim:
+            layers.append(ResBlock(width, layer_norm=layer_norm, activation=activation))
+        else:
+            layers.append(nn.Linear(input_dim, width))
+            if layer_norm:
+                layers.extend((nn.LayerNorm(width), act_cls()))
+            else:
+                layers.append(nn.ELU())
         input_dim = width
     layers.append(nn.Linear(input_dim, output_dim))
     return nn.Sequential(*layers)
@@ -138,7 +158,10 @@ class Dynamics(nn.Module):
             phys_output_dim = 27
         else:
             phys_output_dim = 54
-        self.net = mlp(width, cfg.wm_hidden, phys_output_dim + self.contact_count, True, activation=cfg.wm_activation)
+        self.net = mlp(
+            width, cfg.wm_hidden, phys_output_dim + self.contact_count, True,
+            activation=cfg.wm_activation, residual=cfg.wm_residual,
+        )
         nn.init.zeros_(self.net[-1].weight)
         nn.init.zeros_(self.net[-1].bias)
         self.learned_termination = cfg.wm_task_losses
@@ -254,25 +277,31 @@ class Critic(nn.Module):
         self.constrained = cfg.constraints_enabled
         self.paper_critic = cfg.paper_critic
         self.stable_values = cfg.uses_target_critic
+        self.ensemble_size = cfg.critic_ensemble_size
         from .constraints import cost_names
-        self.net = mlp(cfg.critic_state_dim + context_dim + extra, cfg.critic_hidden,
-                       1 + len(cost_names(cfg)) if self.constrained else 1,
-                       layer_norm=cfg.critic_layer_norm, activation="gelu")
+        out_dim = 1 + len(cost_names(cfg)) if self.constrained else 1
+        in_dim = cfg.critic_state_dim + context_dim + extra
+
+        def _make_head():
+            head = mlp(in_dim, cfg.critic_hidden, out_dim, layer_norm=cfg.critic_layer_norm, activation="gelu")
+            if self.stable_values:
+                nn.init.zeros_(head[-1].weight)
+                nn.init.constant_(head[-1].bias, -4.59511985)
+            elif self.paper_critic:
+                nn.init.zeros_(head[-1].weight)
+                nn.init.zeros_(head[-1].bias)
+            elif self.constrained:
+                with torch.no_grad():
+                    head[-1].bias[1:] = -5.
+            return head
+
         if self.stable_values:
             from .stable_values import value_bounds
             self.register_buffer('value_bounds', torch.tensor(value_bounds(cfg)))
-            # A low initial risk prior; logits are trained with soft-label BCE,
-            # so a saturated value retains a corrective supervised gradient.
-            nn.init.zeros_(self.net[-1].weight)
-            nn.init.constant_(self.net[-1].bias, -4.59511985)
-        elif self.paper_critic:
-            # Unbounded linear values, trained in return units by Eq. (3).
-            nn.init.zeros_(self.net[-1].weight)
-            nn.init.zeros_(self.net[-1].bias)
-        elif self.constrained:
-            with torch.no_grad():
-                self.net[-1].bias[1:] = -5.
-
+        if self.ensemble_size == 1:
+            self.net = _make_head()
+        else:
+            self.nets = nn.ModuleList([_make_head() for _ in range(self.ensemble_size)])
 
     def inputs(self, s, context):
         features = full_features(s)
@@ -286,11 +315,7 @@ class Critic(nn.Module):
             result = result * self.input_scale + self.input_offset
         return result
 
-    def logits(self, s, context):
-        return run_mlp(self.net, self.input_norm(self.inputs(s, context)), self.amp)
-
-    def forward(self, s, context):
-        value = self.logits(s, context)
+    def _activate(self, value):
         if self.paper_critic:
             return value
         if self.stable_values:
@@ -298,3 +323,27 @@ class Critic(nn.Module):
         if self.constrained:
             return torch.cat((value[..., :1], torch.nn.functional.softplus(value[..., 1:])), -1)
         return value.squeeze(-1)
+
+    def logits(self, s, context):
+        x = self.input_norm(self.inputs(s, context))
+        if self.ensemble_size == 1:
+            return run_mlp(self.net, x, self.amp)
+        return torch.stack([run_mlp(net, x, self.amp) for net in self.nets], dim=0).mean(dim=0)
+
+    def forward_all(self, s, context):
+        """Evaluate every ensemble member independently: shape [K, ..., out_dim]."""
+        x = self.input_norm(self.inputs(s, context))
+        if self.ensemble_size == 1:
+            return self._activate(run_mlp(self.net, x, self.amp)).unsqueeze(0)
+        return torch.stack([self._activate(run_mlp(net, x, self.amp)) for net in self.nets], dim=0)
+
+    def forward(self, s, context):
+        if self.ensemble_size == 1:
+            return self._activate(self.logits(s, context))
+        values = self.forward_all(s, context)
+        if not self.constrained:
+            return values.min(dim=0).values
+        # Conservative Twin/Ensemble Critic: pessimistic reward (min) and cautious cost/drop risk (max).
+        reward_min = values[..., :1].min(dim=0).values
+        cost_max = values[..., 1:].max(dim=0).values
+        return torch.cat((reward_min, cost_max), dim=-1)
