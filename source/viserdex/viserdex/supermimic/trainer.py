@@ -78,6 +78,8 @@ def imagination_protocol(cfg):
             parts.append("aln")
         if cfg.actor_failure_sample_fraction > 0:
             parts.append("afail")
+        if cfg.wm_ema_tau > 0:
+            parts.append("wema")
         return "_".join(parts)
     if cfg.dex_reference:
         return "encoder_EMA_zero_bias_contacts_independent_failure_v33"
@@ -150,10 +152,10 @@ def lambda_returns(rewards, continuation, values, gamma, lam):
     return torch.stack(result[::-1])
 
 
-def checked_step(model, optimizer, value_clip=False, distributed=None, *, tensor_norm=False):
+def checked_step(model, optimizer, value_clip=False, distributed=None, *, tensor_norm=False, max_norm=1.0):
     if distributed is not None:
         distributed.gradients(model)
-    norm = nn.utils.clip_grad_norm_(model.parameters(), 1.0, error_if_nonfinite=True)
+    norm = nn.utils.clip_grad_norm_(model.parameters(), max_norm, error_if_nonfinite=True)
     if value_clip:
         nn.utils.clip_grad_value_(model.parameters(), 0.1)
     optimizer.step()
@@ -191,9 +193,17 @@ def validate_resume_actor_ramp(schedule, iteration):
 
 class Trainer:
     @property
+    def imagination_wm(self):
+        return self.ema_wm if self.cfg.wm_ema_tau > 0.0 else self.wm
+
+    @property
     def sync_models(self):
         models = (self.wm, self.actor, self.critic)
-        return models + ((self.target_critic,) if self.cfg.has_target_critic else ())
+        if self.cfg.has_target_critic:
+            models = models + (self.target_critic,)
+        if self.cfg.wm_ema_tau > 0.0:
+            models = models + (self.ema_wm,)
+        return models
 
     def __init__(self, cfg, noise_cfg, context, limits, base_inverse, device, episode_steps=600, distributed=None, geometry_spec=None, wm_cuda_graph=False):
         self.cfg, self.noise_cfg = cfg, noise_cfg
@@ -220,6 +230,8 @@ class Trainer:
         self.distributed.broadcast_models(self.wm, self.actor, self.critic)
         if cfg.has_target_critic:
             self.target_critic = copy.deepcopy(self.critic).eval().requires_grad_(False)
+        if cfg.wm_ema_tau > 0.0:
+            self.ema_wm = copy.deepcopy(self.wm).eval().requires_grad_(False)
         wm_parameters = (p for n, p in self.wm.named_parameters()
                          if not cfg.dex_reference or not n.startswith("termination_net."))
         if cfg.weight_decay > 0.0:
@@ -284,9 +296,25 @@ class Trainer:
         self.resume_actor_ramp = validate_resume_actor_ramp(
             dict(start_iteration=self.iteration, duration=duration), self.iteration)
 
-    def continuation(self, state, next_physical):
+    @torch.no_grad()
+    def sync_wm_ema_buffers(self):
+        if self.cfg.wm_ema_tau > 0.0:
+            for target, current in zip(self.ema_wm.buffers(), self.wm.buffers()):
+                target.copy_(current)
+
+    @torch.no_grad()
+    def update_wm_ema(self):
+        if self.cfg.wm_ema_tau > 0.0:
+            # Track fast early WM convergence during warmup, then smooth with wm_ema_tau in joint training.
+            tau = max(self.cfg.wm_ema_tau, 0.25) if self.iteration < self.cfg.wm_only_iters else self.cfg.wm_ema_tau
+            for target, current in zip(self.ema_wm.parameters(), self.wm.parameters()):
+                target.lerp_(current, tau)
+            self.sync_wm_ema_buffers()
+
+    def continuation(self, state, next_physical, *, wm=None):
+        model = self.wm if wm is None else wm
         if self.cfg.wm_task_losses:
-            continuation = 1 - self.wm.termination_probability(next_physical)
+            continuation = 1 - model.termination_probability(next_physical)
             if self.cfg.stable_value_learning or self.cfg.drop_boundary_mode == 'com_ellipsoid':
                 from .spatial_contract import drop_distance
                 # The known simulator boundary takes precedence over a false
@@ -307,6 +335,7 @@ class Trainer:
         else:
             self.wm.input_norm.update(self.wm.inputs(state, target, self.context), self.distributed)
             self.wm.delta_norm.update(physical_delta(state, nxt), self.distributed)
+        self.sync_wm_ema_buffers()
         if policy_statistics:
             self.actor.obs_norm.update(self.actor.scaled_observation(observation), self.distributed)
             self.critic.input_norm.update(self.critic.inputs(state, self.context), self.distributed)
@@ -444,7 +473,7 @@ class Trainer:
             fgn = checked_step(self.wm.termination_net, self.opt_failure, distributed=self.distributed, tensor_norm=True)
             self.opt_failure.zero_grad(set_to_none=True)
             self.optimizer_steps["failure"] += 1
-        gn = checked_step(self.wm, self.opt_wm, distributed=self.distributed, tensor_norm=True)
+        gn = checked_step(self.wm, self.opt_wm, distributed=self.distributed, tensor_norm=True, max_norm=cfg.wm_grad_clip)
         replay.update_priorities(batch, torch.cat(sequence_errors))
         self.optimizer_steps["wm"] += 1
         metrics = {"wm_loss": loss_total / cfg.wm_window, "wm_grad_norm": gn}
@@ -480,6 +509,7 @@ class Trainer:
         loss_total = torch.zeros((), device=self.device)
         valid_steps = torch.zeros((), device=self.device)
         last_pred = initial
+        eval_wm = self.imagination_wm
         for t in range(cfg.wm_window):
             active = w["mask"][:, t].bool()
             action = torch.where(active[:, None], w["action"][:, t], 0.0)
@@ -488,7 +518,7 @@ class Trainer:
             if cfg.dex_reference:
                 s = torch.cat((s[..., :125], real_state[..., 125:131]), -1)
             target = action_target(s, action, limits, cfg, home=self._wm_home, residual_rad=self._wm_action_residual)
-            pred = self.wm(s, target, context)
+            pred = eval_wm(s, target, context)
             error = physical_delta(real_next, pred) / scale
             if cfg.wm_huber_delta > 0.0:
                 from torch.nn import functional as F
@@ -782,6 +812,7 @@ class Trainer:
                    "resume_actor_ramp": resume_ramp, "event_archive_size": replay.archive_size}
         for _ in range(self.cfg.wm_updates):
             metrics.update(self.wm_update(replay, tensor_metrics=True))
+        self.update_wm_ema()
         if self.iteration >= self.cfg.wm_only_iters:
             metrics.update(self.policy_update(replay))
         elif self.cfg.uses_target_critic:
@@ -822,6 +853,8 @@ class Trainer:
             payload["opt_failure"] = self.opt_failure.state_dict()
         if self.cfg.has_target_critic:
             payload['target_critic'] = self.target_critic.state_dict()
+        if self.cfg.wm_ema_tau > 0.0:
+            payload['ema_wm'] = self.ema_wm.state_dict()
         path = Path(path)
         tmp = path.with_suffix(".tmp")
         torch.save(payload, tmp)
@@ -896,6 +929,8 @@ class Trainer:
             self.opt_failure.load_state_dict(payload["opt_failure"])
         if self.cfg.has_target_critic:
             self.target_critic.load_state_dict(payload['target_critic'], strict=True)
+        if self.cfg.wm_ema_tau > 0.0:
+            self.ema_wm.load_state_dict(payload['ema_wm'], strict=True)
         for name in ("iteration", "real_steps", "step_credit", "optimizer_steps"):
             setattr(self, name, payload[name])
         self.optimizer_steps = dict(self.optimizer_steps)

@@ -48,11 +48,14 @@ def task_losses(trainer, state, prediction, real_state, real_next, action, limit
     """Per-sample losses; replay masking/importance weights are applied by caller."""
     cfg = trainer.cfg
     res_t = getattr(trainer, '_wm_action_residual', None)
-    with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_reward_loss_weight > 0):
+    zeros_1d = torch.zeros_like(real_reward)
+    if cfg.wm_reward_loss_weight > 0:
         predicted_reward = task_reward(state, prediction, action, cfg,
             limits=limits, encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home, residual_rad=res_t)
         reward_error = ((predicted_reward - real_reward) / task_reward_bound(cfg)).square()
-    with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_observation_loss_weight > 0):
+    else:
+        reward_error = zeros_1d
+    if cfg.wm_observation_loss_weight > 0:
         predicted_obs = clean_next_observation(state, prediction, action, limits, cfg,
             encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home, residual_rad=res_t)
         actual_obs = clean_next_observation(real_state, real_next, action, limits, cfg,
@@ -60,7 +63,9 @@ def task_losses(trainer, state, prediction, real_state, real_next, action, limit
         # Fixed Actor affine in both paths; no sensor sampling or learned norm drift.
         obs_error = (trainer.actor.scaled_observation(predicted_obs) -
                      trainer.actor.scaled_observation(actual_obs)).square().mean(-1)
-    with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_cost_loss_weight > 0):
+    else:
+        obs_error = zeros_1d
+    if cfg.wm_cost_loss_weight > 0:
         constants = dict(encoder_bias=trainer._wm_encoder_bias, hand_center=trainer._wm_hand_center,
                          home=trainer._wm_home, residual_rad=res_t)
         predicted_cost, _ = violation_costs(state, prediction, action, limits, cfg, **constants)
@@ -69,7 +74,10 @@ def task_losses(trainer, state, prediction, real_state, real_next, action, limit
         # without clipping targets or changing the actor/critic cost definition.
         cost_errors = (torch.log1p(predicted_cost) - torch.log1p(actual_cost)).square()
         cost_error = cost_errors.mean(-1)
-    terminal_error = (torch.zeros_like(reward_error) if cfg.dex_reference else
+    else:
+        cost_errors = zeros_1d.unsqueeze(-1).expand(-1, len(cost_names(cfg)))
+        cost_error = zeros_1d
+    terminal_error = (zeros_1d if cfg.dex_reference else
         F.binary_cross_entropy_with_logits(
             trainer.wm.termination_logits(prediction), terminated.float(), reduction='none'))
     total = (
@@ -79,7 +87,7 @@ def task_losses(trainer, state, prediction, real_state, real_next, action, limit
         + (cfg.wm_cost_loss_weight * cost_error if cfg.wm_cost_loss_weight else 0.0)
     )
     if not isinstance(total, torch.Tensor):
-        total = torch.zeros_like(reward_error)
+        total = zeros_1d
     components = torch.cat((torch.stack((reward_error, obs_error, terminal_error, cost_error), -1),
                             cost_errors), -1)
     if cfg.dex_reference:

@@ -235,6 +235,8 @@ class Config:
     actor_layer_norm: bool = False
     actor_activation: str = "elu"
     actor_failure_sample_fraction: float = 0.0
+    wm_ema_tau: float = 0.0
+    wm_grad_clip: float = 1.0
 
     @property
     def uses_v34_optimizations(self):
@@ -277,6 +279,8 @@ class Config:
             or self.actor_layer_norm
             or self.actor_activation != "elu"
             or self.actor_failure_sample_fraction > 0.0
+            or self.wm_ema_tau > 0.0
+            or self.wm_grad_clip != 1.0
             or (self.wm_task_losses and min(
                 self.wm_reward_loss_weight, self.wm_observation_loss_weight, self.wm_cost_loss_weight) == 0.0)
         )
@@ -332,7 +336,7 @@ class Config:
                 'exploration_min_std_rad', 'exploration_decay_iters',
                 'lr_decay_iters', 'lr_min_ratio', 'wm_updates',
                 'wm_step_decay', 'wm_input_noise_std', 'actor_layer_norm', 'actor_activation',
-                'actor_failure_sample_fraction',
+                'actor_failure_sample_fraction', 'wm_ema_tau', 'wm_grad_clip',
             }
             for name, value in expected.items():
                 if name in v34_ablation_fields:
@@ -439,6 +443,10 @@ class Config:
             raise ValueError('wm_step_decay must be in (0, 1]')
         if not math.isfinite(self.actor_failure_sample_fraction) or not 0 <= self.actor_failure_sample_fraction <= 0.5:
             raise ValueError('actor_failure_sample_fraction must be in [0, 0.5]')
+        if not math.isfinite(self.wm_ema_tau) or not 0 <= self.wm_ema_tau <= 1:
+            raise ValueError('wm_ema_tau must be in [0, 1]')
+        if not math.isfinite(self.wm_grad_clip) or self.wm_grad_clip <= 0:
+            raise ValueError('wm_grad_clip must be finite and positive')
         if not math.isfinite(self.critic_ema_tau) or not 0 <= self.critic_ema_tau <= 1:
             raise ValueError('critic_ema_tau must be in [0, 1]')
         if self.critic_ema_tau > 0 and not self.paper_critic:
@@ -634,8 +642,23 @@ def rotation_log(q):
 
 
 def rotation_features(q):
-    basis = torch.eye(3, device=q.device, dtype=q.dtype)[:2]
-    return quat_apply(q[..., None, :].expand(*q.shape[:-1], 2, 4), basis.expand(*q.shape[:-1], 2, 3)).flatten(-2)
+    # Closed-form first two columns of rotation matrix for XYZW quaternion q.
+    # Avoids per-call torch.eye allocation while matching quat_apply(q, eye[:2]) exactly.
+    x, y, z, w = q.unbind(-1)
+    xx, yy, zz = x * x, y * y, z * z
+    xy, xz, yz = x * y, x * z, y * z
+    wx, wy, wz = w * x, w * y, w * z
+    return torch.stack(
+        (
+            1.0 - 2.0 * (yy + zz),
+            2.0 * (xy + wz),
+            2.0 * (xz - wy),
+            2.0 * (xy - wz),
+            1.0 - 2.0 * (xx + zz),
+            2.0 * (yz + wx),
+        ),
+        dim=-1,
+    )
 
 
 def physical_features(s):

@@ -219,6 +219,7 @@ def imagine_stable(trainer, batch):
     if cfg.absolute_policy_optimization:
         from .absolute_policy import explore_absolute, logit_regularizer
         noise = batch['exploration_noise_rad']
+    wm_model = trainer.imagination_wm
     for t in range(cfg.horizon):
         active = alive > 0
         alive_history.append(alive.detach())
@@ -236,7 +237,7 @@ def imagine_stable(trainer, batch):
             action = trainer.actor(history)
         target = action_target(state, action, limits, cfg,
                                home=trainer._wm_home, residual_rad=trainer._wm_action_residual)
-        nxt = trainer.wm(state, target, context)
+        nxt = wm_model(state, target, context)
         r = reward(state, nxt, action, cfg.control_dt, cfg.success_bonus, cfg.action_rate_weight,
                    cfg.joint_vel_weight, cfg.action_l2_weight, cfg.action_second_diff_weight, hold_cfg=cfg,
                    limits=limits, encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home,
@@ -244,7 +245,7 @@ def imagine_stable(trainer, batch):
         raw, _ = violation_costs(state, nxt, action, limits, cfg,
                                  encoder_bias=trainer._wm_encoder_bias, hand_center=trainer._wm_hand_center,
                                  home=trainer._wm_home, residual_rad=trainer._wm_action_residual)
-        continuation = torch.where(active, trainer.continuation(state, nxt), 0.)
+        continuation = torch.where(active, trainer.continuation(state, nxt, wm=wm_model), 0.)
         p = 1-continuation
         step_discount = (cfg.gamma * cfg.lam) ** t if use_lam else cfg.gamma ** t
         discount_alive = step_discount * alive
@@ -257,13 +258,14 @@ def imagine_stable(trainer, batch):
         # A known failure freezes this sample at its last valid state. Future
         # contributions are zero; no post-drop imagined state feeds the models.
         survives = alive > 0
-        if cfg.absolute_policy_optimization:
-            noise = torch.where(survives[:, None], next_noise, noise)
         state = torch.where(survives[:, None], advanced, state)
-        obs, next_sensors = observe(state, sensors, limits, trainer.noise_cfg, cfg)
-        history = torch.where(survives[:, None, None], push_history(history, obs), history)
-        sensors = {k: torch.where(survives.reshape(-1, *([1]*(v.ndim-1))), v, sensors[k])
-                   for k, v in next_sensors.items()}
+        if t < cfg.horizon - 1:
+            if cfg.absolute_policy_optimization:
+                noise = torch.where(survives[:, None], next_noise, noise)
+            obs, next_sensors = observe(state, sensors, limits, trainer.noise_cfg, cfg)
+            history = torch.where(survives[:, None, None], push_history(history, obs), history)
+            sensors = {k: torch.where(survives.reshape(-1, *([1]*(v.ndim-1))), v, sensors[k])
+                       for k, v in next_sensors.items()}
         post_states.append(state)
         post_alives.append(alive)
         immediate.append(torch.cat((r[:, None], cost), -1) * active[:, None])

@@ -537,16 +537,19 @@ def test_phase4_twin_conservative_critic_ema_huber_and_residual_wm():
     assert cfg.wm_updates == 6
     assert cfg.actor_layer_norm is True and cfg.actor_activation == "gelu"
     assert cfg.actor_failure_sample_fraction == 0.08
+    assert cfg.wm_ema_tau == 0.05 and cfg.wm_grad_clip == 5.0
     assert cfg.critic_ensemble_size == 2
     assert cfg.critic_ema_tau == 0.05
     assert cfg.critic_huber_delta == 0.5
     assert cfg.has_target_critic is True and cfg.uses_paper_target_critic is True
     assert cfg.lr_decay_iters == 30000 and cfg.lr_min_ratio == 0.15
     proto = imagination_protocol(cfg)
-    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber", "_wdec", "_wnoise", "_aln", "_afail"):
+    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber", "_wdec", "_wnoise", "_aln", "_afail", "_wema"):
         assert tag in proto, f"Missing {tag} in {proto}"
 
     trainer, replay = populate_replay(cfg, n_envs=10, steps=14)
+    assert hasattr(trainer, "ema_wm") and trainer.imagination_wm is trainer.ema_wm
+    wm_ema_before = [p.clone() for p in trainer.ema_wm.parameters()]
     assert any(isinstance(m, ResBlock) for m in trainer.wm.net.modules())
     assert any(isinstance(m, torch.nn.LayerNorm) for m in trainer.actor.net.modules())
     assert any(isinstance(m, torch.nn.GELU) for m in trainer.actor.net.modules())
@@ -576,11 +579,28 @@ def test_phase4_twin_conservative_critic_ema_huber_and_residual_wm():
     assert math.isfinite(metrics["wm_loss"])
     assert math.isfinite(metrics["critic_loss"])
     assert math.isfinite(metrics["actor_loss"])
-    # Polyak EMA moved target_critic toward critic without copying 100%.
+    # Polyak EMA moved target_critic and ema_wm toward live weights without copying 100%.
     diffs_prev = [float((p - b).detach().abs().max()) for p, b in zip(trainer.target_critic.parameters(), target_before)]
     diffs_live = [float((p - c).detach().abs().max()) for p, c in zip(trainer.target_critic.parameters(), trainer.critic.parameters())]
     assert max(diffs_prev) > 0.0
     assert max(diffs_live) > 0.0
+    wm_diffs_prev = [float((p - b).detach().abs().max()) for p, b in zip(trainer.ema_wm.parameters(), wm_ema_before)]
+    wm_diffs_live = [float((p - c).detach().abs().max()) for p, c in zip(trainer.ema_wm.parameters(), trainer.wm.parameters())]
+    assert max(wm_diffs_prev) > 0.0
+    assert max(wm_diffs_live) > 0.0
+
+    # Verify closed-form rotation_features matches quat_apply(q, eye[:2]) identically in forward and backward.
+    from viserdex.supermimic.core import rotation_features
+    from viserdex.distillation.noise import quat_apply
+    q_raw = torch.randn(32, 4, requires_grad=True)
+    q = q_raw / q_raw.norm(dim=-1, keepdim=True)
+    ref_basis = torch.eye(3)[:2].expand(32, 2, 3)
+    ref_rf = quat_apply(q[:, None, :].expand(32, 2, 4), ref_basis).flatten(-2)
+    fast_rf = rotation_features(q)
+    torch.testing.assert_close(fast_rf, ref_rf, atol=1e-6, rtol=1e-6)
+    g_ref = torch.autograd.grad(ref_rf.square().sum(), q_raw, retain_graph=True)[0]
+    g_fast = torch.autograd.grad(fast_rf.square().sum(), q_raw)[0]
+    torch.testing.assert_close(g_fast, g_ref, atol=1e-5, rtol=1e-5)
 
     # Verify pre-drop recovery start-state sampling populates valid pre-drop indices.
     replay_fail = Replay(

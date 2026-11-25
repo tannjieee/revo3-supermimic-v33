@@ -69,13 +69,20 @@ def observe(s, sensor, limits, cfg, policy_cfg=None):
     velocity = s[:, QD]
     if cfg.joint_enabled:
         measured = joints + d["joint_bias"] + torch.randn_like(joints) * cfg.joint_noise_std
-        history = torch.cat((measured[:, None], d["joint_history"][:, :-1]), 1)
-        d["joint_history"] = torch.where(d["joint_fresh"][:, None, None], measured[:, None], history)
-        velocity_history = torch.cat((velocity[:, None], d["joint_velocity_history"][:, :-1]), 1)
-        d["joint_velocity_history"] = torch.where(d["joint_fresh"][:, None, None], velocity[:, None], velocity_history)
-        velocity = d["joint_velocity_history"][torch.arange(len(s), device=s.device), d["delay"]]
-        joints = d["joint_history"][torch.arange(len(s), device=s.device), d["delay"]]
-        d["joint_fresh"] = torch.zeros_like(d["joint_fresh"])
+        if cfg.joint_delay_max_steps == 0:
+            # Exact zero-delay fast path: avoids arange allocation, cat, and 2D fancy indexing.
+            d["joint_history"] = measured[:, None]
+            d["joint_velocity_history"] = velocity[:, None]
+            joints = measured
+            d["joint_fresh"] = torch.zeros_like(d["joint_fresh"])
+        else:
+            history = torch.cat((measured[:, None], d["joint_history"][:, :-1]), 1)
+            d["joint_history"] = torch.where(d["joint_fresh"][:, None, None], measured[:, None], history)
+            velocity_history = torch.cat((velocity[:, None], d["joint_velocity_history"][:, :-1]), 1)
+            d["joint_velocity_history"] = torch.where(d["joint_fresh"][:, None, None], velocity[:, None], velocity_history)
+            velocity = d["joint_velocity_history"][torch.arange(len(s), device=s.device), d["delay"]]
+            joints = d["joint_history"][torch.arange(len(s), device=s.device), d["delay"]]
+            d["joint_fresh"] = torch.zeros_like(d["joint_fresh"])
     position, orientation = s[:, POS], s[:, ROT]
     if cfg.enabled:
         pos = position + d["bias"][:, :3] + (2 * torch.rand_like(position) - 1) * cfg.position_noise

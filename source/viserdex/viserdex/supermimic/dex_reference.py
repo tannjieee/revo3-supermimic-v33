@@ -98,6 +98,10 @@ def validate_profile(p):
         raise ValueError('Invalid actor_failure_sample_fraction')
     if 'critic_ema_tau' in p and (not math.isfinite(p['critic_ema_tau']) or not 0 <= p['critic_ema_tau'] <= 1):
         raise ValueError('Invalid critic_ema_tau')
+    if 'wm_ema_tau' in p and (not math.isfinite(p['wm_ema_tau']) or not 0 <= p['wm_ema_tau'] <= 1):
+        raise ValueError('Invalid wm_ema_tau')
+    if 'wm_grad_clip' in p and (not math.isfinite(p['wm_grad_clip']) or p['wm_grad_clip'] <= 0):
+        raise ValueError('Invalid wm_grad_clip')
     if 'lr_min_ratio' in p and (not math.isfinite(p['lr_min_ratio']) or not 0 < p['lr_min_ratio'] <= 1):
         raise ValueError('Invalid lr_min_ratio')
     for name in ('critic_ensemble_size', 'lr_decay_iters', 'wm_updates'):
@@ -222,7 +226,7 @@ def profile_options(p, digest):
                 'critic_ensemble_size', 'critic_ema_tau', 'critic_huber_delta',
                 'exploration_decay_iters', 'lr_decay_iters', 'lr_min_ratio', 'wm_updates',
                 'wm_step_decay', 'wm_input_noise_std', 'actor_layer_norm', 'actor_activation',
-                'actor_failure_sample_fraction'):
+                'actor_failure_sample_fraction', 'wm_ema_tau', 'wm_grad_clip'):
         if key in p:
             options[key] = p[key]
     if 'exploration_position_std_deg' in p:

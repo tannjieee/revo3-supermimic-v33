@@ -117,6 +117,8 @@ wm_huber_delta: 2.0
 wm_residual: true
 wm_step_decay: 0.85
 wm_input_noise_std: 0.02
+wm_ema_tau: 0.05
+wm_grad_clip: 5.0
 wm_updates: 6
 weight_decay: 0.0002
 actor_layer_norm: true
