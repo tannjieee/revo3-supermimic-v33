@@ -42,6 +42,14 @@ def imagination_protocol(cfg):
             parts.append("cmean")
         if cfg.target_rate_pre_slew_cost:
             parts.append("preslew")
+        if cfg.dex_action_residual_rad:
+            parts.append("res")
+        if cfg.sequential_goals:
+            parts.append("seq")
+        if cfg.compact_critic_costs:
+            parts.append("c2")
+        if cfg.ema_delta_penalty_weight or cfg.joint_speed_penalty_weight or cfg.cage_penalty_weight:
+            parts.append("reg")
         return "_".join(parts)
     if cfg.dex_reference:
         return "encoder_EMA_zero_bias_contacts_independent_failure_v33"
@@ -214,6 +222,10 @@ class Trainer:
         )
         self._wm_encoder_bias = torch.tensor(cfg.encoder_bias_rad, device=self.device)
         self._wm_home = torch.tensor(cfg.action_home, device=self.device)
+        self._wm_action_residual = (
+            torch.tensor(cfg.dex_action_residual_rad, device=self.device, dtype=torch.float32)
+            if cfg.dex_action_residual_rad else None
+        )
         self._wm_hand_center = torch.tensor(cfg.hand_center_base_m, device=self.device)
 
     def arm_resume_actor_ramp(self, duration):
@@ -282,7 +294,7 @@ class Trainer:
             if cfg.dex_reference:
                 # Only the force realized for this transition is known; no future force leakage.
                 s = torch.cat((s[..., :125], real_state[..., 125:131]), -1)
-            target = action_target(s, action, limits, cfg)
+            target = action_target(s, action, limits, cfg, home=self._wm_home, residual_rad=self._wm_action_residual)
             if cfg.dex_reference:
                 pred, contact_logits = self.wm.predict(s, target, context)
             else:
@@ -422,7 +434,7 @@ class Trainer:
             real_next = torch.where(active[:, None], w["next_physical"][:, t], s[:, :55])
             if cfg.dex_reference:
                 s = torch.cat((s[..., :125], real_state[..., 125:131]), -1)
-            target = action_target(s, action, limits, cfg)
+            target = action_target(s, action, limits, cfg, home=self._wm_home, residual_rad=self._wm_action_residual)
             pred = self.wm(s, target, context)
             error = physical_delta(real_next, pred) / scale
             groups = torch.stack([part.square().mean(-1) for part in error.split((21, 21, 3, 3, 3, 3), -1)], -1)
@@ -499,7 +511,7 @@ class Trainer:
         ended = torch.zeros_like(alive, dtype=torch.bool)
         for t in range(cfg.horizon):
             action = self.actor(history)
-            target = action_target(s, action, limits, cfg)
+            target = action_target(s, action, limits, cfg, home=self._wm_home, residual_rad=self._wm_action_residual)
             nxt = self.wm(s, target, context)
             r = reward(s, nxt, action, cfg.control_dt, cfg.success_bonus, cfg.action_rate_weight, cfg.joint_vel_weight, cfg.action_l2_weight, cfg.action_second_diff_weight, hold_cfg=cfg)
             # The reset boundary is not simulated. At a timeout, bootstrap V once and stop.
@@ -587,7 +599,8 @@ class Trainer:
         if audit_policy_step:
             with torch.no_grad():
                 audit_limits = self.limits[start['env_id'][:len(audit_history)]]
-                half_range = (audit_limits[..., 1]-audit_limits[..., 0])/2
+                half_range = (audit_limits.new_tensor(cfg.dex_action_residual_rad)
+                              if cfg.dex_action_residual_rad else (audit_limits[..., 1]-audit_limits[..., 0])/2)
                 delta = (self.actor(audit_history)-audit_action_before)*half_range
                 gradient_metrics.update(actor_update_target_rms_deg=delta.square().mean().sqrt()*(180/math.pi),
                     actor_update_target_max_deg=delta.abs().max()*(180/math.pi),

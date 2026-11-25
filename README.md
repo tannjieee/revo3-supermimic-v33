@@ -60,13 +60,15 @@ bash scripts/launch/run.sh test
 ### 4. 启动训练
 
 ```bash
-# V34 Phase 0+1 优化版（27D 速度增量解析积分 + Bryson 物理容差 + 10% WM Holdout +
-# 75/25 均匀失败采样 + 确定性想象 + Pre-slew target_rate + Critic V_max/LayerNorm/GELU +
-# linear_fine 强梯度朝向奖励 + gamma=0.98/lam=0.9025）
-bash scripts/launch/run_v34_opt.sh --output_dir ./runs/v34_opt_p1 --iterations 30000
+# V34 Phase 2 完整优化版（推荐：Phase 0+1 全部动力学/Critic 升级 + HOME 局部残差动作域 +
+# 连续多目标切换 sequential_goals + 2 头精简 Critic(reward+drop) + 平滑/阻尼/掌心 Cage 正则 + H=12）
+bash scripts/launch/run_v34_opt_p2.sh --output_dir ./runs/v34_opt_p2 --iterations 30000
 
-# V34 快速 GPU smoke 验证
-bash scripts/launch/run_v34_opt.sh --output_dir ./runs/v34_smoke --iterations 5 --smoke
+# V34 Phase 2 快速 GPU smoke 验证
+bash scripts/launch/run_v34_opt_p2.sh --output_dir ./runs/v34_p2_smoke --iterations 5 --smoke
+
+# V34 Phase 0+1 对照版（仅 WM 速度积分 + Bryson + Holdout + Critic V_max/LN/GELU + linear_fine）
+bash scripts/launch/run_v34_opt.sh --output_dir ./runs/v34_opt_p1 --iterations 30000
 
 # V33 基线（target100 / no_target_home）
 bash scripts/launch/run_v33.sh --output_dir ./runs/v33_target100 --iterations 30000

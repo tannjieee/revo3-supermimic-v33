@@ -30,9 +30,9 @@ from .geometry_asset import build_geometry_spec
 from .geometry import HandObjectGeometry
 from .position_reward import POSITION_CONFIG_FIELDS, position_hold_valid
 from .stability_reward import STABILITY_CONFIG_FIELDS
-from .quiet_hold import QUIET_HOLD_CONFIG_FIELDS, validate_episode_timing
+from .quiet_hold import QUIET_HOLD_CONFIG_FIELDS, DEX_REG_CONFIG_FIELDS, validate_episode_timing
 from .state_layout import COMPACT, LEGACY, REFERENCE
-from .goal_hold import persistent_hold_transition, hold_kwargs
+from .goal_hold import hold_transition, persistent_hold_transition, hold_kwargs
 
 TASK_ID = "Isaac-ViserDex-Repose-Revo3-SuperMimic-YellowDie-WujiOffset-HandPose-Hold-v1"
 
@@ -181,6 +181,11 @@ class Adapter:
                     raise ValueError(f'Single-goal reward/command mismatch: {name}')
             if getattr(command_cfg, 'orientation_reward_mode', 'gaussian') != self.hold_cfg.orientation_reward_mode:
                 raise ValueError('Single-goal reward/command mismatch: orientation_reward_mode')
+            if getattr(command_cfg, 'sequential_goals', False) != self.hold_cfg.sequential_goals:
+                raise ValueError('Single-goal reward/command mismatch: sequential_goals')
+            for name in DEX_REG_CONFIG_FIELDS:
+                if getattr(command_cfg, name, getattr(self.hold_cfg, name)) != getattr(self.hold_cfg, name):
+                    raise ValueError(f'Single-goal reward/command mismatch: {name}')
             if env.cfg.rewards.track_orientation_inv_l2 is not None or env.cfg.rewards.track_orientation_exp.weight != 1.:
                 raise ValueError('Single-goal task requires the exponential orientation reward contract')
             if any(getattr(env.cfg.rewards, name) is not None for name in ('action_l2', 'hand_pose', 'success_bonus')):
@@ -674,11 +679,16 @@ class Adapter:
                                                     float((local_error-self.captured_position_error).abs().max()))
             torch.testing.assert_close(self.captured_linear_speed, self.captured_physical[:, VEL].norm(dim=-1), atol=2e-6, rtol=1e-5)
         if self.hold_cfg.compact_state:
-            expected_hold, expected_event = persistent_hold_transition(
-                previous_hold, self.captured_orientation_error, self.captured_angular_speed,
-                self.env.step_dt, already_completed=previous_completed,
-                blocked=done | ~position_hold_valid(self.captured_position_error, self.captured_linear_speed, self.hold_cfg),
-                **hold_kwargs(self.hold_cfg))
+            blocked = done | ~position_hold_valid(self.captured_position_error, self.captured_linear_speed, self.hold_cfg)
+            if self.hold_cfg.sequential_goals:
+                expected_hold, expected_event = hold_transition(
+                    previous_hold, self.captured_orientation_error, self.captured_angular_speed,
+                    self.env.step_dt, blocked=blocked, **hold_kwargs(self.hold_cfg))
+            else:
+                expected_hold, expected_event = persistent_hold_transition(
+                    previous_hold, self.captured_orientation_error, self.captured_angular_speed,
+                    self.env.step_dt, already_completed=previous_completed,
+                    blocked=blocked, **hold_kwargs(self.hold_cfg))
         else:
             expected_hold, expected_event = goal_event(state, self.captured_physical, self.env.step_dt,
                 error=self.captured_orientation_error, speed=self.captured_angular_speed,
@@ -738,7 +748,9 @@ class Adapter:
             if (~done).any():
                 torch.testing.assert_close(self.state[~done, COUNT].squeeze(-1),
                                            state[~done, COUNT].squeeze(-1) + expected_event[~done])
-        unchanged = ~done if self.hold_cfg.goal_mode == 'single_dense_hold' else ~done & ~expected_event
+        unchanged = (~done & ~expected_event
+                     if (self.hold_cfg.goal_mode != 'single_dense_hold' or self.hold_cfg.sequential_goals)
+                     else ~done)
         torch.testing.assert_close(self.state[unchanged, self.sl.goal_rot], state[unchanged, self.sl.goal_rot])
         if self.hold_cfg.goal_mode == 'single_dense_hold':
             torch.testing.assert_close(self.state[~done, self.sl.goal_pos], state[~done, self.sl.goal_pos])

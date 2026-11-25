@@ -78,13 +78,13 @@ def home_pose_penalty(joints, home, cfg):
     return cfg.home_pose_weight * (excess / cfg.home_pose_scale_rad).square().mean(-1)
 
 
-def imagined_motion_penalty(state, next_physical, action, angle, cfg, *, limits=None, encoder_bias=None):
+def imagined_motion_penalty(state, next_physical, action, angle, cfg, *, limits=None, encoder_bias=None, home=None, residual_rad=None):
     from .core import action_target
     from .state_layout import COMPACT
     # WM CUDA capture supplies resident constants; standalone audits may construct them.
     if limits is None:
         limits = action.new_tensor(cfg.network_joint_limits)
-    target = action_target(state, action, limits, cfg)
+    target = action_target(state, action, limits, cfg, home=home, residual_rad=residual_rad)
     if cfg.dex_reference:
         from .dex_reference import EMA, ZERO
         previous = state[..., EMA] - state[..., ZERO]
@@ -95,6 +95,55 @@ def imagined_motion_penalty(state, next_physical, action, angle, cfg, *, limits=
         initial = state[..., :21] - encoder_bias
         previous = torch.where(state[..., COMPACT.delay_ready].bool(), previous, initial)
     return motion_penalty(angle, next_physical[..., 21:42], target, previous, cfg.control_dt, cfg)
+
+
+REF_TARGET_RATE_RAD_S = math.radians(100.0)
+REF_JOINT_SPEED_RAD_S = math.radians(90.0)
+DEX_REG_CONFIG_FIELDS = (
+    'ema_delta_penalty_weight', 'joint_speed_penalty_weight',
+    'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m',
+)
+
+
+def dex_regularization_penalty(distance, joint_velocity, unclipped_target, previous_target, dt, cfg):
+    """Differentiable all-phase smoothness, damping, and soft palm-cage penalties (per second).
+
+    Shared identically by real Newton reward callbacks and differentiable WM imagination.
+    All terms are nonnegative penalties, preserving the exact task_reward_bound upper bound.
+    """
+    total = torch.zeros_like(distance)
+    w_ema = getattr(cfg, 'ema_delta_penalty_weight', 0.0)
+    if w_ema:
+        delta = (unclipped_target - previous_target) / (dt * REF_TARGET_RATE_RAD_S)
+        total = total + w_ema * delta.square().mean(-1)
+    w_vel = getattr(cfg, 'joint_speed_penalty_weight', 0.0)
+    if w_vel:
+        vel = joint_velocity / REF_JOINT_SPEED_RAD_S
+        total = total + w_vel * vel.square().mean(-1)
+    w_cage = getattr(cfg, 'cage_penalty_weight', 0.0)
+    if w_cage:
+        safe = getattr(cfg, 'cage_safe_radius_m', 0.045)
+        scale = getattr(cfg, 'cage_scale_m', 0.025)
+        excess = (distance - safe).clamp_min(0.0)
+        total = total + w_cage * (excess / scale).square()
+    return total
+
+
+def imagined_dex_regularization(state, next_physical, action, distance, cfg, *, limits=None, home=None, residual_rad=None):
+    from .dex_reference import EMA, ZERO, unclipped_target
+    if limits is None:
+        limits = action.new_tensor(cfg.network_joint_limits)
+    if cfg.dex_reference:
+        res_ref = residual_rad if residual_rad is not None else (cfg.dex_action_residual_rad or None)
+        home_ref = (home if home is not None else cfg.action_home) if res_ref is not None else None
+        unclipped = unclipped_target(state, action, limits, cfg.ema_alpha, home=home_ref, residual_rad=res_ref)
+        previous = state[..., EMA] - state[..., ZERO]
+    else:
+        from .core import action_target
+        from .state_layout import COMPACT
+        unclipped = action_target(state, action, limits, cfg)
+        previous = action_target(state, state[..., COMPACT.last_action], limits, cfg)
+    return dex_regularization_penalty(distance, next_physical[..., 21:42], unclipped, previous, cfg.control_dt, cfg)
 
 
 def validate_episode_timing(dt, steps, *, compact):

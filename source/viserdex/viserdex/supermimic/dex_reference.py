@@ -75,14 +75,48 @@ def validate_profile(p):
     if 'failure_sample_fraction' in p and (not math.isfinite(p['failure_sample_fraction']) or not 0 <= p['failure_sample_fraction'] <= 1):
         raise ValueError('Invalid failure_sample_fraction')
     for name in ('grouped_physical_loss', 'deterministic_imagination', 'target_rate_pre_slew_cost',
-                 'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss'):
+                 'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
+                 'sequential_goals', 'compact_critic_costs'):
         if name in p and type(p[name]) is not bool:
             raise ValueError(f'{name} must be boolean')
     if 'orientation_reward_mode' in p and p['orientation_reward_mode'] not in ('gaussian', 'linear_fine'):
         raise ValueError(f"Invalid orientation_reward_mode: {p['orientation_reward_mode']}")
     if 'orientation_tolerance_deg' in p and (not math.isfinite(p['orientation_tolerance_deg']) or not 0 <= p['orientation_tolerance_deg'] < 180):
         raise ValueError('Invalid orientation_tolerance_deg')
+    if 'action_residual_deg' in p:
+        res = p['action_residual_deg']
+        if isinstance(res, (int, float)):
+            if not math.isfinite(res) or res <= 0:
+                raise ValueError('action_residual_deg must be finite and positive')
+        elif isinstance(res, dict):
+            unknown = set(res) - set(HARDWARE_JOINT_NAMES) - {'default'}
+            if unknown:
+                raise ValueError(f'Unknown joint names in action_residual_deg: {sorted(unknown)}')
+            if 'default' not in res and set(res) != set(HARDWARE_JOINT_NAMES):
+                raise ValueError('action_residual_deg dict requires either all 21 joints or a default entry')
+            for k, v in res.items():
+                if not math.isfinite(v) or v <= 0:
+                    raise ValueError(f'Invalid action_residual_deg[{k}]')
+        else:
+            raise ValueError('action_residual_deg must be a positive number or joint-name mapping')
+    for name in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight', 'cage_penalty_weight', 'cage_safe_radius_m'):
+        if name in p and (not math.isfinite(p[name]) or p[name] < 0):
+            raise ValueError(f'Invalid {name}')
+    if 'cage_scale_m' in p and (not math.isfinite(p['cage_scale_m']) or p['cage_scale_m'] <= 0):
+        raise ValueError('Invalid cage_scale_m')
     return limits, asset
+
+
+def action_residual_vector_rad(p):
+    """Return 21-element tuple of per-joint residual radii in hardware order, or () if disabled."""
+    if not p or 'action_residual_deg' not in p:
+        return ()
+    from .revised_contract import HARDWARE_JOINT_NAMES
+    res = p['action_residual_deg']
+    if isinstance(res, (int, float)):
+        return tuple(math.radians(float(res)) for _ in HARDWARE_JOINT_NAMES)
+    default = res.get('default')
+    return tuple(math.radians(float(res.get(n, default))) for n in HARDWARE_JOINT_NAMES)
 
 
 def home_pose_options(p):
@@ -104,6 +138,10 @@ def reward_options(p):
         options['orientation_reward_mode'] = p['orientation_reward_mode']
     if 'orientation_tolerance_deg' in p:
         options['orientation_tolerance_rad'] = math.radians(p['orientation_tolerance_deg'])
+    for key in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight',
+                'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m', 'sequential_goals'):
+        if key in p:
+            options[key] = p[key]
     return options
 
 
@@ -126,12 +164,26 @@ def profile_options(p, digest):
                 'contact_loss_reduction', 'wm_reward_loss_weight', 'wm_observation_loss_weight',
                 'wm_cost_loss_weight', 'wm_holdout_fraction', 'replay_sampling_mode',
                 'failure_sample_fraction', 'deterministic_imagination', 'target_rate_pre_slew_cost',
-                'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss'):
+                'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss', 'compact_critic_costs'):
         if key in p:
             options[key] = p[key]
     if 'wm_bryson_scales' in p:
         options['wm_bryson_scales'] = tuple(float(v) for v in p['wm_bryson_scales'])
+    residual = action_residual_vector_rad(p)
+    if residual:
+        options['dex_action_residual_rad'] = residual
     return options
+
+
+def raw_encoder_target(action, limits, *, home=None, residual_rad=None):
+    """Decode tanh action to encoder target: either full soft limits or HOME-local residual."""
+    if residual_rad is None or len(residual_rad) == 0:
+        from .policy_contract import absolute_joint_target
+        return absolute_joint_target(action, limits)
+    home_t = home if isinstance(home, torch.Tensor) else action.new_tensor(home)
+    res_t = residual_rad if isinstance(residual_rad, torch.Tensor) else action.new_tensor(residual_rad)
+    lower, upper = limits[..., 0], limits[..., 1]
+    return (home_t + res_t * action).clamp(lower, upper)
 
 
 def filter_target(previous, raw, alpha, max_delta=0.):
@@ -142,16 +194,16 @@ def filter_target(previous, raw, alpha, max_delta=0.):
     return encoded
 
 
-def target(state, action, limits, alpha, max_delta=0.):
-    from .policy_contract import absolute_joint_target
-    encoded = filter_target(state[..., EMA], absolute_joint_target(action, limits), alpha, max_delta)
+def target(state, action, limits, alpha, max_delta=0., *, home=None, residual_rad=None):
+    raw = raw_encoder_target(action, limits, home=home, residual_rad=residual_rad)
+    encoded = filter_target(state[..., EMA], raw, alpha, max_delta)
     return encoded-state[..., ZERO]
 
 
-def unclipped_target(state, action, limits, alpha):
+def unclipped_target(state, action, limits, alpha, *, home=None, residual_rad=None):
     """Pre-slew EMA geometric target so rate-limit costs retain nonzero gradients."""
-    from .policy_contract import absolute_joint_target
-    encoded = alpha * absolute_joint_target(action, limits) + (1 - alpha) * state[..., EMA]
+    raw = raw_encoder_target(action, limits, home=home, residual_rad=residual_rad)
+    encoded = alpha * raw + (1 - alpha) * state[..., EMA]
     return encoded - state[..., ZERO]
 
 

@@ -15,6 +15,8 @@ OBJECT_COST_NAMES = ('object_angular_speed', 'object_linear_speed', 'drop')
 
 
 def cost_names(cfg):
+    if getattr(cfg, 'compact_critic_costs', False) and cfg.object_hold_costs_enabled:
+        return ('drop',)
     return COST_NAMES + OBJECT_COST_NAMES if cfg.object_hold_costs_enabled else COST_NAMES
 
 
@@ -25,10 +27,13 @@ def object_hold_gate(state, next_physical, cfg):
     return torch.exp(-(angle / cfg.cost_object_hold_angle_sigma_rad).square())
 
 
-def violation_costs(state, next_physical, action, limits, cfg, *, encoder_bias=None, hand_center=None):
-    target = action_target(state, action, limits, cfg)
+def violation_costs(state, next_physical, action, limits, cfg, *, encoder_bias=None, hand_center=None, home=None, residual_rad=None):
+    if getattr(cfg, 'compact_critic_costs', False) and cfg.object_hold_costs_enabled:
+        drop_ratio = (drop_distance(next_physical, cfg, origin=hand_center) / cfg.drop_radius_m)[..., None]
+        return torch.relu(drop_ratio - 1).square(), drop_ratio
+    target = action_target(state, action, limits, cfg, home=home, residual_rad=residual_rad)
     rate_target = target
-    previous = action_target(state, state[..., COMPACT.last_action], limits, cfg)
+    previous = action_target(state, state[..., COMPACT.last_action], limits, cfg, home=home, residual_rad=residual_rad)
     # An empty reset queue has no previous policy command: use the measured
     # encoder position as the first target-rate reference, as in playback.
     bias = state.new_tensor(cfg.encoder_bias_rad) if encoder_bias is None else encoder_bias
@@ -38,7 +43,11 @@ def violation_costs(state, next_physical, action, limits, cfg, *, encoder_bias=N
         previous = state[..., EMA]-state[..., ZERO]
         if getattr(cfg, 'target_rate_pre_slew_cost', False) and cfg.target_slew_rate_rad_s:
             # Penalize the pre-slew EMA command intent so hard slew clamping does not zero gradients.
-            rate_target = unclipped_target(state, action, limits, cfg.ema_alpha)
+            res_ref = residual_rad if residual_rad is not None else (cfg.dex_action_residual_rad or None)
+            home_ref = (home if home is not None else cfg.action_home) if res_ref is not None else None
+            rate_target = unclipped_target(
+                state, action, limits, cfg.ema_alpha, home=home_ref, residual_rad=res_ref,
+            )
     else:
         previous = torch.where(state[..., COMPACT.delay_ready].bool(), previous, initial)
     velocity_ratio = next_physical[..., 21:42].abs() / cfg.cost_velocity_limit_rad_s

@@ -24,7 +24,10 @@ def explore_absolute(action, previous_noise_rad, limits, cfg, *, innovation=None
     rho = math.exp(-cfg.control_dt / cfg.exploration_correlation_s)
     noise = rho * previous_noise_rad + cfg.exploration_position_std_rad * math.sqrt(1-rho*rho) * innovation
     lower, upper = limits[..., 0], limits[..., 1]
-    half = (upper-lower)*.5
+    if getattr(cfg, 'dex_action_residual_rad', ()):
+        half = action.new_tensor(cfg.dex_action_residual_rad)
+    else:
+        half = (upper-lower)*.5
     perturbed = action + noise/half
     # Fold the normalized coordinate into [-1,1]; inference remains plain tanh.
     reflected = 1 - torch.abs(torch.remainder(perturbed+1, 4)-2)

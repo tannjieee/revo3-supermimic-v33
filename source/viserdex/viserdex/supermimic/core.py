@@ -197,6 +197,15 @@ class Config:
     critic_layer_norm: bool = False
     critic_value_cap: bool = False
     critic_mean_loss: bool = False
+    # V34 Phase 2 optimization flags (control space, sequential goals, compact Critic, smooth/cage regs).
+    dex_action_residual_rad: tuple = ()
+    sequential_goals: bool = False
+    compact_critic_costs: bool = False
+    ema_delta_penalty_weight: float = 0.0
+    joint_speed_penalty_weight: float = 0.0
+    cage_penalty_weight: float = 0.0
+    cage_safe_radius_m: float = 0.045
+    cage_scale_m: float = 0.025
 
     @property
     def uses_v34_optimizations(self):
@@ -213,6 +222,12 @@ class Config:
             or self.critic_value_cap
             or self.critic_mean_loss
             or self.orientation_reward_mode != "gaussian"
+            or bool(self.dex_action_residual_rad)
+            or self.sequential_goals
+            or self.compact_critic_costs
+            or self.ema_delta_penalty_weight > 0.0
+            or self.joint_speed_penalty_weight > 0.0
+            or self.cage_penalty_weight > 0.0
             or (self.wm_task_losses and min(
                 self.wm_reward_loss_weight, self.wm_observation_loss_weight, self.wm_cost_loss_weight) == 0.0)
         )
@@ -245,6 +260,9 @@ class Config:
                 'deterministic_imagination', 'target_rate_pre_slew_cost',
                 'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
                 'orientation_reward_mode', 'orientation_tolerance_rad',
+                'dex_action_residual_rad', 'sequential_goals', 'compact_critic_costs',
+                'ema_delta_penalty_weight', 'joint_speed_penalty_weight',
+                'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m',
             }
             for name, value in expected.items():
                 if name in v34_ablation_fields:
@@ -332,9 +350,22 @@ class Config:
         if not math.isfinite(self.failure_sample_fraction) or not 0 <= self.failure_sample_fraction <= 1:
             raise ValueError('failure_sample_fraction must be in [0, 1]')
         for name in ('deterministic_imagination', 'target_rate_pre_slew_cost',
-                     'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss'):
+                     'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
+                     'sequential_goals', 'compact_critic_costs'):
             if type(getattr(self, name)) is not bool:
                 raise ValueError(f'{name} must be boolean')
+        if self.dex_action_residual_rad:
+            if not self.dex_reference:
+                raise ValueError('dex_action_residual_rad requires dex_reference')
+            if len(self.dex_action_residual_rad) != 21 or any(not math.isfinite(v) or v <= 0 for v in self.dex_action_residual_rad):
+                raise ValueError('dex_action_residual_rad must contain 21 finite positive radii')
+        if self.compact_critic_costs and not self.object_hold_costs_enabled:
+            raise ValueError('compact_critic_costs requires object_hold_costs_enabled')
+        for name in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight', 'cage_penalty_weight', 'cage_safe_radius_m'):
+            if not math.isfinite(getattr(self, name)) or getattr(self, name) < 0:
+                raise ValueError(f'{name} must be finite and nonnegative')
+        if not math.isfinite(self.cage_scale_m) or self.cage_scale_m <= 0:
+            raise ValueError('cage_scale_m must be finite and positive')
         if self.orientation_reward_mode not in ('gaussian', 'linear_fine'):
             raise ValueError(f'Unknown orientation_reward_mode: {self.orientation_reward_mode}')
         if self.network_revision not in ('legacy', 'urdf_little_v2', 'hardware_center25_v3'):
@@ -557,10 +588,15 @@ def ema_target(s, action, limits, alpha=0.95):
     return (alpha * target + (1 - alpha) * s[..., EMA]).clamp(lower, upper)
 
 
-def action_target(s, action, limits, cfg):
+def action_target(s, action, limits, cfg, *, home=None, residual_rad=None):
     """Exact real/imagined control contract; targets retain their own EMA memory."""
     if cfg.dex_reference:
-        return dex.target(s, action, limits, cfg.ema_alpha, cfg.target_slew_rate_rad_s * cfg.control_dt)
+        res = residual_rad if residual_rad is not None else (cfg.dex_action_residual_rad or None)
+        h = home if home is not None else (cfg.action_home if res is not None else None)
+        return dex.target(
+            s, action, limits, cfg.ema_alpha, cfg.target_slew_rate_rad_s * cfg.control_dt,
+            home=h, residual_rad=res,
+        )
     if cfg.action_mode == "direct_limits":
         return absolute_joint_target(action, limits)
     if cfg.action_mode == "limits":
@@ -606,12 +642,12 @@ def goal_event(s, physical_next, dt, error=None, speed=None, hold_cfg=None, epis
                            blocked=blocked, **hold_kwargs(hold_cfg))
 
 
-def reward(s, physical_next, action, dt=1 / 30, success_bonus=250.0, action_rate_weight=0.01, joint_vel_weight=2.5e-5, action_l2_weight=1e-4, action_second_diff_weight=0.0, *, hold_cfg=None, limits=None, encoder_bias=None, home=None):
+def reward(s, physical_next, action, dt=1 / 30, success_bonus=250.0, action_rate_weight=0.01, joint_vel_weight=2.5e-5, action_l2_weight=1e-4, action_second_diff_weight=0.0, *, hold_cfg=None, limits=None, encoder_bias=None, home=None, residual_rad=None):
     error = rotation_log(quat_mul(physical_next[..., ROT], quat_conjugate(s[..., layout(s).goal_rot]))).norm(dim=-1)
-    return reward_from_orientation_error(s, physical_next, action, error, dt, success_bonus, action_rate_weight, joint_vel_weight, action_l2_weight, action_second_diff_weight, hold_cfg=hold_cfg, limits=limits, encoder_bias=encoder_bias, home=home)
+    return reward_from_orientation_error(s, physical_next, action, error, dt, success_bonus, action_rate_weight, joint_vel_weight, action_l2_weight, action_second_diff_weight, hold_cfg=hold_cfg, limits=limits, encoder_bias=encoder_bias, home=home, residual_rad=residual_rad)
 
 
-def reward_from_orientation_error(s, physical_next, action, error, dt=1 / 30, success_bonus=250.0, action_rate_weight=0.01, joint_vel_weight=2.5e-5, action_l2_weight=1e-4, action_second_diff_weight=0.0, *, hold_cfg=None, success_event=None, limits=None, encoder_bias=None, home=None):
+def reward_from_orientation_error(s, physical_next, action, error, dt=1 / 30, success_bonus=250.0, action_rate_weight=0.01, joint_vel_weight=2.5e-5, action_l2_weight=1e-4, action_second_diff_weight=0.0, *, hold_cfg=None, success_event=None, limits=None, encoder_bias=None, home=None, residual_rad=None):
     if hold_cfg is not None and hold_cfg.goal_mode == "single_dense_hold":
         distance = (physical_next[..., POS] - s[..., layout(s).goal_pos]).norm(dim=-1)
         quiet_penalty = 0.0
@@ -623,13 +659,20 @@ def reward_from_orientation_error(s, physical_next, action, error, dt=1 / 30, su
         if hold_cfg.quiet_hold_enabled:
             from .quiet_hold import imagined_motion_penalty
             quiet_penalty = imagined_motion_penalty(s, physical_next, action, error, hold_cfg,
-                limits=limits, encoder_bias=encoder_bias)
+                limits=limits, encoder_bias=encoder_bias, home=home, residual_rad=residual_rad)
+        reg_penalty = 0.0
+        if (hold_cfg.ema_delta_penalty_weight or hold_cfg.joint_speed_penalty_weight
+                or hold_cfg.cage_penalty_weight):
+            from .quiet_hold import imagined_dex_regularization
+            reg_penalty = imagined_dex_regularization(
+                s, physical_next, action, distance, hold_cfg, limits=limits, home=home, residual_rad=residual_rad)
         return dt * (
             orientation_reward(error, hold_cfg) + position_reward(distance, hold_cfg)
             + stability_reward(error, distance, physical_next[..., OMEGA].norm(dim=-1),
                                physical_next[..., VEL].norm(dim=-1), hold_cfg)
             - quiet_penalty
             - pose_penalty
+            - reg_penalty
             - joint_vel_weight * physical_next[..., QD].square().sum(-1)
             - action_rate_weight * (action - s[..., layout(s).last_action]).square().sum(-1)
         )

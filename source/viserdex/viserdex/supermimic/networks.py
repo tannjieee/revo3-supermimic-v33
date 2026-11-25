@@ -206,13 +206,17 @@ class Actor(nn.Module):
             self.net[-1].weight.mul_(0.01)
             self.net[-1].bias.zero_()
             if cfg.absolute_policy_optimization:
-                limits = torch.tensor(cfg.network_joint_limits)
-                home = torch.tensor(cfg.action_home) - torch.tensor(cfg.encoder_bias_rad)
-                normalized = 2*(home-limits[:, 0])/(limits[:, 1]-limits[:, 0])-1
-                # A constant legal absolute HOME target independent of input
-                # normalization at startup. Earlier layers learn after step one.
                 self.net[-1].weight.zero_()
-                self.net[-1].bias.copy_(torch.atanh(normalized))
+                if cfg.dex_action_residual_rad:
+                    # Residual actions are centered at HOME: a = tanh(0) = 0 -> q_raw = HOME.
+                    self.net[-1].bias.zero_()
+                else:
+                    limits = torch.tensor(cfg.network_joint_limits)
+                    home = torch.tensor(cfg.action_home) - torch.tensor(cfg.encoder_bias_rad)
+                    normalized = 2*(home-limits[:, 0])/(limits[:, 1]-limits[:, 0])-1
+                    # A constant legal absolute HOME target independent of input
+                    # normalization at startup. Earlier layers learn after step one.
+                    self.net[-1].bias.copy_(torch.atanh(normalized))
 
     def scaled_observation(self, observation):
         result = observation * self.observation_scale if hasattr(self, 'observation_scale') else observation

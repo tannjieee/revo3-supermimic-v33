@@ -5,12 +5,12 @@ from isaaclab.managers import CommandTerm
 from isaaclab.utils import configclass
 from isaaclab.utils.math import quat_error_magnitude, quat_apply, quat_mul
 from .hold_command import HoldReorientCommand, HoldReorientCommandCfg
-from .goal_hold import persistent_hold_transition
+from .goal_hold import hold_transition, persistent_hold_transition
 from .core import sample_xy_goal
 from .orientation_reward import orientation_reward, validate_orientation_reward
 from .position_reward import position_reward, position_hold_valid, validate_position_reward
 from .stability_reward import stability_reward, validate_stability_reward
-from .quiet_hold import validate_quiet_hold, motion_penalty
+from .quiet_hold import validate_quiet_hold, motion_penalty, dex_regularization_penalty
 
 
 class SingleGoalCommand(HoldReorientCommand):
@@ -46,38 +46,55 @@ class SingleGoalCommand(HoldReorientCommand):
         self.last_speed.copy_(self.object.data.root_ang_vel_w.torch.norm(dim=-1))
         self.last_position_error.copy_((self.object.data.root_pos_w.torch - self.pos_command_w).norm(dim=-1))
         self.last_linear_speed.copy_(self.object.data.root_lin_vel_w.torch.norm(dim=-1))
-        ticks, event = persistent_hold_transition(
-            self.hold_ticks, self.last_angle, self.last_speed, self._env.step_dt,
-            already_completed=self.metrics['consecutive_success'] > 0,
-            angle_threshold=self.cfg.orientation_success_threshold,
-            speed_threshold=self.cfg.hold_speed_threshold, duration=self.cfg.hold_duration,
-            blocked=self._env.reset_buf | ~position_hold_valid(
-                self.last_position_error, self.last_linear_speed, self.cfg),
-        )
+        blocked = self._env.reset_buf | ~position_hold_valid(
+            self.last_position_error, self.last_linear_speed, self.cfg)
+        if getattr(self.cfg, 'sequential_goals', False):
+            ticks, event = hold_transition(
+                self.hold_ticks, self.last_angle, self.last_speed, self._env.step_dt,
+                angle_threshold=self.cfg.orientation_success_threshold,
+                speed_threshold=self.cfg.hold_speed_threshold, duration=self.cfg.hold_duration,
+                blocked=blocked,
+            )
+        else:
+            ticks, event = persistent_hold_transition(
+                self.hold_ticks, self.last_angle, self.last_speed, self._env.step_dt,
+                already_completed=self.metrics['consecutive_success'] > 0,
+                angle_threshold=self.cfg.orientation_success_threshold,
+                speed_threshold=self.cfg.hold_speed_threshold, duration=self.cfg.hold_duration,
+                blocked=blocked,
+            )
         self.hold_ticks.copy_(ticks)
         self.just_completed.copy_(event)
         self.metrics['consecutive_success'].add_(event)
         return event
 
     def compute(self, dt):
-        # Official task-local command lifecycle. Only reset or an explicit new
-        # command samples a goal; neither elapsed time nor success can do so.
+        # Official task-local command lifecycle. Sequential goals resample immediately
+        # after each completed hold; legacy single-goal keeps one goal per episode.
         self._update_metrics()
+        if getattr(self.cfg, 'sequential_goals', False):
+            self._update_command()
 
     def _update_command(self):
-        pass
+        if not getattr(self.cfg, 'sequential_goals', False):
+            return
+        earned = self.just_completed & ~self._env.reset_buf
+        ids = earned.nonzero(as_tuple=False).squeeze(-1)
+        if len(ids):
+            self._resample_command(ids, preserve_success=True)
 
-    def _resample_command(self, env_ids):
+    def _resample_command(self, env_ids, *, preserve_success=False):
         self.quat_command_w[env_ids] = sample_xy_goal(self.quat_command_w[env_ids])
         self.pos_command_e[env_ids] = self.default_pos_command_e[env_ids]
         self.pos_command_w[env_ids] = self.pos_command_e[env_ids] + self._env.scene.env_origins[env_ids]
-        self._restart_goal(env_ids)
+        self._restart_goal(env_ids, preserve_success=preserve_success)
 
-    def _restart_goal(self, env_ids):
+    def _restart_goal(self, env_ids, *, preserve_success=False):
         self.goal_start_step[env_ids] = self._env.common_step_counter
         self.hold_ticks[env_ids] = 0
         self.just_completed[env_ids] = False
-        self.metrics['consecutive_success'][env_ids] = 0
+        if not preserve_success:
+            self.metrics['consecutive_success'][env_ids] = 0
 
     def set_goal(self, env_ids, quaternion_xyzw, position_base_m):
         """Explicit hand-base-frame pose; reissuing it restarts evaluation statistics only."""
@@ -113,6 +130,7 @@ class SingleGoalCommand(HoldReorientCommand):
 class SingleGoalCommandCfg(HoldReorientCommandCfg):
     class_type: type = SingleGoalCommand
     update_goal_on_success: bool = False
+    sequential_goals: bool = False
     goal_evaluation_s: float = 10.0
     track_object_position: bool = True  # Preserve saved environments predating orientation-only holding.
     stability_reward_scale: float = 3.0
@@ -129,6 +147,11 @@ class SingleGoalCommandCfg(HoldReorientCommandCfg):
     home_pose_weight: float = 0.0
     home_pose_deadband_rad: float = math.pi / 12
     home_pose_scale_rad: float = math.pi / 6
+    ema_delta_penalty_weight: float = 0.0
+    joint_speed_penalty_weight: float = 0.0
+    cage_penalty_weight: float = 0.0
+    cage_safe_radius_m: float = 0.045
+    cage_scale_m: float = 0.025
     orientation_reward_mode: str = "gaussian"
     orientation_reward_scale: float = 10.0
     orientation_coarse_sigma_rad: float = math.pi / 2
@@ -173,4 +196,14 @@ def dense_stability_reward(env, command_name='object_pose'):
         joints = joints if isinstance(joints, torch.Tensor) else joints.torch
         home = home if isinstance(home, torch.Tensor) else home.torch
         value = value - home_pose_penalty(joints[:, action._joint_ids], home[:, action._joint_ids], command.cfg)
+    if (getattr(command.cfg, 'ema_delta_penalty_weight', 0.)
+            or getattr(command.cfg, 'joint_speed_penalty_weight', 0.)
+            or getattr(command.cfg, 'cage_penalty_weight', 0.)):
+        action = env.action_manager.get_term('joint_pos')
+        velocity = action._asset.data.joint_vel
+        velocity = velocity if isinstance(velocity, torch.Tensor) else velocity.torch
+        unclipped = getattr(action, 'unclipped_processed_actions', action.processed_actions)
+        value = value - dex_regularization_penalty(
+            command.last_position_error, velocity[:, action._joint_ids],
+            unclipped, action.previous_processed_actions, env.step_dt, command.cfg)
     return value

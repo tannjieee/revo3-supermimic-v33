@@ -232,12 +232,16 @@ def imagine_stable(trainer, batch):
                 regularization = logit_regularizer(logits, cfg)
         else:
             action = trainer.actor(history)
-        target = action_target(state, action, limits, cfg)
+        target = action_target(state, action, limits, cfg,
+                               home=trainer._wm_home, residual_rad=trainer._wm_action_residual)
         nxt = trainer.wm(state, target, context)
         r = reward(state, nxt, action, cfg.control_dt, cfg.success_bonus, cfg.action_rate_weight,
                    cfg.joint_vel_weight, cfg.action_l2_weight, cfg.action_second_diff_weight, hold_cfg=cfg,
-                   limits=limits, encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home)
-        raw, _ = violation_costs(state, nxt, action, limits, cfg)
+                   limits=limits, encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home,
+                   residual_rad=trainer._wm_action_residual)
+        raw, _ = violation_costs(state, nxt, action, limits, cfg,
+                                 encoder_bias=trainer._wm_encoder_bias, hand_center=trainer._wm_hand_center,
+                                 home=trainer._wm_home, residual_rad=trainer._wm_action_residual)
         continuation = torch.where(active, trainer.continuation(state, nxt), 0.)
         p = 1-continuation
         discount_alive = cfg.gamma**t * alive

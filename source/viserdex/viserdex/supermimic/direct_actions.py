@@ -20,7 +20,7 @@ class DirectJointPositionAction(JointPositionToLimitsAction):
         from .sdk_limits import validate_limits
         from .training_limits import load_training_limits
         if cfg.dex_reference_profile is not None:
-            from .dex_reference import validate_profile
+            from .dex_reference import validate_profile, action_residual_vector_rad
             expected, source = validate_profile(cfg.dex_reference_profile)
             if list(cfg.joint_names) != source['joint_names']:
                 raise ValueError('v33 hardware joint order changed')
@@ -30,7 +30,10 @@ class DirectJointPositionAction(JointPositionToLimitsAction):
             self.position_limits = self._raw_actions.new_tensor(limits)[None].expand(env.num_envs, -1, -1)
             self.zero_bias = torch.zeros_like(self._raw_actions)
             self.ema_encoder = torch.zeros_like(self._raw_actions)
+            self.unclipped_processed_actions = torch.zeros_like(self._raw_actions)
             self.target_max_delta = math.radians(cfg.dex_reference_profile.get('target_slew_rate_deg_s', 0.)) * env.step_dt
+            residual = action_residual_vector_rad(cfg.dex_reference_profile)
+            self.action_residual_rad = self._raw_actions.new_tensor(residual) if residual else None
             self.reset()
             return
         if cfg.limit_contract in ('urdf_little_v2', 'hardware_center25_v3'):
@@ -58,11 +61,21 @@ class DirectJointPositionAction(JointPositionToLimitsAction):
         self.previous_processed_actions.copy_(torch.where(
             self._quiet_target_ready, self._processed_actions, initial))
         self._raw_actions.copy_(actions)
-        raw = absolute_joint_target(actions, self.position_limits)
         if self.cfg.dex_reference_profile is not None:
-            from .dex_reference import filter_target
+            from .dex_reference import filter_target, raw_encoder_target
+            residual = getattr(self, 'action_residual_rad', None)
+            home = None
+            if residual is not None:
+                home = self._asset.data.default_joint_pos
+                home = (home if isinstance(home, torch.Tensor) else home.torch)[:, self._joint_ids]
+            raw = raw_encoder_target(actions, self.position_limits, home=home, residual_rad=residual)
+            if hasattr(self, 'unclipped_processed_actions'):
+                unclipped_ema = self.cfg.alpha * raw + (1 - self.cfg.alpha) * self.ema_encoder
+                self.unclipped_processed_actions.copy_(unclipped_ema - self.zero_bias)
             self.ema_encoder = filter_target(self.ema_encoder, raw, self.cfg.alpha, getattr(self, 'target_max_delta', 0.))
             raw = self.ema_encoder-self.zero_bias
+        else:
+            raw = absolute_joint_target(actions, self.position_limits)
         self._processed_actions.copy_(raw)
         self._quiet_target_ready.fill_(True)
 

@@ -19,10 +19,11 @@ from viserdex.supermimic.stable_values import value_bounds, cap_values
 from viserdex.supermimic.trainer import Trainer, checkpoint_version, imagination_protocol, holdout_env_count
 
 V34_PROFILE = Path(__file__).resolve().parents[1] / "configs/supermimic_v34/control_opt_p1.yaml"
+V34_P2_PROFILE = Path(__file__).resolve().parents[1] / "configs/supermimic_v34/control_opt_p2.yaml"
 
 
-def make_v34_cfg(**overrides):
-    profile, digest = load_profile(V34_PROFILE)
+def make_v34_cfg(*, profile_path=V34_PROFILE, **overrides):
+    profile, digest = load_profile(profile_path)
     base = hand_center_config(
         wm_task_losses=True, stable_value_learning=True, absolute_policy_optimization=True,
         paper_critic=True, quiet_hold_enabled=True, cost_penalty=0.05, actor_lr_scale=0.25,
@@ -242,6 +243,133 @@ def test_v34_wm_cuda_graph_matches_eager():
     batch = replay.sample(cfg.wm_batch, cfg.wm_window, include_events=False)
 
     # Single-batch parity between eager loss/backward and CapturedWMLoss.
+    from viserdex.supermimic.wm_cuda_graph import CapturedWMLoss
+    captured = CapturedWMLoss(graph, batch)
+    eager.opt_wm.zero_grad(set_to_none=True)
+    eager.opt_failure.zero_grad(set_to_none=True)
+    loss_e, err_e, phys_e, _, _ = eager._wm_loss(batch)
+    loss_e.backward()
+    eager._independent_failure_loss.backward()
+    loss_g, err_g, phys_g, _, _ = captured(batch)
+    torch.testing.assert_close(loss_g, loss_e, atol=1e-5, rtol=1e-5)
+    torch.testing.assert_close(err_g, err_e, atol=1e-5, rtol=1e-5)
+    torch.testing.assert_close(phys_g, phys_e, atol=1e-5, rtol=1e-5)
+    for (n, pe), (_, pg) in zip(eager.wm.named_parameters(), graph.wm.named_parameters()):
+        torch.testing.assert_close(pg.grad, pe.grad, atol=1e-4, rtol=1e-4, msg=f"Grad mismatch on {n}")
+
+
+def test_phase2_home_residual_actions_and_centered_actor_init():
+    from viserdex.supermimic.core import action_target
+    from viserdex.supermimic.networks import Actor
+    from viserdex.supermimic.revised_contract import HARDWARE_JOINT_NAMES
+    cfg = make_v34_cfg(profile_path=V34_P2_PROFILE, cost_penalty=0.25, horizon=12)
+    assert len(cfg.dex_action_residual_rad) == 21
+    # Thumb opposition joints have wider residual allowance than default fingers.
+    cmp_idx = HARDWARE_JOINT_NAMES.index("right_thumb_CMP_joint")
+    idx_idx = HARDWARE_JOINT_NAMES.index("right_index_PIP_joint")
+    assert cfg.dex_action_residual_rad[cmp_idx] == pytest.approx(math.radians(55.0))
+    assert cfg.dex_action_residual_rad[idx_idx] == pytest.approx(math.radians(42.0))
+
+    # Centered zero-bias Actor outputs action == 0 -> exact HOME geometric target at startup.
+    actor = Actor(cfg)
+    assert float(actor.net[-1].bias.detach().abs().max()) == 0.0
+    state, limits = synthetic_step(cfg, 4)
+    home = torch.tensor(cfg.action_home, dtype=torch.float32)[None].expand(4, -1)
+    # Zero encoder offset: action == 0 -> exact HOME target.
+    state[:, 104:125] = 0.0
+    state[:, 83:104] = home
+    zero_action = torch.zeros(4, 21)
+    tgt = action_target(state, zero_action, limits, cfg)
+    torch.testing.assert_close(tgt, home, atol=1e-6, rtol=0)
+    # With nonzero zero_bias delta: action == 0 produces home - alpha * delta (exact EMA math).
+    delta = 0.01 * torch.ones(4, 21)
+    state[:, 104:125] = delta
+    state[:, 83:104] = home + delta
+    tgt_biased = action_target(state, zero_action, limits, cfg)
+    torch.testing.assert_close(tgt_biased, home - cfg.ema_alpha * delta, atol=1e-6, rtol=0)
+
+    # Full extreme actions [-1, +1] stay strictly within soft limits before zero subtraction.
+    for sign in (-1.0, 1.0):
+        raw_enc = target(state, torch.full((4, 21), sign), limits, 1.0, 0.0,
+                         home=cfg.action_home, residual_rad=cfg.dex_action_residual_rad) + state[:, 104:125]
+        assert (raw_enc >= limits[..., 0] - 1e-6).all()
+        assert (raw_enc <= limits[..., 1] + 1e-6).all()
+
+
+def test_phase2_regularization_penalties_and_gradients():
+    from viserdex.supermimic.quiet_hold import dex_regularization_penalty, imagined_dex_regularization
+    cfg = make_v34_cfg(profile_path=V34_P2_PROFILE)
+    state, limits = synthetic_step(cfg, 4)
+    nxt = state[:, :55].clone().requires_grad_(True)
+    action = torch.full((4, 21), 0.5, requires_grad=True)
+    # Inside safe cage radius (2 cm < 4.5 cm): zero cage penalty.
+    d_in = torch.full((4,), 0.02, requires_grad=True)
+    p_in = dex_regularization_penalty(d_in, torch.zeros(4, 21), torch.zeros(4, 21), torch.zeros(4, 21), cfg.control_dt, cfg)
+    assert float(p_in.detach().max()) == 0.0
+    # Outside safe cage radius (7 cm > 4.5 cm): smooth positive penalty pulling object back inward.
+    d_out = torch.full((4,), 0.07, requires_grad=True)
+    p_out = dex_regularization_penalty(d_out, torch.zeros(4, 21), torch.zeros(4, 21), torch.zeros(4, 21), cfg.control_dt, cfg)
+    assert float(p_out.detach().min()) == pytest.approx(cfg.cage_penalty_weight, abs=1e-5)
+    g_d = torch.autograd.grad(p_out.sum(), d_out)[0]
+    assert (g_d > 0).all()
+
+    # Full imagined regularization delivers finite nonzero gradients to both action and next_physical.
+    dist = (nxt[:, POS] - state[:, 76:79]).norm(dim=-1) + 0.08
+    reg = imagined_dex_regularization(state, nxt, action, dist, cfg, limits=limits)
+    reg.sum().backward()
+    assert torch.isfinite(action.grad).all() and action.grad.abs().sum() > 0
+    assert torch.isfinite(nxt.grad).all() and nxt.grad[:, QD].abs().sum() > 0
+
+
+def test_phase2_compact_two_head_critic_update_export_and_inference():
+    from viserdex.supermimic.constraints import cost_names
+    from viserdex.supermimic.inference import export_actor, ManualConvexPolicy
+    from viserdex.supermimic.revised_contract import HARDWARE_JOINT_NAMES
+    cfg = make_v34_cfg(profile_path=V34_P2_PROFILE, cost_penalty=0.25, horizon=8)
+    assert cost_names(cfg) == ("drop",)
+    trainer, replay = populate_replay(cfg, n_envs=10, steps=14)
+    # Critic outputs exactly 2 heads: [reward, drop_risk].
+    assert trainer.critic.net[-1].out_features == 2
+    assert "_res_" in imagination_protocol(cfg) and "_seq_" in imagination_protocol(cfg) and "_c2_" in imagination_protocol(cfg)
+
+    metrics = trainer.update(replay)
+    assert math.isfinite(metrics["wm_loss"])
+    assert math.isfinite(metrics["actor_loss"])
+    assert math.isfinite(metrics["critic_loss"])
+    assert "imagined_cost_drop" in metrics
+    assert "imagined_cost_joint_speed" not in metrics
+
+    # Export and run offline ManualConvexPolicy inference end-to-end.
+    ckpt = Path("/tmp/test_v34_p2_ckpt.pt")
+    exported = Path("/tmp/test_v34_p2_actor.pt")
+    meta = dict(
+        environment_contract="c", joint_names=list(HARDWARE_JOINT_NAMES), context_schema={},
+        observation_protocol=cfg.observation_protocol, state_protocol=cfg.state_protocol,
+        observation_dim=cfg.observation_dim, quaternion_order="XYZW",
+        joint_limits_rad=[list(lim) for lim in cfg.network_joint_limits],
+        context_manifest={}, identified_hand={}, sdk_software_limits={}, training_soft_limits={},
+        environment_binding=dict(assets={}),
+    )
+    trainer.save(ckpt, meta)
+    export_actor(ckpt, exported)
+    policy = ManualConvexPolicy(exported, device="cpu")
+    policy.set_goal([0.0, 0.0, 0.0, 1.0], [0.04, 0.0, 0.10])
+    tgt, raw, obs = policy.propose(list(cfg.action_home), [0.0] * 21, [0.04, 0.0, 0.10], [0.0, 0.0, 0.0, 1.0])
+    policy.commit()
+    assert tgt.shape == (21,) and raw.shape == (21,) and obs.shape == (75,)
+    ckpt.unlink(missing_ok=True)
+    exported.unlink(missing_ok=True)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required for Phase 2 CUDA Graph parity check")
+def test_phase2_wm_cuda_graph_matches_eager():
+    cfg = make_v34_cfg(profile_path=V34_P2_PROFILE, cost_penalty=0.25, horizon=8)
+    torch.manual_seed(456)
+    eager, replay = populate_replay(cfg, n_envs=10, steps=14, device="cuda")
+    graph = Trainer(cfg, eager.noise_cfg, eager.context, eager.limits, eager.base_inverse, "cuda", 250, wm_cuda_graph=True)
+    graph.wm.load_state_dict(eager.wm.state_dict())
+    batch = replay.sample(cfg.wm_batch, cfg.wm_window, include_events=False)
+
     from viserdex.supermimic.wm_cuda_graph import CapturedWMLoss
     captured = CapturedWMLoss(graph, batch)
     eager.opt_wm.zero_grad(set_to_none=True)

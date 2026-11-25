@@ -16,11 +16,11 @@ from .stability_reward import task_reward_bound
 PROTOCOL = 'analytic_task_consistency_learned_termination_v1'
 
 
-def clean_next_observation(state, physical, action, limits, cfg, *, encoder_bias=None):
+def clean_next_observation(state, physical, action, limits, cfg, *, encoder_bias=None, home=None, residual_rad=None):
     if cfg.dex_reference:
         from .dex_reference import ZERO, observation
         from .core import action_target, advance
-        target = action_target(state, action, limits, cfg)
+        target = action_target(state, action, limits, cfg, home=home, residual_rad=residual_rad)
         nxt = advance(state, physical, action, target, state[..., COMPACT.goal_rot], hold_cfg=cfg)
         joints = 2*(physical[..., Q]+state[..., ZERO]-limits[..., 0])/(limits[..., 1]-limits[..., 0])-1
         return observation(joints, nxt, limits, physical[..., POS], physical[..., ROT])
@@ -32,10 +32,11 @@ def clean_next_observation(state, physical, action, limits, cfg, *, encoder_bias
                               include_object_position=cfg.include_object_position)
 
 
-def task_reward(state, physical, action, cfg, *, limits=None, encoder_bias=None, home=None):
+def task_reward(state, physical, action, cfg, *, limits=None, encoder_bias=None, home=None, residual_rad=None):
     return reward(state, physical, action, cfg.control_dt, cfg.success_bonus,
                   cfg.action_rate_weight, cfg.joint_vel_weight, cfg.action_l2_weight,
-                  cfg.action_second_diff_weight, hold_cfg=cfg, limits=limits, encoder_bias=encoder_bias, home=home)
+                  cfg.action_second_diff_weight, hold_cfg=cfg, limits=limits,
+                  encoder_bias=encoder_bias, home=home, residual_rad=residual_rad)
 
 
 def loss_names(cfg):
@@ -46,18 +47,22 @@ def loss_names(cfg):
 def task_losses(trainer, state, prediction, real_state, real_next, action, limits, real_reward, terminated):
     """Per-sample losses; replay masking/importance weights are applied by caller."""
     cfg = trainer.cfg
+    res_t = getattr(trainer, '_wm_action_residual', None)
     with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_reward_loss_weight > 0):
         predicted_reward = task_reward(state, prediction, action, cfg,
-            limits=limits, encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home)
+            limits=limits, encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home, residual_rad=res_t)
         reward_error = ((predicted_reward - real_reward) / task_reward_bound(cfg)).square()
     with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_observation_loss_weight > 0):
-        predicted_obs = clean_next_observation(state, prediction, action, limits, cfg, encoder_bias=trainer._wm_encoder_bias)
-        actual_obs = clean_next_observation(real_state, real_next, action, limits, cfg, encoder_bias=trainer._wm_encoder_bias)
+        predicted_obs = clean_next_observation(state, prediction, action, limits, cfg,
+            encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home, residual_rad=res_t)
+        actual_obs = clean_next_observation(real_state, real_next, action, limits, cfg,
+            encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home, residual_rad=res_t)
         # Fixed Actor affine in both paths; no sensor sampling or learned norm drift.
         obs_error = (trainer.actor.scaled_observation(predicted_obs) -
                      trainer.actor.scaled_observation(actual_obs)).square().mean(-1)
     with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_cost_loss_weight > 0):
-        constants = dict(encoder_bias=trainer._wm_encoder_bias, hand_center=trainer._wm_hand_center)
+        constants = dict(encoder_bias=trainer._wm_encoder_bias, hand_center=trainer._wm_hand_center,
+                         home=trainer._wm_home, residual_rad=res_t)
         predicted_cost, _ = violation_costs(state, prediction, action, limits, cfg, **constants)
         actual_cost, _ = violation_costs(real_state, real_next, action, limits, cfg, **constants)
         # Costs are dimensionless but unbounded. Log1p balances large violations

@@ -18,8 +18,8 @@ from viserdex.assets.revo3_spec import REVO3_JOINT_NAMES
 
 
 def validate_payload(payload):
-    if payload.get('version') not in (25, 26, 27, 28, 29, 30, 31, 32, 33):
-        raise ValueError('A version-25 or later direct pose-goal Actor (supported: v25-v33) is required')
+    if payload.get('version') not in (25, 26, 27, 28, 29, 30, 31, 32, 33, 34):
+        raise ValueError('A version-25 or later direct pose-goal Actor (supported: v25-v34) is required')
     cfg = Config(**payload['config'])
     from .trainer import checkpoint_version
     from .revised_contract import joint_names

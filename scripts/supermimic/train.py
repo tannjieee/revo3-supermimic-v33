@@ -24,7 +24,10 @@ from viserdex.supermimic.manual_convex import TASK_ID as DIRECT_TASK_ID
 from viserdex.supermimic.distributed import Distributed
 from viserdex.supermimic.position_reward import POSITION_CONFIG_FIELDS, POSITION_REWARD_PROTOCOL, position_hold_valid
 from viserdex.supermimic.stability_reward import STABILITY_CONFIG_FIELDS, DENSE_REWARD_PROTOCOL, ORIENTATION_HOLD_REWARD_PROTOCOL
-from viserdex.supermimic.quiet_hold import QUIET_HOLD_CONFIG_FIELDS, configure_fresh_environment, reward_protocol as quiet_hold_reward_protocol
+from viserdex.supermimic.quiet_hold import (
+    QUIET_HOLD_CONFIG_FIELDS, DEX_REG_CONFIG_FIELDS, configure_fresh_environment,
+    reward_protocol as quiet_hold_reward_protocol,
+)
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--joint_speed_limit_deg_s", type=float, default=90.)
@@ -67,6 +70,9 @@ parser.add_argument("--stability_linear_speed_scale", type=float, default=.02)
 parser.add_argument("--gamma", type=float, help="Manual-convex default 0.99 per policy control step")
 parser.add_argument("--lam", type=float, help="Fresh-run GAE lambda override (e.g. 0.9025 for 25 Hz time alignment)")
 parser.add_argument("--horizon", type=int, help="Fresh-run imagination horizon H override")
+parser.add_argument("--hold_duration", type=float, help="Fresh-run consecutive hold duration in seconds")
+parser.add_argument("--sequential_goals", action=argparse.BooleanOptionalAction, default=None,
+                    help="Fresh-run multi-goal switching: resample a new SO(3) goal after each completed hold")
 parser.add_argument("--wm_holdout_fraction", type=float, help="Fresh-run fraction of environments held out strictly for WM validation")
 parser.add_argument("--replay_sampling_mode", choices=("legacy", "uniform_failure"), help="Fresh-run WM replay sampling mode")
 parser.add_argument("--resume_gamma_override", action="store_true",
@@ -326,7 +332,12 @@ def configure(cfg):
             cfg.commands.object_pose.orientation_reward_mode = args.orientation_reward_mode
         if args.orientation_tolerance_deg is not None:
             cfg.commands.object_pose.orientation_tolerance_rad = math.radians(args.orientation_tolerance_deg)
-        if args.dex_reference_config is not None or args.orientation_reward_mode is not None or args.orientation_tolerance_deg is not None:
+        if args.hold_duration is not None:
+            cfg.commands.object_pose.hold_duration = args.hold_duration
+        if args.sequential_goals is not None:
+            cfg.commands.object_pose.sequential_goals = args.sequential_goals
+        if (args.dex_reference_config is not None or args.orientation_reward_mode is not None
+                or args.orientation_tolerance_deg is not None):
             from viserdex.supermimic.quiet_hold import validate_quiet_hold
             from viserdex.supermimic.orientation_reward import validate_orientation_reward
             validate_quiet_hold(cfg.commands.object_pose)
@@ -413,7 +424,9 @@ def main():
             factory = hand_center_config
     goal_options = {}
     if args.policy_variant == 'manual_convex':
-        for name in ('goal_evaluation_s', *STABILITY_CONFIG_FIELDS, *QUIET_HOLD_CONFIG_FIELDS, 'orientation_coarse_sigma_rad', 'orientation_fine_sigma_rad',
+        for name in ('goal_evaluation_s', *STABILITY_CONFIG_FIELDS, *QUIET_HOLD_CONFIG_FIELDS, *DEX_REG_CONFIG_FIELDS,
+                     'sequential_goals', 'hold_duration',
+                     'orientation_coarse_sigma_rad', 'orientation_fine_sigma_rad',
                      'orientation_coarse_fraction', 'orientation_reward_mode', 'orientation_reward_scale', *POSITION_CONFIG_FIELDS):
             goal_options[name] = getattr(app.cfg.commands.object_pose, name)
         if goal_options['quiet_hold_enabled']:
@@ -486,6 +499,8 @@ def main():
             overrides['wm_holdout_fraction'] = args.wm_holdout_fraction
         if args.replay_sampling_mode is not None:
             overrides['replay_sampling_mode'] = args.replay_sampling_mode
+        if args.sequential_goals is not None:
+            overrides['sequential_goals'] = args.sequential_goals
         cfg = replace(cfg, **overrides)
     if args.check_joint_update:
         cfg.wm_only_iters = 0
@@ -735,10 +750,17 @@ def main():
                 if cfg.uses_v34_optimizations
                 else 'physical54_dimension_mean_contact_BCE_sum_0.1_independent_failure_v33'
             )
+            action_desc = (
+                'tanh -> HOME-local residual clamp(soft bounds) -> EMA -> subtract episode zero -> geometric PD, zero delay'
+                if cfg.dex_action_residual_rad
+                else 'tanh -> YAML soft encoder bounds -> EMA -> subtract episode zero -> geometric PD, zero delay'
+            )
             metadata.update(state_fields=reference_fields(), observation_fields=reference_obs(),
                 contact_supervision=adapter.contact_labels.manifest,
                 wm_supervision_protocol=wm_proto,
-                action_parameterization='tanh -> YAML soft encoder bounds -> EMA -> subtract episode zero -> geometric PD, zero delay',
+                action_parameterization=action_desc,
+                sequential_goals=cfg.sequential_goals,
+                compact_critic_costs=cfg.compact_critic_costs,
                 wm_input_dim=len(trainer.wm.input_norm.mean), wm_output_dim=phys_out_dim+len(cfg.contact_body_names),
                 fixed_encoder_compensation_enabled=False,
                 control_profile=cfg.control_profile, control_profile_sha256=cfg.control_profile_sha256)
