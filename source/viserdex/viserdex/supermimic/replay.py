@@ -11,14 +11,26 @@ import torch
 
 
 class Replay:
-    def __init__(self, capacity, num_envs, device, event_capacity=4096, event_fraction=0.25, event_window=8, adaptive=False, uniform_fraction=.2, *, storage_device="cpu"):
+    def __init__(self, capacity, num_envs, device, event_capacity=4096, event_fraction=0.25, event_window=8,
+                 adaptive=False, uniform_fraction=.2, *, storage_device="cpu",
+                 wm_holdout_envs=0, sampling_mode="legacy", failure_sample_fraction=0.25):
         self.capacity, self.num_envs, self.device = capacity, num_envs, device
         if capacity < 1 or num_envs < 1 or not 0 < uniform_fraction <= 1:
             raise ValueError("Invalid replay capacity/uniform floor")
+        if wm_holdout_envs < 0 or wm_holdout_envs >= num_envs:
+            raise ValueError("wm_holdout_envs must satisfy 0 <= wm_holdout_envs < num_envs")
+        if sampling_mode not in ("legacy", "uniform_failure"):
+            raise ValueError(f"Unknown replay sampling_mode: {sampling_mode}")
+        if not 0 <= failure_sample_fraction <= 1:
+            raise ValueError("failure_sample_fraction must be in [0, 1]")
+        self.wm_holdout_envs = int(wm_holdout_envs)
+        self.wm_train_envs = num_envs - self.wm_holdout_envs
+        self.sampling_mode = sampling_mode
+        self.failure_sample_fraction = float(failure_sample_fraction)
         self.storage_device = torch.device(storage_device)
         if self.storage_device.type not in ("cpu", "cuda"):
             raise ValueError("Replay storage_device must be CPU or CUDA")
-        self.adaptive = adaptive
+        self.adaptive = adaptive and sampling_mode == "legacy"
         self.uniform_fraction = uniform_fraction
         self.priority = torch.ones(capacity, num_envs, device=self.storage_device)
         self.storage_device = self.priority.device  # Resolve an implicit CUDA index.
@@ -29,11 +41,11 @@ class Replay:
         # Fixed-size reduction avoids CUDA unique/nonzero synchronization. The
         # extra entry absorbs stale generation tokens without modifying replay.
         self._priority_scratch = None
-        if adaptive and self.storage_device.type == "cuda":
+        if self.adaptive and self.storage_device.type == "cuda":
             self._priority_scratch = torch.zeros(capacity * num_envs + 1, dtype=torch.float64,
                                                  device=self.storage_device)
-        self.event_capacity = 0 if adaptive else event_capacity
-        self.event_fraction = event_fraction
+        self.event_capacity = 0 if self.adaptive else event_capacity
+        self.event_fraction = failure_sample_fraction if sampling_mode == "uniform_failure" else event_fraction
         self.event_window = event_window
         self.archive = {}
         self.archive_size = self.archive_cursor = 0
@@ -67,7 +79,9 @@ class Replay:
         logical = torch.randint(self.size - window + 1, (batch,), device=self.storage_device)
         oldest = self.cursor if self.size == self.capacity else 0
         time = (logical[:, None] + oldest + torch.arange(window, device=self.storage_device)[None]) % self.capacity
-        env = torch.randint(self.num_envs, (batch,), device=self.storage_device)
+        # Isolate WM training windows strictly to [0, wm_train_envs) when holdout is active.
+        env_limit = self.wm_train_envs if window > 1 else self.num_envs
+        env = torch.randint(env_limit, (batch,), device=self.storage_device)
         if window == 1:
             out = {k: v[time[:, 0], env].to(self.device) for k, v in self.data.items()}
         else:
@@ -79,13 +93,33 @@ class Replay:
             done = out["done"]
             out["mask"] = torch.cat((torch.ones(batch, 1, device=self.device), (~done[:, :-1]).float().cumprod(1)), 1)
         out["env_id"] = env.to(self.device)
-        if include_events and window == self.event_window and self.archive_size:
+        use_events = (include_events or self.sampling_mode == "uniform_failure")
+        if use_events and window == self.event_window and self.archive_size and self.event_fraction > 0:
             n = min(batch, int(batch * self.event_fraction))
-            indices = torch.randint(self.archive_size, (n,), device=self.storage_device)
-            for key, values in self.archive.items():
-                out[key][:n] = values[indices].to(self.device)
-            out["mask"][:n] = 1.0
-        
+            if n > 0:
+                indices = torch.randint(self.archive_size, (n,), device=self.storage_device)
+                for key, values in self.archive.items():
+                    out[key][:n] = values[indices].to(self.device)
+                done_e = out["done"][:n]
+                out["mask"][:n] = torch.cat(
+                    (torch.ones(n, 1, device=self.device), (~done_e[:, :-1]).float().cumprod(1)), 1
+                )
+        return out
+
+    def sample_holdout(self, batch, window):
+        """Sample uniform WM validation windows strictly from held-out environments."""
+        if self.wm_holdout_envs < 1:
+            raise ValueError("Holdout sampling requires wm_holdout_envs >= 1")
+        if self.size < window:
+            raise ValueError("Insufficient replay")
+        logical = torch.randint(self.size - window + 1, (batch,), device=self.storage_device)
+        oldest = self.cursor if self.size == self.capacity else 0
+        time = (logical[:, None] + oldest + torch.arange(window, device=self.storage_device)[None]) % self.capacity
+        env = torch.randint(self.wm_train_envs, self.num_envs, (batch,), device=self.storage_device)
+        out = {k: self.data[k][time, env[:, None]].to(self.device) for k in self._wm_keys()}
+        done = out["done"]
+        out["mask"] = torch.cat((torch.ones(batch, 1, device=self.device), (~done[:, :-1]).float().cumprod(1)), 1)
+        out["env_id"] = env.to(self.device)
         return out
 
     def _sample_prioritized(self, batch, window):
@@ -93,12 +127,12 @@ class Replay:
             raise ValueError("Priorities are bound to the configured WM window")
         oldest = self.cursor if self.size == self.capacity else 0
         starts = (torch.arange(self.size-window+1, device=self.storage_device) + oldest) % self.capacity
-        priorities = self.priority[starts].flatten().pow(.6)
+        priorities = self.priority[starts, :self.wm_train_envs].flatten().pow(.6)
         count = len(priorities)
         probability = self.uniform_fraction/count + (1-self.uniform_fraction)*priorities/priorities.sum()
         choice = torch.multinomial(probability, batch, replacement=True)
-        slot = starts[choice // self.num_envs]
-        env = choice % self.num_envs
+        slot = starts[choice // self.wm_train_envs]
+        env = choice % self.wm_train_envs
         times = (slot[:, None] + torch.arange(window, device=self.storage_device)[None]) % self.capacity
         out = {k: self.data[k][times, env[:, None]].to(self.device)
                for k in self._wm_keys()}
@@ -191,19 +225,25 @@ class Replay:
         if not self.event_capacity or self.size < w:
             return
         times = (torch.arange(w, device=self.storage_device) + self.cursor - w) % self.capacity
-        state = self.data["state"][times]
-        nxt = self.data["next_physical"][times]
-        done = self.data["done"][times]
-        distance = nxt[-1, :, 42:45].norm(dim=-1)
-        speed = nxt[-1, :, 49:52].norm(dim=-1)
-        from .state_layout import layout
-        from .core import ROT, GOAL_ROT, quat_mul, quat_conjugate, rotation_log
-        angle = rotation_log(quat_mul(nxt[-1, :, ROT], quat_conjugate(state[-1, :, layout(state).goal_rot]))).norm(dim=-1)
-        previous = state[-1, :, 42:45].norm(dim=-1)
-        # Motion proxies, explicitly NOT measured contact/slip labels.
-        event = done[-1] | (distance > .20) | (speed > 1.) | (angle < .1)
-        event |= (previous > .15) & (distance < previous - .02)
-        valid = event & ~done[:-1].any(0)
+        done = self.data["done"][times, :self.wm_train_envs]
+        if self.sampling_mode == "uniform_failure":
+            # Dex-Supermimic style: archive near-failure windows strictly from WM training envs.
+            term = (self.data["terminated"][times, :self.wm_train_envs].bool()
+                    if "terminated" in self.data else done.bool())
+            valid = term[-1] & ~done[:-1].any(0)
+        else:
+            state = self.data["state"][times, :self.wm_train_envs]
+            nxt = self.data["next_physical"][times, :self.wm_train_envs]
+            distance = nxt[-1, :, 42:45].norm(dim=-1)
+            speed = nxt[-1, :, 49:52].norm(dim=-1)
+            from .state_layout import layout
+            from .core import ROT, GOAL_ROT, quat_mul, quat_conjugate, rotation_log
+            angle = rotation_log(quat_mul(nxt[-1, :, ROT], quat_conjugate(state[-1, :, layout(state).goal_rot]))).norm(dim=-1)
+            previous = state[-1, :, 42:45].norm(dim=-1)
+            # Motion proxies, explicitly NOT measured contact/slip labels.
+            event = done[-1] | (distance > .20) | (speed > 1.) | (angle < .1)
+            event |= (previous > .15) & (distance < previous - .02)
+            valid = event & ~done[:-1].any(0)
         ids = valid.nonzero().flatten()
         if not len(ids):
             return

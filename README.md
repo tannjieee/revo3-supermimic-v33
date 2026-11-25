@@ -57,17 +57,20 @@ bash scripts/launch/run.sh prepare
 bash scripts/launch/run.sh test
 ```
 
-### 4. 启动 V33 训练
+### 4. 启动训练
 
 ```bash
-# target100 标准 V33 配置
+# V34 Phase 0+1 优化版（27D 速度增量解析积分 + Bryson 物理容差 + 10% WM Holdout +
+# 75/25 均匀失败采样 + 确定性想象 + Pre-slew target_rate + Critic V_max/LayerNorm/GELU +
+# linear_fine 强梯度朝向奖励 + gamma=0.98/lam=0.9025）
+bash scripts/launch/run_v34_opt.sh --output_dir ./runs/v34_opt_p1 --iterations 30000
+
+# V34 快速 GPU smoke 验证
+bash scripts/launch/run_v34_opt.sh --output_dir ./runs/v34_smoke --iterations 5 --smoke
+
+# V33 基线（target100 / no_target_home）
 bash scripts/launch/run_v33.sh --output_dir ./runs/v33_target100 --iterations 30000
-
-# no_target_home 消融基线（hold_target_motion_weight=0, home_pose_weight=0）
 bash scripts/launch/run_v33_no_target_home.sh --output_dir ./runs/v33_no_target_home --iterations 30000
-
-# 快速 smoke 验证
-bash scripts/launch/run_v33_no_target_home.sh --output_dir ./runs/v33_smoke --iterations 5 --smoke
 ```
 
 ## 相关文档

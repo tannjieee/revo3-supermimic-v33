@@ -129,6 +129,7 @@ class SingleGoalCommandCfg(HoldReorientCommandCfg):
     home_pose_weight: float = 0.0
     home_pose_deadband_rad: float = math.pi / 12
     home_pose_scale_rad: float = math.pi / 6
+    orientation_reward_mode: str = "gaussian"
     orientation_reward_scale: float = 10.0
     orientation_coarse_sigma_rad: float = math.pi / 2
     orientation_fine_sigma_rad: float = math.pi / 18

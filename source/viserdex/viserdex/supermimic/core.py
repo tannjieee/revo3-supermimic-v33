@@ -80,6 +80,7 @@ class Config:
     position_sigma_m: float = 0.05
     hold_position_threshold_m: float = 0.02
     hold_linear_speed_threshold_m_s: float = 0.05
+    orientation_reward_mode: str = "gaussian"
     orientation_reward_scale: float = 10.0
     orientation_coarse_sigma_rad: float = math.pi / 2
     orientation_fine_sigma_rad: float = math.pi / 18
@@ -181,6 +182,40 @@ class Config:
     input_position_scale: float = 1.0
     input_linear_velocity_scale: float = 1.0
     input_angular_velocity_scale: float = 1.0
+    # V34 Phase 0/1 optimization flags (all disabled/legacy by default for V33 compatibility).
+    wm_dynamics_mode: str = "delta54"
+    wm_integration_coeff: float = 0.55
+    wm_loss_normalization: str = "running_std"
+    wm_bryson_scales: tuple = (0.05, 1.5, 0.005, 0.03, 0.10, 0.50)
+    wm_activation: str = "silu"
+    contact_loss_reduction: str = "sum"
+    wm_holdout_fraction: float = 0.0
+    replay_sampling_mode: str = "legacy"
+    failure_sample_fraction: float = 0.25
+    deterministic_imagination: bool = False
+    target_rate_pre_slew_cost: bool = False
+    critic_layer_norm: bool = False
+    critic_value_cap: bool = False
+    critic_mean_loss: bool = False
+
+    @property
+    def uses_v34_optimizations(self):
+        return (
+            self.wm_dynamics_mode != "delta54"
+            or self.wm_loss_normalization != "running_std"
+            or self.wm_activation != "silu"
+            or self.contact_loss_reduction != "sum"
+            or self.wm_holdout_fraction > 0.0
+            or self.replay_sampling_mode != "legacy"
+            or self.deterministic_imagination
+            or self.target_rate_pre_slew_cost
+            or self.critic_layer_norm
+            or self.critic_value_cap
+            or self.critic_mean_loss
+            or self.orientation_reward_mode != "gaussian"
+            or (self.wm_task_losses and min(
+                self.wm_reward_loss_weight, self.wm_observation_loss_weight, self.wm_cost_loss_weight) == 0.0)
+        )
 
     @property
     def uses_target_critic(self):
@@ -202,7 +237,18 @@ class Config:
             raise ValueError('v33 state protocol and profile flag must agree')
         if self.dex_reference:
             expected = dex.profile_options(self.control_profile, self.control_profile_sha256)
+            v34_ablation_fields = {
+                'wm_dynamics_mode', 'wm_integration_coeff', 'wm_loss_normalization', 'wm_bryson_scales',
+                'wm_activation', 'grouped_physical_loss', 'contact_loss_reduction',
+                'wm_reward_loss_weight', 'wm_observation_loss_weight', 'wm_cost_loss_weight',
+                'wm_holdout_fraction', 'replay_sampling_mode', 'failure_sample_fraction',
+                'deterministic_imagination', 'target_rate_pre_slew_cost',
+                'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss',
+                'orientation_reward_mode', 'orientation_tolerance_rad',
+            }
             for name, value in expected.items():
+                if name in v34_ablation_fields:
+                    continue
                 actual = getattr(self, name)
                 if isinstance(value, tuple):
                     actual = tuple(tuple(v) if isinstance(v, list) else v for v in actual)
@@ -264,8 +310,33 @@ class Config:
             raise ValueError('WM task supervision requires the hand-center constrained profile')
         for name in ('wm_reward_loss_weight', 'wm_observation_loss_weight',
                      'wm_termination_loss_weight', 'wm_cost_loss_weight'):
-            if not math.isfinite(getattr(self, name)) or getattr(self, name) <= 0:
-                raise ValueError(f'{name} must be finite and positive')
+            if not math.isfinite(getattr(self, name)) or getattr(self, name) < 0:
+                raise ValueError(f'{name} must be finite and nonnegative')
+        if self.wm_dynamics_mode not in ('delta54', 'velocity_integrated'):
+            raise ValueError(f'Unknown wm_dynamics_mode: {self.wm_dynamics_mode}')
+        if not math.isfinite(self.wm_integration_coeff) or not 0 < self.wm_integration_coeff <= 1:
+            raise ValueError('wm_integration_coeff must be in (0, 1]')
+        if self.wm_loss_normalization not in ('running_std', 'bryson'):
+            raise ValueError(f'Unknown wm_loss_normalization: {self.wm_loss_normalization}')
+        if (len(self.wm_bryson_scales) != 6
+                or any(not math.isfinite(v) or v <= 0 for v in self.wm_bryson_scales)):
+            raise ValueError('wm_bryson_scales must contain 6 finite positive nominal errors')
+        if self.wm_activation not in ('silu', 'gelu'):
+            raise ValueError(f'Unknown wm_activation: {self.wm_activation}')
+        if self.contact_loss_reduction not in ('sum', 'mean'):
+            raise ValueError(f'Unknown contact_loss_reduction: {self.contact_loss_reduction}')
+        if not math.isfinite(self.wm_holdout_fraction) or not 0 <= self.wm_holdout_fraction < 0.5:
+            raise ValueError('wm_holdout_fraction must be in [0, 0.5)')
+        if self.replay_sampling_mode not in ('legacy', 'uniform_failure'):
+            raise ValueError(f'Unknown replay_sampling_mode: {self.replay_sampling_mode}')
+        if not math.isfinite(self.failure_sample_fraction) or not 0 <= self.failure_sample_fraction <= 1:
+            raise ValueError('failure_sample_fraction must be in [0, 1]')
+        for name in ('deterministic_imagination', 'target_rate_pre_slew_cost',
+                     'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss'):
+            if type(getattr(self, name)) is not bool:
+                raise ValueError(f'{name} must be boolean')
+        if self.orientation_reward_mode not in ('gaussian', 'linear_fine'):
+            raise ValueError(f'Unknown orientation_reward_mode: {self.orientation_reward_mode}')
         if self.network_revision not in ('legacy', 'urdf_little_v2', 'hardware_center25_v3'):
             raise ValueError('Unknown network revision')
         if self.network_revision != 'legacy':
@@ -455,6 +526,29 @@ def integrate_physical(s, delta):
         ),
         -1,
     )
+
+
+def integrate_velocity_physical(s, delta_vel, dt, c=0.55):
+    """Official SuperMimic GenCoord-style velocity-increment integration.
+
+    Predicts 27D velocity increments [dqd(21), dv(3), dw(3)] and derives next
+    joint angles, object position, and SO(3) orientation by analytic integration:
+        v_next = v + dv
+        q_next = q + dt * (v + c * dv)
+    where c = (decimation + 1) / (2 * decimation) (= 0.55 for decimation=10).
+    Object angular velocity is in hand-base frame, so orientation left-multiplies.
+    """
+    dqd = delta_vel[..., :21]
+    dv = delta_vel[..., 21:24]
+    dw = delta_vel[..., 24:27]
+    q_next = s[..., Q] + dt * (s[..., QD] + c * dqd)
+    qd_next = s[..., QD] + dqd
+    pos_next = s[..., POS] + dt * (s[..., VEL] + c * dv)
+    rot_step = dt * (s[..., OMEGA] + c * dw)
+    rot_next = quat_unique(quat_mul(rotation_vector_quat(rot_step), s[..., ROT]))
+    vel_next = s[..., VEL] + dv
+    omega_next = s[..., OMEGA] + dw
+    return torch.cat((q_next, qd_next, pos_next, rot_next, vel_next, omega_next), -1)
 
 
 def ema_target(s, action, limits, alpha=0.95):

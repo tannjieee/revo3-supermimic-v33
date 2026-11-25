@@ -46,26 +46,35 @@ def loss_names(cfg):
 def task_losses(trainer, state, prediction, real_state, real_next, action, limits, real_reward, terminated):
     """Per-sample losses; replay masking/importance weights are applied by caller."""
     cfg = trainer.cfg
-    predicted_reward = task_reward(state, prediction, action, cfg,
-        limits=limits, encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home)
-    reward_error = ((predicted_reward - real_reward) / task_reward_bound(cfg)).square()
-    predicted_obs = clean_next_observation(state, prediction, action, limits, cfg, encoder_bias=trainer._wm_encoder_bias)
-    actual_obs = clean_next_observation(real_state, real_next, action, limits, cfg, encoder_bias=trainer._wm_encoder_bias)
-    # Fixed Actor affine in both paths; no sensor sampling or learned norm drift.
-    obs_error = (trainer.actor.scaled_observation(predicted_obs) -
-                 trainer.actor.scaled_observation(actual_obs)).square().mean(-1)
-    constants = dict(encoder_bias=trainer._wm_encoder_bias, hand_center=trainer._wm_hand_center)
-    predicted_cost, _ = violation_costs(state, prediction, action, limits, cfg, **constants)
-    actual_cost, _ = violation_costs(real_state, real_next, action, limits, cfg, **constants)
-    # Costs are dimensionless but unbounded. Log1p balances large violations
-    # without clipping targets or changing the actor/critic cost definition.
-    cost_errors = (torch.log1p(predicted_cost) - torch.log1p(actual_cost)).square()
-    cost_error = cost_errors.mean(-1)
+    with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_reward_loss_weight > 0):
+        predicted_reward = task_reward(state, prediction, action, cfg,
+            limits=limits, encoder_bias=trainer._wm_encoder_bias, home=trainer._wm_home)
+        reward_error = ((predicted_reward - real_reward) / task_reward_bound(cfg)).square()
+    with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_observation_loss_weight > 0):
+        predicted_obs = clean_next_observation(state, prediction, action, limits, cfg, encoder_bias=trainer._wm_encoder_bias)
+        actual_obs = clean_next_observation(real_state, real_next, action, limits, cfg, encoder_bias=trainer._wm_encoder_bias)
+        # Fixed Actor affine in both paths; no sensor sampling or learned norm drift.
+        obs_error = (trainer.actor.scaled_observation(predicted_obs) -
+                     trainer.actor.scaled_observation(actual_obs)).square().mean(-1)
+    with torch.set_grad_enabled(torch.is_grad_enabled() and cfg.wm_cost_loss_weight > 0):
+        constants = dict(encoder_bias=trainer._wm_encoder_bias, hand_center=trainer._wm_hand_center)
+        predicted_cost, _ = violation_costs(state, prediction, action, limits, cfg, **constants)
+        actual_cost, _ = violation_costs(real_state, real_next, action, limits, cfg, **constants)
+        # Costs are dimensionless but unbounded. Log1p balances large violations
+        # without clipping targets or changing the actor/critic cost definition.
+        cost_errors = (torch.log1p(predicted_cost) - torch.log1p(actual_cost)).square()
+        cost_error = cost_errors.mean(-1)
     terminal_error = (torch.zeros_like(reward_error) if cfg.dex_reference else
         F.binary_cross_entropy_with_logits(
             trainer.wm.termination_logits(prediction), terminated.float(), reduction='none'))
-    total = (cfg.wm_reward_loss_weight * reward_error + cfg.wm_observation_loss_weight * obs_error +
-             cfg.wm_termination_loss_weight * terminal_error + cfg.wm_cost_loss_weight * cost_error)
+    total = (
+        (cfg.wm_reward_loss_weight * reward_error if cfg.wm_reward_loss_weight else 0.0)
+        + (cfg.wm_observation_loss_weight * obs_error if cfg.wm_observation_loss_weight else 0.0)
+        + (cfg.wm_termination_loss_weight * terminal_error if cfg.wm_termination_loss_weight and not cfg.dex_reference else 0.0)
+        + (cfg.wm_cost_loss_weight * cost_error if cfg.wm_cost_loss_weight else 0.0)
+    )
+    if not isinstance(total, torch.Tensor):
+        total = torch.zeros_like(reward_error)
     components = torch.cat((torch.stack((reward_error, obs_error, terminal_error, cost_error), -1),
                             cost_errors), -1)
     if cfg.dex_reference:

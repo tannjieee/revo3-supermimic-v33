@@ -179,6 +179,8 @@ class Adapter:
                          'orientation_fine_sigma_rad', 'orientation_coarse_fraction', *POSITION_CONFIG_FIELDS):
                 if getattr(command_cfg, name) != getattr(self.hold_cfg, name):
                     raise ValueError(f'Single-goal reward/command mismatch: {name}')
+            if getattr(command_cfg, 'orientation_reward_mode', 'gaussian') != self.hold_cfg.orientation_reward_mode:
+                raise ValueError('Single-goal reward/command mismatch: orientation_reward_mode')
             if env.cfg.rewards.track_orientation_inv_l2 is not None or env.cfg.rewards.track_orientation_exp.weight != 1.:
                 raise ValueError('Single-goal task requires the exponential orientation reward contract')
             if any(getattr(env.cfg.rewards, name) is not None for name in ('action_l2', 'hand_pose', 'success_bonus')):

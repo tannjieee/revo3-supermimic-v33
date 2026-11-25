@@ -18,6 +18,19 @@ def value_bounds(cfg):
     return [task_reward_bound(cfg) / (1-cfg.gamma)] + [1/(1-cfg.gamma)] * len(cost_names(cfg))
 
 
+def cap_values(value, bounds):
+    """Apply theoretical upper bound V_max (and nonnegative lower bound on risk heads).
+
+    Mirrors official SuperMimic's upper-bound clamp without squashing interior values
+    or restricting signed reward lower bounds when penalties are active.
+    """
+    reward = value[..., :1].clamp_max(bounds[0])
+    if value.shape[-1] == 1:
+        return reward
+    costs = torch.minimum(value[..., 1:].clamp_min(0.0), bounds[1:])
+    return torch.cat((reward, costs), -1)
+
+
 def running_risk(raw_cost):
     # Stable even for large finite raw violations; zero and the deadband remain
     # exactly zero. The drop head represents failure, not distance overshoot.
@@ -194,7 +207,11 @@ def imagine_stable(trainer, batch):
     running = torch.zeros(len(state), len(names), device=state.device)
     terminal = torch.zeros_like(running)
     value_model = trainer.critic if cfg.paper_critic else trainer.target_critic
-    states, values = [state], [value_model(state, context).detach()]
+    cap_bounds = state.new_tensor(value_bounds(cfg)) if cfg.critic_value_cap else None
+    init_value = value_model(state, context).detach()
+    if cap_bounds is not None:
+        init_value = cap_values(init_value, cap_bounds)
+    states, values = [state], [init_value]
     immediate, continuations, valid, alive_history = [], [], [], []
     regularization = torch.zeros_like(alive)
     if cfg.absolute_policy_optimization:
@@ -205,7 +222,10 @@ def imagine_stable(trainer, batch):
         alive_history.append(alive.detach())
         if cfg.absolute_policy_optimization:
             logits = trainer.actor.logits(history)
-            action, next_noise = explore_absolute(logits.tanh(), noise, limits, cfg)
+            if cfg.deterministic_imagination:
+                action, next_noise = logits.tanh(), noise
+            else:
+                action, next_noise = explore_absolute(logits.tanh(), noise, limits, cfg)
             # On real replay start states, always give extreme logits a direct
             # corrective gradient, even if the WM predicts an immediate drop.
             if t == 0:
@@ -237,7 +257,8 @@ def imagine_stable(trainer, batch):
         history = torch.where(survives[:, None, None], push_history(history, obs), history)
         sensors = {k: torch.where(survives.reshape(-1, *([1]*(v.ndim-1))), v, sensors[k])
                    for k, v in next_sensors.items()}
-        value = value_model(state, context)
+        raw_value = value_model(state, context)
+        value = cap_values(raw_value, cap_bounds) if cap_bounds is not None else raw_value
         immediate.append(torch.cat((r[:, None], cost), -1) * active[:, None])
         continuations.append(continuation[:, None].expand(-1, 1+len(names)))
         valid.append(active)
@@ -257,10 +278,15 @@ def imagine_stable(trainer, batch):
     with torch.no_grad():
         targets = lambda_returns(torch.stack(immediate), torch.stack(continuations),
                                  torch.stack(values), cfg.gamma, cfg.lam)
+        if cap_bounds is not None:
+            targets = cap_values(targets, cap_bounds)
     metrics = dict(actor_reward_rollout=reward_rollout.detach(), actor_reward_bootstrap=reward_bootstrap.detach(),
                    imagined_alive_mean=torch.stack(alive_history).mean(),
                    imagined_terminal_probability=(1-alive).mean().detach(),
                    actor_cost_bootstrap_fraction=(pieces[2].sum()/normalized.sum().clamp_min(1e-12)).detach())
+    if cap_bounds is not None:
+        metrics['critic_reward_cap_hit_fraction'] = (raw_value[:, 0] >= cap_bounds[0]).float().mean().detach()
+        metrics['critic_cost_cap_hit_fraction'] = (raw_value[:, 1:] >= cap_bounds[1:]).float().mean().detach()
     for i, name in enumerate(names):
         metrics[f'imagined_cost_{name}'] = normalized[i].detach()
         for label, piece in zip(('running', 'terminal', 'bootstrap'), pieces):

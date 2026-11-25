@@ -27,18 +27,22 @@ def object_hold_gate(state, next_physical, cfg):
 
 def violation_costs(state, next_physical, action, limits, cfg, *, encoder_bias=None, hand_center=None):
     target = action_target(state, action, limits, cfg)
+    rate_target = target
     previous = action_target(state, state[..., COMPACT.last_action], limits, cfg)
     # An empty reset queue has no previous policy command: use the measured
     # encoder position as the first target-rate reference, as in playback.
     bias = state.new_tensor(cfg.encoder_bias_rad) if encoder_bias is None else encoder_bias
     initial = state[..., :21] - bias
     if cfg.dex_reference:
-        from .dex_reference import EMA, ZERO
+        from .dex_reference import EMA, ZERO, unclipped_target
         previous = state[..., EMA]-state[..., ZERO]
+        if getattr(cfg, 'target_rate_pre_slew_cost', False) and cfg.target_slew_rate_rad_s:
+            # Penalize the pre-slew EMA command intent so hard slew clamping does not zero gradients.
+            rate_target = unclipped_target(state, action, limits, cfg.ema_alpha)
     else:
         previous = torch.where(state[..., COMPACT.delay_ready].bool(), previous, initial)
     velocity_ratio = next_physical[..., 21:42].abs() / cfg.cost_velocity_limit_rad_s
-    target_ratio = ((target-previous) / cfg.control_dt).abs() / cfg.cost_target_rate_limit_rad_s
+    target_ratio = ((rate_target-previous) / cfg.control_dt).abs() / cfg.cost_target_rate_limit_rad_s
     ratios = torch.stack((velocity_ratio.amax(-1), target_ratio.amax(-1)), -1)
     costs = torch.relu(ratios-1).square()
     if cfg.object_hold_costs_enabled:

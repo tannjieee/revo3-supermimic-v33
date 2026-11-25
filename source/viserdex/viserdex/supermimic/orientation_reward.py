@@ -4,9 +4,13 @@ import torch
 from .quiet_hold import angular_excess
 
 ORIENTATION_REWARD_PROTOCOL = "two_scale_so3_gaussian_v1"
+LINEAR_FINE_ORIENTATION_PROTOCOL = "linear_lorentzian_so3_v2"
 
 
 def validate_orientation_reward(cfg):
+    mode = getattr(cfg, 'orientation_reward_mode', 'gaussian')
+    if mode not in ('gaussian', 'linear_fine'):
+        raise ValueError(f'Unknown orientation_reward_mode: {mode}')
     for name in ('orientation_reward_scale', 'orientation_coarse_sigma_rad', 'orientation_fine_sigma_rad'):
         if not math.isfinite(getattr(cfg, name)) or getattr(cfg, name) <= 0:
             raise ValueError(f'{name} must be finite and positive')
@@ -17,17 +21,21 @@ def validate_orientation_reward(cfg):
 
 
 def orientation_reward(error_rad, cfg):
-    """10 * (0.3 exp(-(theta/90deg)^2) + 0.7 exp(-(theta/10deg)^2)).
+    """Bounded SO(3) orientation reward in [0, orientation_reward_scale].
 
-    theta is the sign-invariant shortest SO(3) angle, not Euler differences.
-    No 1/2 in the exponent: sigma denotes the width at exp(-1).
-    The coarse term avoids the almost-zero far-field gradient of a narrow
-    Gaussian. Both terms have zero derivative at the target.
-    Quiet holding replaces theta with max(theta - tolerance, 0), making the
-    entire accepted neighborhood a maximum-reward plateau.
-    Fresh quiet-hold runs use only the coarse exponential (mix=1).
+    Modes:
+    - 'gaussian' (legacy V25-V33): 10 * (mix * exp(-(theta/sigma_c)^2) + (1-mix) * exp(-(theta/sigma_f)^2)).
+    - 'linear_fine' (V34): strong far-field linear gradient plus sharp near-target Lorentzian pull:
+      scale * (0.6 * clamp(1 - theta/pi, 0) + 0.4 / (1 + (theta / 0.25)^2)).
+      Strict upper bound equals orientation_reward_scale at theta = 0; avoids both far-field
+      Gaussian saturation and the ~26 deg near-goal plateau.
     """
     error_rad = angular_excess(error_rad, cfg)
+    mode = getattr(cfg, 'orientation_reward_mode', 'gaussian')
+    if mode == 'linear_fine':
+        linear = (1.0 - error_rad / math.pi).clamp_min(0.0)
+        fine = (1.0 + (error_rad / 0.25).square()).reciprocal()
+        return cfg.orientation_reward_scale * (0.6 * linear + 0.4 * fine)
     mix = cfg.orientation_coarse_fraction
     if mix == 1.0:
         return cfg.orientation_reward_scale * torch.exp(-(error_rad / cfg.orientation_coarse_sigma_rad).square())

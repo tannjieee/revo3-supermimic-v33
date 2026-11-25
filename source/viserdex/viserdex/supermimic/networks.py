@@ -2,7 +2,7 @@
 
 import torch
 from torch import nn
-from .core import physical_features, full_features, physical_delta, integrate_physical
+from .core import physical_features, full_features, physical_delta, integrate_physical, integrate_velocity_physical
 from .state_layout import COMPACT
 from .geometry import HandObjectGeometry
 
@@ -56,12 +56,13 @@ def input_normalizer(cfg, dim):
     return RunningNorm(dim, std_floor=floor)
 
 
-def mlp(input_dim, hidden, output_dim, layer_norm=False):
+def mlp(input_dim, hidden, output_dim, layer_norm=False, activation="silu"):
     layers = []
+    act_cls = nn.GELU if activation == "gelu" else nn.SiLU
     for width in hidden:
         layers.append(nn.Linear(input_dim, width))
         if layer_norm:
-            layers.extend((nn.LayerNorm(width), nn.SiLU()))
+            layers.extend((nn.LayerNorm(width), act_cls()))
         else:
             layers.append(nn.ELU())
         input_dim = width
@@ -113,6 +114,9 @@ class Dynamics(nn.Module):
         super().__init__()
         self.amp = cfg.amp
         self.dex_reference = cfg.dex_reference
+        self.dynamics_mode = cfg.wm_dynamics_mode
+        self.control_dt = cfg.control_dt
+        self.integration_coeff = cfg.wm_integration_coeff
         self.contact_count = len(cfg.contact_body_names) if cfg.dex_reference else 0
         self.compact_state = cfg.compact_state
         self.include_delay_ready = cfg.include_delay_ready
@@ -126,7 +130,15 @@ class Dynamics(nn.Module):
             self.register_buffer('input_offset', offset)
         self.delta_norm = RunningNorm(54, eps=1e-4)
         self.register_buffer("context_scale", torch.ones(context_dim))
-        self.net = mlp(width, cfg.wm_hidden, 54 + self.contact_count, True)
+        if self.dynamics_mode == "velocity_integrated":
+            # Fixed physical scale per velocity channel: [dqd(21), dv(3), dw(3)].
+            # Avoids running-std drift while keeping output gradients well-conditioned.
+            vel_scale = torch.tensor([3.0] * 21 + [0.3] * 3 + [3.0] * 3, dtype=torch.float32)
+            self.register_buffer("velocity_delta_scale", vel_scale)
+            phys_output_dim = 27
+        else:
+            phys_output_dim = 54
+        self.net = mlp(width, cfg.wm_hidden, phys_output_dim + self.contact_count, True, activation=cfg.wm_activation)
         nn.init.zeros_(self.net[-1].weight)
         nn.init.zeros_(self.net[-1].bias)
         self.learned_termination = cfg.wm_task_losses
@@ -167,6 +179,10 @@ class Dynamics(nn.Module):
 
     def predict(self, s, target, context):
         output = run_mlp(self.net, self.input_norm(self.inputs(s, target, context)), self.amp)
+        if self.dynamics_mode == "velocity_integrated":
+            delta_vel = output[..., :27] * self.velocity_delta_scale
+            physical = integrate_velocity_physical(s, delta_vel, self.control_dt, self.integration_coeff)
+            return physical, output[..., 27:]
         physical = integrate_physical(s, output[..., :54] * self.delta_norm.std + self.delta_norm.mean)
         return physical, output[..., 54:]
 
@@ -236,7 +252,8 @@ class Critic(nn.Module):
         self.stable_values = cfg.uses_target_critic
         from .constraints import cost_names
         self.net = mlp(cfg.critic_state_dim + context_dim + extra, cfg.critic_hidden,
-                       1 + len(cost_names(cfg)) if self.constrained else 1)
+                       1 + len(cost_names(cfg)) if self.constrained else 1,
+                       layer_norm=cfg.critic_layer_norm, activation="gelu")
         if self.stable_values:
             from .stable_values import value_bounds
             self.register_buffer('value_bounds', torch.tensor(value_bounds(cfg)))

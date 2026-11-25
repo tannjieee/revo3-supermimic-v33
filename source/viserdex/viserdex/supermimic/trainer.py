@@ -23,7 +23,26 @@ IMAGINATION_PROTOCOL = "bounded_actor_imagined_lambda_online_critic_v1"
 MICROBATCH_FIELDS = ("microbatch", "wm_microbatch", "actor_microbatch", "critic_microbatch")
 
 
+def holdout_env_count(num_envs, fraction):
+    if fraction <= 0 or num_envs < 2:
+        return 0
+    return max(1, min(num_envs - 1, round(num_envs * fraction)))
+
+
 def imagination_protocol(cfg):
+    if cfg.dex_reference and cfg.uses_v34_optimizations:
+        parts = ["supermimic_opt_v34", cfg.wm_dynamics_mode, cfg.wm_loss_normalization, cfg.orientation_reward_mode]
+        if cfg.deterministic_imagination:
+            parts.append("det")
+        if cfg.critic_value_cap:
+            parts.append("vcap")
+        if cfg.critic_layer_norm:
+            parts.append("cln")
+        if cfg.critic_mean_loss:
+            parts.append("cmean")
+        if cfg.target_rate_pre_slew_cost:
+            parts.append("preslew")
+        return "_".join(parts)
     if cfg.dex_reference:
         return "encoder_EMA_zero_bias_contacts_independent_failure_v33"
     if cfg.paper_critic:
@@ -39,6 +58,8 @@ def imagination_protocol(cfg):
 
 
 def checkpoint_version(cfg):
+    if cfg.dex_reference and cfg.uses_v34_optimizations:
+        return 34
     if cfg.dex_reference:
         return 33
     if cfg.paper_critic:
@@ -180,9 +201,16 @@ class Trainer:
         self.grasp_manager = None
         self.wm_cuda_graph = wm_cuda_graph
         self._wm_capture = None
+        self.wm_holdout_envs = holdout_env_count(len(context), cfg.wm_holdout_fraction)
+        self.wm_train_envs = len(context) - self.wm_holdout_envs
         # Fixed physical-unit floors are allocated once, also safe for capture.
         self._wm_floor = torch.tensor(
             [0.003] * 21 + [0.05] * 21 + [0.003] * 3 + [0.005] * 3 + [0.02] * 3 + [0.05] * 3, device=self.device
+        )
+        bs = cfg.wm_bryson_scales
+        self._wm_bryson_scale = torch.tensor(
+            [bs[0]] * 21 + [bs[1]] * 21 + [bs[2]] * 3 + [bs[3]] * 3 + [bs[4]] * 3 + [bs[5]] * 3,
+            device=self.device, dtype=torch.float32,
         )
         self._wm_encoder_bias = torch.tensor(cfg.encoder_bias_rad, device=self.device)
         self._wm_home = torch.tensor(cfg.action_home, device=self.device)
@@ -213,8 +241,14 @@ class Trainer:
 
     @torch.no_grad()
     def update_real_statistics(self, state, target, nxt, observation, *, policy_statistics=True):
-        self.wm.input_norm.update(self.wm.inputs(state, target, self.context), self.distributed)
-        self.wm.delta_norm.update(physical_delta(state, nxt), self.distributed)
+        # Strictly exclude held-out WM environments from WM normalizer statistics.
+        n = self.wm_train_envs
+        if n < len(state):
+            self.wm.input_norm.update(self.wm.inputs(state[:n], target[:n], self.context[:n]), self.distributed)
+            self.wm.delta_norm.update(physical_delta(state[:n], nxt[:n]), self.distributed)
+        else:
+            self.wm.input_norm.update(self.wm.inputs(state, target, self.context), self.distributed)
+            self.wm.delta_norm.update(physical_delta(state, nxt), self.distributed)
         if policy_statistics:
             self.actor.obs_norm.update(self.actor.scaled_observation(observation), self.distributed)
             self.critic.input_norm.update(self.critic.inputs(state, self.context), self.distributed)
@@ -229,7 +263,8 @@ class Trainer:
         geometry_totals = torch.zeros(5, device=self.device)
         from .wm_supervision import task_losses, loss_names
         task_totals = torch.zeros(len(loss_names(cfg)), device=self.device)
-        scale = torch.maximum(self.wm.delta_norm.std, self._wm_floor)
+        scale = (self._wm_bryson_scale if cfg.wm_loss_normalization == "bryson"
+                 else torch.maximum(self.wm.delta_norm.std, self._wm_floor))
         context = self.context[w["env_id"]]
         limits = self.limits[w["env_id"]]
         s = w["state"][:, 0]
@@ -265,8 +300,14 @@ class Trainer:
                 if cfg.dex_reference:
                     from torch.nn import functional as F
                     labels = torch.where(active[:, None], w['contact'][:, t], 0.).float()
-                    contact_loss = F.binary_cross_entropy_with_logits(contact_logits, labels, reduction='none').sum(-1)
-                    step_loss = step_loss + cfg.contact_loss_weight*contact_loss
+                    contact_bce = F.binary_cross_entropy_with_logits(contact_logits, labels, reduction='none')
+                    contact_loss = (contact_bce.mean(-1) if cfg.contact_loss_reduction == 'mean'
+                                    else contact_bce.sum(-1))
+                    if cfg.contact_loss_weight:
+                        step_loss = step_loss + cfg.contact_loss_weight * contact_loss
+                    else:
+                        # Keep contact output head in autograd graph for CUDA graph capture.
+                        step_loss = step_loss + 0.0 * contact_loss
                     components[:, -1] = contact_loss.detach()
                     terminal = (w['terminated'][:, t] & active).float()
                     independent = (F.binary_cross_entropy_with_logits(self.wm.termination_logits(real_next.detach()), terminal, reduction='none')
@@ -357,6 +398,65 @@ class Trainer:
             names = ("point_position", "point_velocity", "relative_position", "relative_velocity", "surface_gap")
             metrics.update({"wm_loss_" + name: value.detach().to(torch.float64) / cfg.wm_window for name, value in zip(names, geometry_totals)})
         return metrics if tensor_metrics else scalar_metrics(metrics)
+
+    @torch.no_grad()
+    def evaluate_wm_holdout(self, replay, batch_size=None):
+        """Leak-free WM validation on held-out environments with k-step RMSE vs persistence."""
+        cfg = self.cfg
+        n = min(batch_size or cfg.wm_batch, cfg.wm_batch)
+        w = replay.sample_holdout(n, cfg.wm_window)
+        scale = (self._wm_bryson_scale if cfg.wm_loss_normalization == "bryson"
+                 else torch.maximum(self.wm.delta_norm.std, self._wm_floor))
+        context = self.context[w["env_id"]]
+        limits = self.limits[w["env_id"]]
+        initial = w["state"][:, 0, :55]
+        s = w["state"][:, 0]
+        physical_totals = torch.zeros(6, device=self.device)
+        loss_total = torch.zeros((), device=self.device)
+        valid_steps = torch.zeros((), device=self.device)
+        last_pred = initial
+        for t in range(cfg.wm_window):
+            active = w["mask"][:, t].bool()
+            action = torch.where(active[:, None], w["action"][:, t], 0.0)
+            real_state = torch.where(active[:, None], w["state"][:, t], s)
+            real_next = torch.where(active[:, None], w["next_physical"][:, t], s[:, :55])
+            if cfg.dex_reference:
+                s = torch.cat((s[..., :125], real_state[..., 125:131]), -1)
+            target = action_target(s, action, limits, cfg)
+            pred = self.wm(s, target, context)
+            error = physical_delta(real_next, pred) / scale
+            groups = torch.stack([part.square().mean(-1) for part in error.split((21, 21, 3, 3, 3, 3), -1)], -1)
+            step_phys = groups.mean(-1) if cfg.grouped_physical_loss else error.square().mean(-1)
+            m = w["mask"][:, t]
+            loss_total += (step_phys * m).sum()
+            physical_totals += (groups * m[:, None]).sum(0)
+            valid_steps += m.sum()
+            last_pred = pred
+            advanced = (advance(s, pred, action, target, s[:, layout(s).goal_rot], self.episode_steps, hold_cfg=cfg)
+                        if cfg.compact_state else torch.cat((pred, target, s[:, 76:]), -1))
+            s = torch.where((active & ~w["done"][:, t])[:, None], advanced, s)
+        denom = valid_steps.clamp_min(1.0)
+        names = ("joint_position", "joint_velocity", "object_position", "object_rotation", "object_velocity", "object_omega")
+        metrics = {"wm_holdout_loss": loss_total / denom}
+        for name, value in zip(names, physical_totals):
+            metrics[f"wm_holdout_loss_{name}"] = value / denom
+        final_mask = w["mask"][:, -1].bool()
+        if final_mask.any():
+            real_final = w["next_physical"][final_mask, -1]
+            pred_err = physical_delta(real_final, last_pred[final_mask])
+            pers_err = physical_delta(real_final, initial[final_mask])
+            rot_rmse = pred_err[:, 45:48].norm(dim=-1).square().mean().sqrt() * (180.0 / math.pi)
+            rot_base = pers_err[:, 45:48].norm(dim=-1).square().mean().sqrt() * (180.0 / math.pi)
+            pos_rmse = pred_err[:, 42:45].norm(dim=-1).square().mean().sqrt() * 1000.0
+            pos_base = pers_err[:, 42:45].norm(dim=-1).square().mean().sqrt() * 1000.0
+            metrics.update(
+                wm_holdout_rot_rmse_deg=rot_rmse,
+                wm_holdout_rot_baseline_deg=rot_base,
+                wm_holdout_rot_gain_ratio=rot_rmse / rot_base.clamp_min(1e-6),
+                wm_holdout_pos_rmse_mm=pos_rmse,
+                wm_holdout_pos_baseline_mm=pos_base,
+            )
+        return scalar_metrics(metrics)
 
     def update_world_model(self, replay, *, updates=None):
         """Refit fresh replay without advancing training time or policy optimizers.
@@ -524,23 +624,33 @@ class Trainer:
         # Reward and violation returns can differ sharply early in training.
         # Balance regression heads with fixed detached per-rollout scales; this
         # changes neither value units nor the physical zero-cost budgets.
-        target_scale = (targets.detach().std(0, unbiased=False).clamp_min(1.)
-                        if self.cfg.constraints_enabled and not self.cfg.paper_critic else 1.)
-        # Eq. (3): expectation over starts, SUM over imagined time, not mean
-        # over time. Preserve this scale even when known-terminal tails are absent.
-        time_scale = 1.
-        if self.cfg.paper_critic:
-            if rollout_count is None or rollout_count < 1:
-                raise ValueError('Paper Critic requires the number of imagined rollout starts')
-            counts = self.distributed.reduce(states.new_tensor([len(states), rollout_count]), 'sum')
-            time_scale = counts[0] / counts[1]
+        if self.cfg.critic_mean_loss:
+            if self.cfg.constraints_enabled:
+                from .stable_values import value_bounds
+                target_scale = states.new_tensor(value_bounds(self.cfg))
+            else:
+                target_scale = 1.0
+            head_divisor = float(targets.shape[-1]) if targets.ndim > 1 else 1.0
+            time_scale = 1.0
+        else:
+            target_scale = (targets.detach().std(0, unbiased=False).clamp_min(1.)
+                            if self.cfg.constraints_enabled and not self.cfg.paper_critic else 1.)
+            head_divisor = 1.0
+            # Eq. (3): expectation over starts, SUM over imagined time, not mean
+            # over time. Preserve this scale even when known-terminal tails are absent.
+            time_scale = 1.
+            if self.cfg.paper_critic:
+                if rollout_count is None or rollout_count < 1:
+                    raise ValueError('Paper Critic requires the number of imagined rollout starts')
+                counts = self.distributed.reduce(states.new_tensor([len(states), rollout_count]), 'sum')
+                time_scale = counts[0] / counts[1]
         updates = 0
         for _ in range(self.cfg.critic_epochs):
             splits = torch.tensor_split(torch.randperm(len(states), device=self.device),
                                         self.cfg.critic_minibatches)
             for idx in splits:
                 self.opt_critic.zero_grad(set_to_none=True)
-                denominator = self.distributed.batch_denominator(len(idx))
+                denominator = self.distributed.batch_denominator(len(idx)) * head_divisor
                 for chunk in idx.split(self.cfg.critic_microbatch or self.cfg.microbatch):
                     loss = ((self.critic(states[chunk], context[chunk]) - targets[chunk]) / target_scale).square().sum() / denominator * time_scale
                     loss.backward()

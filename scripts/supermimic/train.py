@@ -65,8 +65,16 @@ parser.add_argument("--stability_position_sigma_m", type=float, default=.02)
 parser.add_argument("--stability_angular_speed_scale", type=float, default=.3)
 parser.add_argument("--stability_linear_speed_scale", type=float, default=.02)
 parser.add_argument("--gamma", type=float, help="Manual-convex default 0.99 per policy control step")
+parser.add_argument("--lam", type=float, help="Fresh-run GAE lambda override (e.g. 0.9025 for 25 Hz time alignment)")
+parser.add_argument("--horizon", type=int, help="Fresh-run imagination horizon H override")
+parser.add_argument("--wm_holdout_fraction", type=float, help="Fresh-run fraction of environments held out strictly for WM validation")
+parser.add_argument("--replay_sampling_mode", choices=("legacy", "uniform_failure"), help="Fresh-run WM replay sampling mode")
 parser.add_argument("--resume_gamma_override", action="store_true",
                     help="Apply explicit --gamma to a resume only before any actor/critic optimizer update")
+parser.add_argument("--orientation_reward_mode", choices=("gaussian", "linear_fine"),
+                    help="Fresh-run orientation reward shape (gaussian or linear_fine)")
+parser.add_argument("--orientation_tolerance_deg", type=float,
+                    help="Fresh-run orientation tolerance plateau in degrees (0 disables plateau)")
 parser.add_argument("--orientation_coarse_sigma_deg", type=float, default=90.)
 parser.add_argument("--orientation_fine_sigma_deg", type=float, default=10.)
 parser.add_argument("--orientation_coarse_fraction", type=float, default=.3)
@@ -270,6 +278,7 @@ def configure(cfg):
             orientation_coarse_sigma_rad=math.radians(args.orientation_coarse_sigma_deg),
             orientation_fine_sigma_rad=math.radians(args.orientation_fine_sigma_deg),
             orientation_coarse_fraction=args.orientation_coarse_fraction,
+            orientation_reward_mode=(args.orientation_reward_mode or 'gaussian'),
             orientation_reward_scale=args.orientation_reward_scale,
             **{name: getattr(args, name) for name in POSITION_CONFIG_FIELDS if name != 'track_object_position'},
             track_object_position=args.track_object_position if args.track_object_position is not None else False)
@@ -278,7 +287,7 @@ def configure(cfg):
                 raise ValueError('goal_position_base_m must be finite')
             cfg.commands.object_pose.goal_position_base_m = tuple(args.goal_position_base_m)
         for name in ('goal_evaluation_s', *STABILITY_CONFIG_FIELDS, 'orientation_coarse_sigma_rad', 'orientation_fine_sigma_rad',
-                     'orientation_coarse_fraction', 'orientation_reward_scale', *POSITION_CONFIG_FIELDS):
+                     'orientation_coarse_fraction', 'orientation_reward_mode', 'orientation_reward_scale', *POSITION_CONFIG_FIELDS):
             setattr(cfg.commands.object_pose, name, getattr(settings, name))
     if binding is not None and args.track_object_position is not None:
         if getattr(cfg.commands.object_pose, 'track_object_position', True) != args.track_object_position:
@@ -313,7 +322,15 @@ def configure(cfg):
             from viserdex.supermimic.quiet_hold import validate_quiet_hold
             for name, value in reward_options(profile).items():
                 setattr(cfg.commands.object_pose, name, value)
+        if args.orientation_reward_mode is not None:
+            cfg.commands.object_pose.orientation_reward_mode = args.orientation_reward_mode
+        if args.orientation_tolerance_deg is not None:
+            cfg.commands.object_pose.orientation_tolerance_rad = math.radians(args.orientation_tolerance_deg)
+        if args.dex_reference_config is not None or args.orientation_reward_mode is not None or args.orientation_tolerance_deg is not None:
+            from viserdex.supermimic.quiet_hold import validate_quiet_hold
+            from viserdex.supermimic.orientation_reward import validate_orientation_reward
             validate_quiet_hold(cfg.commands.object_pose)
+            validate_orientation_reward(cfg.commands.object_pose)
     elif binding is not None:
         if args.quiet_hold is not None and args.quiet_hold != getattr(cfg.commands.object_pose, 'quiet_hold_enabled', False):
             raise ValueError('Saved reward cannot change on resume; start a fresh run')
@@ -372,7 +389,7 @@ from viserdex.supermimic.object_variant import object_metadata
 from viserdex.supermimic.stream_audit import StreamAudit
 from viserdex.supermimic.simulation import Adapter
 from viserdex.supermimic.replay import Replay
-from viserdex.supermimic.trainer import Trainer, checkpoint_version, imagination_protocol
+from viserdex.supermimic.trainer import Trainer, checkpoint_version, imagination_protocol, holdout_env_count
 from viserdex.supermimic.validation import open_loop_errors
 
 
@@ -397,12 +414,20 @@ def main():
     goal_options = {}
     if args.policy_variant == 'manual_convex':
         for name in ('goal_evaluation_s', *STABILITY_CONFIG_FIELDS, *QUIET_HOLD_CONFIG_FIELDS, 'orientation_coarse_sigma_rad', 'orientation_fine_sigma_rad',
-                     'orientation_coarse_fraction', 'orientation_reward_scale', *POSITION_CONFIG_FIELDS):
+                     'orientation_coarse_fraction', 'orientation_reward_mode', 'orientation_reward_scale', *POSITION_CONFIG_FIELDS):
             goal_options[name] = getattr(app.cfg.commands.object_pose, name)
         if goal_options['quiet_hold_enabled']:
             goal_options['network_joint_limits'] = app.cfg.actions.joint_pos.position_limits_rad
         if args.gamma is not None:
             goal_options['gamma'] = args.gamma
+        if args.lam is not None and not args.resume:
+            goal_options['lam'] = args.lam
+        if args.horizon is not None and not args.resume:
+            goal_options['horizon'] = args.horizon
+        if args.wm_holdout_fraction is not None and not args.resume:
+            goal_options['wm_holdout_fraction'] = args.wm_holdout_fraction
+        if args.replay_sampling_mode is not None and not args.resume:
+            goal_options['replay_sampling_mode'] = args.replay_sampling_mode
     elif args.gamma is not None:
         raise ValueError('--gamma override is supported by the new manual_convex variant only')
     if revised and args.network_revision == 'hardware_center25_v3':
@@ -452,7 +477,16 @@ def main():
         from dataclasses import replace
         from viserdex.supermimic.dex_reference import load_profile, profile_options
         profile, digest = load_profile(args.dex_reference_config)
-        cfg = replace(cfg, **profile_options(profile, digest))
+        overrides = profile_options(profile, digest)
+        if args.orientation_reward_mode is not None:
+            overrides['orientation_reward_mode'] = args.orientation_reward_mode
+        if args.orientation_tolerance_deg is not None:
+            overrides['orientation_tolerance_rad'] = math.radians(args.orientation_tolerance_deg)
+        if args.wm_holdout_fraction is not None:
+            overrides['wm_holdout_fraction'] = args.wm_holdout_fraction
+        if args.replay_sampling_mode is not None:
+            overrides['replay_sampling_mode'] = args.replay_sampling_mode
+        cfg = replace(cfg, **overrides)
     if args.check_joint_update:
         cfg.wm_only_iters = 0
     if args.smoke:
@@ -695,11 +729,17 @@ def main():
         )
         if cfg.dex_reference:
             from viserdex.supermimic.dex_reference import state_fields as reference_fields, observation_fields as reference_obs
+            phys_out_dim = 27 if cfg.wm_dynamics_mode == 'velocity_integrated' else 54
+            wm_proto = (
+                f'velocity27_integrated_{cfg.wm_loss_normalization}_contact_{cfg.contact_loss_reduction}_v34'
+                if cfg.uses_v34_optimizations
+                else 'physical54_dimension_mean_contact_BCE_sum_0.1_independent_failure_v33'
+            )
             metadata.update(state_fields=reference_fields(), observation_fields=reference_obs(),
                 contact_supervision=adapter.contact_labels.manifest,
-                wm_supervision_protocol='physical54_dimension_mean_contact_BCE_sum_0.1_independent_failure_v33',
+                wm_supervision_protocol=wm_proto,
                 action_parameterization='tanh -> YAML soft encoder bounds -> EMA -> subtract episode zero -> geometric PD, zero delay',
-                wm_input_dim=len(trainer.wm.input_norm.mean), wm_output_dim=54+len(cfg.contact_body_names),
+                wm_input_dim=len(trainer.wm.input_norm.mean), wm_output_dim=phys_out_dim+len(cfg.contact_body_names),
                 fixed_encoder_compensation_enabled=False,
                 control_profile=cfg.control_profile, control_profile_sha256=cfg.control_profile_sha256)
         if args.policy_variant == 'manual_convex':
@@ -758,7 +798,10 @@ def main():
         def new_replay():
             return Replay(cfg.buffer_steps, env.num_envs, env.device, cfg.event_capacity, cfg.event_fraction,
                           cfg.wm_window, adaptive=cfg.adaptive_replay,
-                          storage_device=env.device if args.replay_storage == 'cuda' else 'cpu')
+                          storage_device=env.device if args.replay_storage == 'cuda' else 'cpu',
+                          wm_holdout_envs=holdout_env_count(env.num_envs, cfg.wm_holdout_fraction),
+                          sampling_mode=cfg.replay_sampling_mode,
+                          failure_sample_fraction=cfg.failure_sample_fraction)
         replay = new_replay()
         stream_audit = StreamAudit(rank_dir / "stream_audit.jsonl", adapter.context, adapter.limits,
                                    cfg, adapter.geometry_spec, args.audit_interval)
@@ -1049,6 +1092,10 @@ def main():
                 phase = (("wm_critic_warmup" if cfg.uses_target_critic else "wm_warmup")
                          if trainer.iteration < cfg.wm_only_iters else "joint")
                 metrics = trainer.update(replay)
+                if replay.wm_holdout_envs > 0:
+                    holdout_every = min(args.audit_interval, 50) if args.audit_interval > 0 else 50
+                    if trainer.iteration == 1 or trainer.iteration % holdout_every == 0:
+                        metrics.update(trainer.evaluate_wm_holdout(replay))
                 metrics.update(real)
                 metrics.update(
                     iteration=trainer.iteration,

@@ -50,6 +50,38 @@ def validate_profile(p):
         raise ValueError('Invalid home_pose_scale_deg')
     if bool(p.get('object_motion_angular_speed_rad_s', 0)) != bool(p.get('object_motion_linear_speed_m_s', 0)):
         raise ValueError('Global object speed costs require both thresholds')
+    # Optional V34 optimization profile overrides (omitted in legacy V33 YAML profiles).
+    if 'wm_dynamics_mode' in p and p['wm_dynamics_mode'] not in ('delta54', 'velocity_integrated'):
+        raise ValueError(f"Invalid wm_dynamics_mode: {p['wm_dynamics_mode']}")
+    if 'wm_integration_coeff' in p and (not math.isfinite(p['wm_integration_coeff']) or not 0 < p['wm_integration_coeff'] <= 1):
+        raise ValueError('Invalid wm_integration_coeff')
+    if 'wm_loss_normalization' in p and p['wm_loss_normalization'] not in ('running_std', 'bryson'):
+        raise ValueError(f"Invalid wm_loss_normalization: {p['wm_loss_normalization']}")
+    if 'wm_bryson_scales' in p:
+        scales = p['wm_bryson_scales']
+        if not isinstance(scales, (list, tuple)) or len(scales) != 6 or any(not math.isfinite(v) or v <= 0 for v in scales):
+            raise ValueError('wm_bryson_scales must contain 6 finite positive nominal errors')
+    if 'wm_activation' in p and p['wm_activation'] not in ('silu', 'gelu'):
+        raise ValueError(f"Invalid wm_activation: {p['wm_activation']}")
+    if 'contact_loss_reduction' in p and p['contact_loss_reduction'] not in ('sum', 'mean'):
+        raise ValueError(f"Invalid contact_loss_reduction: {p['contact_loss_reduction']}")
+    for name in ('wm_reward_loss_weight', 'wm_observation_loss_weight', 'wm_cost_loss_weight'):
+        if name in p and (not math.isfinite(p[name]) or p[name] < 0):
+            raise ValueError(f'Invalid {name}')
+    if 'wm_holdout_fraction' in p and (not math.isfinite(p['wm_holdout_fraction']) or not 0 <= p['wm_holdout_fraction'] < 0.5):
+        raise ValueError('Invalid wm_holdout_fraction')
+    if 'replay_sampling_mode' in p and p['replay_sampling_mode'] not in ('legacy', 'uniform_failure'):
+        raise ValueError(f"Invalid replay_sampling_mode: {p['replay_sampling_mode']}")
+    if 'failure_sample_fraction' in p and (not math.isfinite(p['failure_sample_fraction']) or not 0 <= p['failure_sample_fraction'] <= 1):
+        raise ValueError('Invalid failure_sample_fraction')
+    for name in ('grouped_physical_loss', 'deterministic_imagination', 'target_rate_pre_slew_cost',
+                 'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss'):
+        if name in p and type(p[name]) is not bool:
+            raise ValueError(f'{name} must be boolean')
+    if 'orientation_reward_mode' in p and p['orientation_reward_mode'] not in ('gaussian', 'linear_fine'):
+        raise ValueError(f"Invalid orientation_reward_mode: {p['orientation_reward_mode']}")
+    if 'orientation_tolerance_deg' in p and (not math.isfinite(p['orientation_tolerance_deg']) or not 0 <= p['orientation_tolerance_deg'] < 180):
+        raise ValueError('Invalid orientation_tolerance_deg')
     return limits, asset
 
 
@@ -68,16 +100,20 @@ def reward_options(p):
     options = home_pose_options(p)
     if 'hold_target_motion_weight' in p:
         options['hold_target_motion_weight'] = p['hold_target_motion_weight']
+    if 'orientation_reward_mode' in p:
+        options['orientation_reward_mode'] = p['orientation_reward_mode']
+    if 'orientation_tolerance_deg' in p:
+        options['orientation_tolerance_rad'] = math.radians(p['orientation_tolerance_deg'])
     return options
 
 
 def profile_options(p, digest):
     limits, _ = validate_profile(p)
     from .revised_contract import HARDWARE_JOINT_NAMES
-    return dict(dex_reference=True, state_protocol=STATE_PROTOCOL, observation_protocol=OBSERVATION_PROTOCOL,
+    options = dict(dex_reference=True, state_protocol=STATE_PROTOCOL, observation_protocol=OBSERVATION_PROTOCOL,
         control_profile=p, control_profile_sha256=digest, network_joint_limits=tuple(map(tuple, limits.tolist())),
         encoder_bias_rad=(0.,)*21, ema_alpha=p['ema_alpha'], history=3, include_delay_ready=False,
-        grouped_physical_loss=False, contact_loss_weight=p['contact_loss_weight'],
+        grouped_physical_loss=p.get('grouped_physical_loss', False), contact_loss_weight=p['contact_loss_weight'],
         contact_body_names=('world',)+tuple(n.replace('_joint', '_link') for n in HARDWARE_JOINT_NAMES),
         zero_bias_range_rad=tuple(math.radians(v) for v in p['zero_bias_deg']),
         wrench_probability=p['wrench_probability'], wrench_force_max=p['wrench_force_max_N'],
@@ -86,6 +122,16 @@ def profile_options(p, digest):
         object_motion_angular_speed_rad_s=p.get('object_motion_angular_speed_rad_s', 0.),
         object_motion_linear_speed_m_s=p.get('object_motion_linear_speed_m_s', 0.),
         **reward_options(p))
+    for key in ('wm_dynamics_mode', 'wm_integration_coeff', 'wm_loss_normalization', 'wm_activation',
+                'contact_loss_reduction', 'wm_reward_loss_weight', 'wm_observation_loss_weight',
+                'wm_cost_loss_weight', 'wm_holdout_fraction', 'replay_sampling_mode',
+                'failure_sample_fraction', 'deterministic_imagination', 'target_rate_pre_slew_cost',
+                'critic_layer_norm', 'critic_value_cap', 'critic_mean_loss'):
+        if key in p:
+            options[key] = p[key]
+    if 'wm_bryson_scales' in p:
+        options['wm_bryson_scales'] = tuple(float(v) for v in p['wm_bryson_scales'])
+    return options
 
 
 def filter_target(previous, raw, alpha, max_delta=0.):
@@ -100,6 +146,13 @@ def target(state, action, limits, alpha, max_delta=0.):
     from .policy_contract import absolute_joint_target
     encoded = filter_target(state[..., EMA], absolute_joint_target(action, limits), alpha, max_delta)
     return encoded-state[..., ZERO]
+
+
+def unclipped_target(state, action, limits, alpha):
+    """Pre-slew EMA geometric target so rate-limit costs retain nonzero gradients."""
+    from .policy_contract import absolute_joint_target
+    encoded = alpha * absolute_joint_target(action, limits) + (1 - alpha) * state[..., EMA]
+    return encoded - state[..., ZERO]
 
 
 def observation(joints_normalized, state, limits, position, orientation):

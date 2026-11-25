@@ -25,6 +25,9 @@ class CapturedWMLoss:
         self.grads = tuple(p.grad for p in self.parameters)
         if any(g is None for g in self.grads):
             raise ValueError("Every WM parameter must participate in captured loss")
+        import gc
+        gc.collect()
+        torch.cuda.synchronize(trainer.device)
         self.graph = torch.cuda.CUDAGraph()
         with torch.cuda.graph(self.graph, stream=stream):
             self.outputs = trainer._wm_loss(self.inputs)
