@@ -78,14 +78,35 @@ def home_pose_penalty(joints, home, cfg):
     return cfg.home_pose_weight * (excess / cfg.home_pose_scale_rad).square().mean(-1)
 
 
-def home_pose_reward(joints, home, cfg):
-    """Bounded per-joint positive reward in [0, home_pose_reward_scale] for natural HOME posture.
+FINGER_JOINT_SLICES = (
+    slice(0, 4),   # little
+    slice(4, 8),   # ring
+    slice(8, 12),  # middle
+    slice(12, 16), # index
+    slice(16, 21), # thumb
+)
 
-    Each joint earns independent Gaussian credit around HOME outside a small deadband,
-    preventing awkward/contorted idle fingers without blocking large-angle regripping.
+
+def home_pose_reward(joints, home, cfg):
+    """Bounded positive reward in [0, home_pose_reward_scale] for natural HOME posture.
+
+    Each joint earns Gaussian credit around HOME outside a small deadband. When
+    ``home_pose_reward_worst_weight > 0``, blends the 21-joint mean with a smooth
+    LogSumExp softmin over the five finger groups so extending any single finger
+    (e.g. sticking out the middle finger) cannot hide behind 1/21 averaging.
     """
     excess = ((joints - home).abs() - cfg.home_pose_reward_deadband_rad).clamp_min(0.0)
-    return cfg.home_pose_reward_scale * torch.exp(-(excess / cfg.home_pose_reward_sigma_rad).square()).mean(-1)
+    credit = torch.exp(-(excess / cfg.home_pose_reward_sigma_rad).square())
+    mean_credit = credit.mean(-1)
+    worst_w = getattr(cfg, 'home_pose_reward_worst_weight', 0.0)
+    if worst_w and joints.shape[-1] == 21:
+        tau = getattr(cfg, 'home_pose_reward_worst_tau', 0.08)
+        finger_means = torch.stack([credit[..., sl].mean(-1) for sl in FINGER_JOINT_SLICES], dim=-1)
+        worst_credit = -tau * (torch.logsumexp(-finger_means / tau, dim=-1) - math.log(len(FINGER_JOINT_SLICES)))
+        combined = (1.0 - worst_w) * mean_credit + worst_w * worst_credit
+    else:
+        combined = mean_credit
+    return cfg.home_pose_reward_scale * combined
 
 
 def imagined_motion_penalty(state, next_physical, action, angle, cfg, *, limits=None, encoder_bias=None, home=None, residual_rad=None):
@@ -115,6 +136,7 @@ DEX_REG_CONFIG_FIELDS = (
     'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s', 'object_angular_speed_scale_rad_s',
     'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s', 'object_linear_speed_scale_m_s',
     'home_pose_reward_scale', 'home_pose_reward_deadband_rad', 'home_pose_reward_sigma_rad',
+    'home_pose_reward_worst_weight', 'home_pose_reward_worst_tau',
 )
 
 

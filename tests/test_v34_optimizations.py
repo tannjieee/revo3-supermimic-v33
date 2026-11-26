@@ -540,14 +540,16 @@ def test_phase4_twin_conservative_critic_ema_huber_and_residual_wm():
     assert cfg.wm_ema_tau == 0.05 and cfg.wm_grad_clip == 5.0
     assert cfg.object_angular_speed_penalty_weight == 1.8 and cfg.object_angular_speed_limit_rad_s == 1.8
     assert cfg.object_linear_speed_penalty_weight == 1.5 and cfg.object_linear_speed_limit_m_s == 0.07
-    assert cfg.home_pose_reward_scale == 1.5
+    assert cfg.home_pose_reward_scale == 2.0
+    assert cfg.home_pose_reward_worst_weight == 0.45
+    assert cfg.home_pose_weight == 1.0
     assert cfg.critic_ensemble_size == 2
     assert cfg.critic_ema_tau == 0.05
     assert cfg.critic_huber_delta == 0.5
     assert cfg.has_target_critic is True and cfg.uses_paper_target_critic is True
     assert cfg.lr_decay_iters == 30000 and cfg.lr_min_ratio == 0.15
     proto = imagination_protocol(cfg)
-    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber", "_wdec", "_wnoise", "_aln", "_afail", "_wema", "_objspeed", "_hrew"):
+    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber", "_wdec", "_wnoise", "_aln", "_afail", "_wema", "_objspeed", "_hrew", "_hworst"):
         assert tag in proto, f"Missing {tag} in {proto}"
 
     trainer, replay = populate_replay(cfg, n_envs=10, steps=14)
@@ -681,12 +683,21 @@ def test_phase6_object_speed_penalty_deadband_gradient_and_parity():
     assert cfg.target_slew_rate_rad_s == pytest.approx(math.radians(160.0))
     assert cfg.ema_alpha == pytest.approx(0.46)
     assert cfg.hold_target_motion_weight == pytest.approx(0.5)
-    assert cfg.home_pose_weight == pytest.approx(0.0)
-    assert cfg.home_pose_reward_scale == pytest.approx(1.5)
+    assert cfg.home_pose_weight == pytest.approx(1.0)
+    assert cfg.home_pose_deadband_rad == pytest.approx(math.radians(20.0))
+    assert cfg.home_pose_scale_rad == pytest.approx(math.radians(20.0))
+    assert cfg.home_pose_reward_scale == pytest.approx(2.0)
     assert cfg.home_pose_reward_deadband_rad == pytest.approx(math.radians(5.0))
     assert cfg.home_pose_reward_sigma_rad == pytest.approx(math.radians(25.0))
+    assert cfg.home_pose_reward_worst_weight == pytest.approx(0.45)
+    assert cfg.home_pose_reward_worst_tau == pytest.approx(0.08)
     assert cfg.cage_safe_radius_m == pytest.approx(0.035)
     assert cfg.cage_penalty_weight == pytest.approx(2.5)
+    # 4-finger gentle flexion floor (MCP >= 10 deg, PIP >= 20 deg) while keeping thumb limits unchanged.
+    for finger_base in (0, 4, 8, 12):
+        assert cfg.network_joint_limits[finger_base + 1][0] == pytest.approx(math.radians(10.0), abs=1e-6)
+        assert cfg.network_joint_limits[finger_base + 2][0] == pytest.approx(math.radians(20.0), abs=1e-6)
+    assert "_hworst" in imagination_protocol(cfg)
 
     # Zero penalty inside deadband [0, limit], strictly positive + smooth gradient above limit.
     zeros_dist = torch.zeros(4)
@@ -706,21 +717,42 @@ def test_phase6_object_speed_penalty_deadband_gradient_and_parity():
     assert float(g_lin[0]) == 0.0 and float(g_lin[1]) == 0.0
     assert float(g_lin[2]) > 0.0 and float(g_lin[3]) > float(g_lin[2])
 
-    # Positive bounded per-joint Gaussian HOME posture reward: full credit inside deadband,
-    # smooth restoring pull outside deadband, independent per joint.
-    home = torch.tensor(cfg.action_home).expand(3, 21)
+    # Positive bounded HOME posture reward with worst-finger softmin mix:
+    # (a) exact full credit inside deadband, (b) extending only the middle finger loses far more
+    # than 1/21 averaging and concentrates restoring gradient onto the offending finger.
+    home = torch.tensor(cfg.action_home).expand(4, 21)
     q_test = home.clone().detach().requires_grad_(True)
     q_offset = torch.zeros_like(home)
-    q_offset[0] = math.radians(4.0)    # inside 5 deg deadband -> exact full scale 1.5
-    q_offset[1, 0] = math.radians(30.0)  # 1 joint 25 deg past deadband -> only 1/21 drops to exp(-1)
-    q_offset[2] = math.radians(30.0)   # all 21 joints 25 deg past deadband -> scale * exp(-1)
+    q_offset[0] = math.radians(4.0)       # inside 5 deg deadband -> exact full scale 2.0
+    q_offset[1, 9:12] = math.radians(30.0)  # middle finger MCP/PIP/DIP extended 30 deg
+    q_offset[2] = math.radians(30.0)      # all 21 joints 25 deg past deadband -> scale * exp(-1)
+    q_offset[3, 9] = math.radians(40.0)   # extreme single joint deviation for quadratic wall check
     hrew = home_pose_reward(q_test + q_offset, home, cfg)
-    assert float(hrew[0]) == pytest.approx(1.5, abs=1e-6)
-    assert float(hrew[1]) == pytest.approx(1.5 * (20.0 + math.exp(-1.0)) / 21.0, rel=1e-5)
-    assert float(hrew[2]) == pytest.approx(1.5 * math.exp(-1.0), rel=1e-5)
+    assert float(hrew[0]) == pytest.approx(2.0, abs=1e-6)
+    assert float(hrew[2]) == pytest.approx(2.0 * math.exp(-1.0), rel=1e-5)
+    # Pure mean loss for 3/21 joints at exp(-1) would keep 2.0*(18 + 3*exp(-1))/21 = 1.819;
+    # worst-finger softmin must penalize single-finger extension significantly harder.
+    pure_mean_case1 = 2.0 * (18.0 + 3.0 * math.exp(-1.0)) / 21.0
+    assert float(hrew[1]) < pure_mean_case1 - 0.15
     g_q = torch.autograd.grad(hrew.sum(), q_test)[0]
     assert float(g_q[0].abs().max()) == 0.0
-    assert float(g_q[1, 0]) < 0.0 and float(g_q[1, 1:].abs().max()) == 0.0
+    assert (g_q[1, 9:12] < 0.0).all()
+    # Backward compatibility: worst_weight=0.0 matches exact legacy 21-joint mean.
+    cfg_legacy_hrew = make_v34_cfg(profile_path=V36_P4_PROFILE, cost_penalty=0.55, horizon=8, home_pose_reward_worst_weight=0.0)
+    hrew_legacy = home_pose_reward(home + q_offset, home, cfg_legacy_hrew)
+    assert float(hrew_legacy[1]) == pytest.approx(pure_mean_case1, rel=1e-5)
+    # Outer convex quadratic HOME wall: zero inside 20 deg deadband, strictly growing restoring gradient beyond.
+    from viserdex.supermimic.quiet_hold import home_pose_penalty
+    q_pen = home.clone().detach().requires_grad_(True)
+    q_pen_off = torch.zeros_like(home)
+    q_pen_off[0] = math.radians(19.0)     # inside 20 deg deadband -> 0 penalty
+    q_pen_off[1, 9] = math.radians(30.0)  # 10 deg past deadband
+    q_pen_off[2, 9] = math.radians(40.0)  # 20 deg past deadband -> 2x gradient of case 1
+    hpen = home_pose_penalty(q_pen + q_pen_off, home, cfg)
+    assert float(hpen[0]) == 0.0 and float(hpen[2]) > float(hpen[1]) > 0.0
+    g_pen = torch.autograd.grad(hpen.sum(), q_pen)[0]
+    assert float(g_pen[0].abs().max()) == 0.0
+    assert float(g_pen[2, 9]) == pytest.approx(2.0 * float(g_pen[1, 9]), rel=1e-5)
 
     # Exact parity between imagined_dex_regularization and direct dex_regularization_penalty.
     state = torch.zeros(4, cfg.state_dim)

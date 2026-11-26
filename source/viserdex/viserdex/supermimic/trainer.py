@@ -84,6 +84,8 @@ def imagination_protocol(cfg):
             parts.append("objspeed")
         if cfg.home_pose_reward_scale > 0:
             parts.append("hrew")
+        if cfg.home_pose_reward_worst_weight > 0:
+            parts.append("hworst")
         return "_".join(parts)
     if cfg.dex_reference:
         return "encoder_EMA_zero_bias_contacts_independent_failure_v33"

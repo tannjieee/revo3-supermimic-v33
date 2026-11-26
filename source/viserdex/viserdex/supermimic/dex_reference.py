@@ -47,9 +47,13 @@ def validate_profile(p):
                  'home_pose_reward_scale', 'home_pose_reward_deadband_deg'):
         if name in p and (not math.isfinite(p[name]) or p[name] < 0):
             raise ValueError(f'Invalid {name}')
-    for name in ('home_pose_scale_deg', 'home_pose_reward_sigma_deg'):
+    for name in ('home_pose_scale_deg', 'home_pose_reward_sigma_deg', 'home_pose_reward_worst_tau'):
         if name in p and (not math.isfinite(p[name]) or p[name] <= 0):
             raise ValueError(f'Invalid {name}')
+    if 'home_pose_reward_worst_weight' in p:
+        w = p['home_pose_reward_worst_weight']
+        if not math.isfinite(w) or not 0.0 <= w <= 1.0:
+            raise ValueError('Invalid home_pose_reward_worst_weight')
     if bool(p.get('object_motion_angular_speed_rad_s', 0)) != bool(p.get('object_motion_linear_speed_m_s', 0)):
         raise ValueError('Global object speed costs require both thresholds')
     # Optional V34 optimization profile overrides (omitted in legacy V33 YAML profiles).
@@ -182,7 +186,9 @@ def home_pose_options(p):
                 home_pose_scale_rad=math.radians(p.get('home_pose_scale_deg', 30.)),
                 home_pose_reward_scale=p.get('home_pose_reward_scale', 0.),
                 home_pose_reward_deadband_rad=math.radians(p.get('home_pose_reward_deadband_deg', 5.)),
-                home_pose_reward_sigma_rad=math.radians(p.get('home_pose_reward_sigma_deg', 25.)))
+                home_pose_reward_sigma_rad=math.radians(p.get('home_pose_reward_sigma_deg', 25.)),
+                home_pose_reward_worst_weight=p.get('home_pose_reward_worst_weight', 0.),
+                home_pose_reward_worst_tau=p.get('home_pose_reward_worst_tau', 0.08))
 
 
 def reward_options(p):

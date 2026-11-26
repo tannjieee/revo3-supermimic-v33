@@ -78,6 +78,8 @@ class Config:
     home_pose_reward_scale: float = 0.0
     home_pose_reward_deadband_rad: float = math.radians(5.0)
     home_pose_reward_sigma_rad: float = math.radians(25.0)
+    home_pose_reward_worst_weight: float = 0.0
+    home_pose_reward_worst_tau: float = 0.08
     position_reward_scale: float = 2.0
     position_tolerance_m: float = 0.01
     position_sigma_m: float = 0.05
@@ -340,6 +342,7 @@ class Config:
                 'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s', 'object_angular_speed_scale_rad_s',
                 'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s', 'object_linear_speed_scale_m_s',
                 'home_pose_reward_scale', 'home_pose_reward_deadband_rad', 'home_pose_reward_sigma_rad',
+                'home_pose_reward_worst_weight', 'home_pose_reward_worst_tau',
                 'orientation_progress_scale', 'orientation_progress_speed_rad_s',
                 'target_slew_ste', 'actor_lr_scale', 'actor_ramp_iters', 'actor_updates',
                 'critic_epochs', 'actor_lambda_return', 'recent_sample_fraction',
@@ -508,9 +511,11 @@ class Config:
             if not math.isfinite(getattr(self, name)) or getattr(self, name) < 0:
                 raise ValueError(f'{name} must be finite and nonnegative')
         for name in ('cage_scale_m', 'object_angular_speed_scale_rad_s', 'object_linear_speed_scale_m_s',
-                     'home_pose_reward_sigma_rad'):
+                     'home_pose_reward_sigma_rad', 'home_pose_reward_worst_tau'):
             if not math.isfinite(getattr(self, name)) or getattr(self, name) <= 0:
                 raise ValueError(f'{name} must be finite and positive')
+        if not math.isfinite(self.home_pose_reward_worst_weight) or not 0.0 <= self.home_pose_reward_worst_weight <= 1.0:
+            raise ValueError('home_pose_reward_worst_weight must be in [0, 1]')
         if self.orientation_reward_mode not in ('gaussian', 'linear_fine'):
             raise ValueError(f'Unknown orientation_reward_mode: {self.orientation_reward_mode}')
         if self.network_revision not in ('legacy', 'urdf_little_v2', 'hardware_center25_v3'):

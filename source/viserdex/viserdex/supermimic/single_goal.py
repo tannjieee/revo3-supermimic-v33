@@ -177,6 +177,8 @@ class SingleGoalCommandCfg(HoldReorientCommandCfg):
     home_pose_reward_scale: float = 0.0
     home_pose_reward_deadband_rad: float = math.radians(5.0)
     home_pose_reward_sigma_rad: float = math.radians(25.0)
+    home_pose_reward_worst_weight: float = 0.0
+    home_pose_reward_worst_tau: float = 0.08
     ema_delta_penalty_weight: float = 0.0
     joint_speed_penalty_weight: float = 0.0
     cage_penalty_weight: float = 0.0
