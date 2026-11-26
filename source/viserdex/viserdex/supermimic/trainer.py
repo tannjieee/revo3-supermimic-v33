@@ -80,6 +80,8 @@ def imagination_protocol(cfg):
             parts.append("afail")
         if cfg.wm_ema_tau > 0:
             parts.append("wema")
+        if cfg.object_angular_speed_penalty_weight > 0 or cfg.object_linear_speed_penalty_weight > 0:
+            parts.append("objspeed")
         return "_".join(parts)
     if cfg.dex_reference:
         return "encoder_EMA_zero_bias_contacts_independent_failure_v33"

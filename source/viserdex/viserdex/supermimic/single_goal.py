@@ -179,6 +179,12 @@ class SingleGoalCommandCfg(HoldReorientCommandCfg):
     cage_penalty_weight: float = 0.0
     cage_safe_radius_m: float = 0.045
     cage_scale_m: float = 0.025
+    object_angular_speed_penalty_weight: float = 0.0
+    object_angular_speed_limit_rad_s: float = 1.5
+    object_angular_speed_scale_rad_s: float = 1.5
+    object_linear_speed_penalty_weight: float = 0.0
+    object_linear_speed_limit_m_s: float = 0.06
+    object_linear_speed_scale_m_s: float = 0.06
     orientation_reward_mode: str = "gaussian"
     orientation_reward_scale: float = 10.0
     orientation_progress_scale: float = 0.0
@@ -232,12 +238,16 @@ def dense_stability_reward(env, command_name='object_pose'):
         value = value - home_pose_penalty(joints[:, action._joint_ids], home[:, action._joint_ids], command.cfg)
     if (getattr(command.cfg, 'ema_delta_penalty_weight', 0.)
             or getattr(command.cfg, 'joint_speed_penalty_weight', 0.)
-            or getattr(command.cfg, 'cage_penalty_weight', 0.)):
+            or getattr(command.cfg, 'cage_penalty_weight', 0.)
+            or getattr(command.cfg, 'object_angular_speed_penalty_weight', 0.)
+            or getattr(command.cfg, 'object_linear_speed_penalty_weight', 0.)):
         action = env.action_manager.get_term('joint_pos')
         velocity = action._asset.data.joint_vel
         velocity = velocity if isinstance(velocity, torch.Tensor) else velocity.torch
         unclipped = getattr(action, 'unclipped_processed_actions', action.processed_actions)
         value = value - dex_regularization_penalty(
             command.last_position_error, velocity[:, action._joint_ids],
-            unclipped, action.previous_processed_actions, env.step_dt, command.cfg)
+            unclipped, action.previous_processed_actions, env.step_dt, command.cfg,
+            object_angular_speed=command.last_speed,
+            object_linear_speed=command.last_linear_speed)
     return value

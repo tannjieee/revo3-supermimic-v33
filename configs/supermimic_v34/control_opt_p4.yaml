@@ -1,26 +1,28 @@
-# Revo3 SuperMimic V36 Phase 4+4.5: Latest Hardware SysID + Deep Stability, Generalization & Throughput Profile
-# Builds on V35 Phase 3 fast-convergence and solves every remaining bottleneck measured at iter 7,217:
-#   1. Latest 2026-11-24 revo3-sysid Fresh-50Hz 21-DOF closed-loop hardware identification
-#      (`revo3_sysid_fresh50hz_v1`, 0.338 deg held-out RMSE, per-joint Kp/Kd/armature/friction/viscous/peak torque).
-#   2. World Model generalization & anti-overfitting (closing the 2.0-2.4x holdout gap):
-#      - Scaled Huber loss (delta=2.0) + multi-step horizon decay (`wm_step_decay: 0.85`).
-#      - Training-only normalized input jitter (`wm_input_noise_std: 0.02`) for smooth local Jacobians.
-#      - Re-balanced Bryson scales `[0.04, 1.2, 0.005, 0.06, 0.08, 1.0]` so rot/omega no longer starve q/qd/vel.
-#      - Residual MLP skip connections with learnable LayerScale (`wm_residual: true`).
-#      - Fused AdamW decoupled weight decay (`weight_decay: 2e-4`) + balanced `wm_updates: 6` (lower replay ratio).
-#   3. Modernized Actor + Active Near-Drop Recovery:
-#      - `actor_layer_norm: true` + `actor_activation: gelu` across (2048, 1024, 512, 256).
-#      - Pre-drop start-state recovery sampling (`actor_failure_sample_fraction: 0.08`, 0.20s before real drops).
-#   4. Value & Policy stability:
-#      - Twin Conservative Critic (`critic_ensemble_size: 2`: min reward, max drop risk).
-#      - Polyak EMA Target Critic (`critic_ema_tau: 0.05`) + Critic Huber loss (`critic_huber_delta: 0.5`).
-#   5. Sample-efficiency & precision refinement:
-#      - Cosine exploration annealing (`2.5 deg -> 0.5 deg` over 15,000 joint iters).
-#      - Scoped cosine LR (`lr_decay_iters: 30000`, `lr_min_ratio: 0.15`).
-#      - Tighter in-hand safety cage (`cage_safe_radius_m: 0.038`) paired with `--actor_cost_weight 0.35`.
+# Revo3 SuperMimic V36-Stable (Phase 4+4.5+5+6): Latest Hardware SysID + Deep Stability, Controlled Speed & Anti-Drop
+# Builds on V35 Phase 3 and directly solves both remaining failure modes measured on 128-env V35 rollout:
+#   - High-speed flicking (V35 p50 EMA rate saturated at 240 deg/s; transit omega p90=358 deg/s, p99=722 deg/s)
+#   - Explosive-spin drops (100% of V35 drops occurred right after ~819 deg/s spin + 0.79 m/s launch velocity)
+# Key upgrades:
+#   1. Latest 2026-11-24 revo3-sysid Fresh-50Hz 21-DOF closed-loop hardware identification (`revo3_sysid_fresh50hz_v1`, 0.338 deg RMSE).
+#   2. World Model generalization & EMA stability: Huber + horizon decay (0.85) + input jitter (0.02) + Bryson rebalance +
+#      ResMLP LayerScale + Polyak EMA WM (`wm_ema_tau: 0.05`) + grad clip 5.0 + Fused AdamW (`weight_decay: 2e-4`).
+#   3. Controlled Rotation Speed & Smooth Finger Kinematics (Phase 6):
+#      - Differentiable all-phase object angular/linear speed deadband penalty (`1.5 rad/s` / `0.06 m/s` free zone,
+#        quadratic damping above limit) paired with `orientation_progress_scale: 2.0`, `speed: 1.0 rad/s` so optimal
+#        cruising speed locks cleanly around ~60-90 deg/s instead of violent 350-800 deg/s flicking.
+#      - Calmer EMA & slew envelope (`ema_alpha: 0.40`, `target_slew_rate_deg_s: 120.0` with STE, tighter residual `36/48 deg`).
+#      - Meaningful all-phase smoothness (`ema_delta: 0.40`, `joint_speed: 0.25`), quiet-hold target damping (`1.0`),
+#        and gentle HOME posture centering (`0.35`, 20 deg free band).
+#   4. Anti-Drop Safety & Recovery:
+#      - Tighter, stronger palm center cage (`safe: 0.032 m`, `scale: 0.020 m`, `weight: 4.0`).
+#      - Stronger drop risk deterrence (`--actor_cost_weight 1.2`) + higher pre-drop recovery sampling (`0.12`).
+#      - Twin Conservative Critic (`critic_ensemble_size: 2`) + Polyak EMA Target Critic + Critic Huber (`0.5`).
+#   5. Precision & Throughput:
+#      - Actor LayerNorm+GELU, cosine exploration annealing (`2.5 -> 0.5 deg`), scoped 30k cosine LR (`floor 0.15`),
+#        fused Critic/Replay/AdamW + pruned zero-weight readouts.
 schema: revo3_ema_soft_limits_v33
 identified_hand_profile: revo3_sysid_fresh50hz_v1
-ema_alpha: 0.51
+ema_alpha: 0.40
 zero_bias_deg: [-1.0, 1.0]
 fixed_encoder_bias_deg: 0.0
 history: 3
@@ -51,14 +53,14 @@ soft_limits_deg:
   right_little_MCP_joint: [0, 85]
   right_little_PIP_joint: [0, 85]
   right_little_DIP_joint: [0, 85]
-target_slew_rate_deg_s: 240.0
+target_slew_rate_deg_s: 120.0
 target_slew_ste: true
-home_pose_weight: 0.0
-home_pose_deadband_deg: 15.0
-home_pose_scale_deg: 30.0
+home_pose_weight: 0.35
+home_pose_deadband_deg: 20.0
+home_pose_scale_deg: 35.0
 object_motion_angular_speed_rad_s: 1.0
 object_motion_linear_speed_m_s: 0.05
-hold_target_motion_weight: 0.0
+hold_target_motion_weight: 1.0
 
 # --- Phase 0 + Phase 1 ---
 wm_dynamics_mode: velocity_integrated
@@ -72,7 +74,7 @@ wm_observation_loss_weight: 0.0
 wm_cost_loss_weight: 0.0
 wm_holdout_fraction: 0.10
 replay_sampling_mode: uniform_failure
-failure_sample_fraction: 0.08
+failure_sample_fraction: 0.12
 recent_sample_fraction: 0.50
 recent_window_steps: 150
 deterministic_imagination: true
@@ -83,23 +85,29 @@ critic_mean_loss: true
 orientation_reward_mode: linear_fine
 orientation_tolerance_deg: 0.0
 
-# --- Phase 2 ---
+# --- Phase 2 + Phase 6: Smoothness, Controlled Speed & Anti-Drop Cage ---
 action_residual_deg:
-  default: 42.0
-  right_thumb_CMP_joint: 55.0
-  right_thumb_CMR_joint: 55.0
-  right_thumb_MCP_joint: 50.0
+  default: 36.0
+  right_thumb_CMP_joint: 48.0
+  right_thumb_CMR_joint: 48.0
+  right_thumb_MCP_joint: 44.0
 sequential_goals: true
 compact_critic_costs: true
-ema_delta_penalty_weight: 0.08
-joint_speed_penalty_weight: 0.04
-cage_penalty_weight: 2.0
-cage_safe_radius_m: 0.038
-cage_scale_m: 0.025
+ema_delta_penalty_weight: 0.40
+joint_speed_penalty_weight: 0.25
+cage_penalty_weight: 4.0
+cage_safe_radius_m: 0.032
+cage_scale_m: 0.020
+object_angular_speed_penalty_weight: 2.5
+object_angular_speed_limit_rad_s: 1.5
+object_angular_speed_scale_rad_s: 1.5
+object_linear_speed_penalty_weight: 2.0
+object_linear_speed_limit_m_s: 0.06
+object_linear_speed_scale_m_s: 0.06
 
-# --- Phase 3: Fast Convergence ---
-orientation_progress_scale: 4.0
-orientation_progress_speed_rad_s: 2.0
+# --- Phase 3: Controlled Fast Convergence ---
+orientation_progress_scale: 2.0
+orientation_progress_speed_rad_s: 1.0
 actor_lr_scale: 0.75
 actor_ramp_iters: 150
 actor_updates: 2
@@ -112,7 +120,7 @@ goal_curriculum_step_deg: 15.0
 goal_curriculum_threshold_ratio: 0.45
 goal_curriculum_cooldown_iters: 100
 
-# --- Phase 4 + 4.5: SysID, Generalization, Stability & Throughput ---
+# --- Phase 4 + 4.5 + 5: SysID, Generalization, Stability & Throughput ---
 wm_huber_delta: 2.0
 wm_residual: true
 wm_step_decay: 0.85
@@ -123,7 +131,7 @@ wm_updates: 6
 weight_decay: 0.0002
 actor_layer_norm: true
 actor_activation: gelu
-actor_failure_sample_fraction: 0.08
+actor_failure_sample_fraction: 0.12
 critic_ensemble_size: 2
 critic_ema_tau: 0.05
 critic_huber_delta: 0.5

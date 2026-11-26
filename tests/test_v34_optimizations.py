@@ -536,15 +536,17 @@ def test_phase4_twin_conservative_critic_ema_huber_and_residual_wm():
     assert cfg.weight_decay == 0.0002
     assert cfg.wm_updates == 6
     assert cfg.actor_layer_norm is True and cfg.actor_activation == "gelu"
-    assert cfg.actor_failure_sample_fraction == 0.08
+    assert cfg.actor_failure_sample_fraction == 0.12
     assert cfg.wm_ema_tau == 0.05 and cfg.wm_grad_clip == 5.0
+    assert cfg.object_angular_speed_penalty_weight == 2.5 and cfg.object_angular_speed_limit_rad_s == 1.5
+    assert cfg.object_linear_speed_penalty_weight == 2.0 and cfg.object_linear_speed_limit_m_s == 0.06
     assert cfg.critic_ensemble_size == 2
     assert cfg.critic_ema_tau == 0.05
     assert cfg.critic_huber_delta == 0.5
     assert cfg.has_target_critic is True and cfg.uses_paper_target_critic is True
     assert cfg.lr_decay_iters == 30000 and cfg.lr_min_ratio == 0.15
     proto = imagination_protocol(cfg)
-    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber", "_wdec", "_wnoise", "_aln", "_afail", "_wema"):
+    for tag in ("_sysid", "_huber", "_wres", "_twin2", "_cema", "_chuber", "_wdec", "_wnoise", "_aln", "_afail", "_wema", "_objspeed"):
         assert tag in proto, f"Missing {tag} in {proto}"
 
     trainer, replay = populate_replay(cfg, n_envs=10, steps=14)
@@ -663,3 +665,67 @@ def test_phase4_huber_resmlp_bf16_wm_cuda_graph_matches_eager():
     m1 = noisy_trainer.wm_update(noisy_replay)
     m2 = noisy_trainer.wm_update(noisy_replay)
     assert math.isfinite(m1["wm_loss"]) and math.isfinite(m2["wm_loss"])
+
+
+def test_phase6_object_speed_penalty_deadband_gradient_and_parity():
+    from viserdex.supermimic.quiet_hold import dex_regularization_penalty, imagined_dex_regularization
+    from viserdex.supermimic.core import reward_from_orientation_error, OMEGA, VEL
+    from viserdex.supermimic.stability_reward import task_reward_bound
+
+    cfg = make_v34_cfg(profile_path=V36_P4_PROFILE, cost_penalty=1.2, horizon=8)
+    assert cfg.object_angular_speed_penalty_weight == 2.5
+    assert cfg.object_angular_speed_limit_rad_s == 1.5
+    assert cfg.object_linear_speed_penalty_weight == 2.0
+    assert cfg.object_linear_speed_limit_m_s == 0.06
+    assert cfg.target_slew_rate_rad_s == pytest.approx(math.radians(120.0))
+    assert cfg.ema_alpha == pytest.approx(0.40)
+    assert cfg.hold_target_motion_weight == pytest.approx(1.0)
+    assert cfg.home_pose_weight == pytest.approx(0.35)
+    assert cfg.cage_safe_radius_m == pytest.approx(0.032)
+    assert cfg.cage_penalty_weight == pytest.approx(4.0)
+
+    # Zero penalty inside deadband [0, limit], strictly positive + smooth gradient above limit.
+    zeros_dist = torch.zeros(4)
+    zeros_vel = torch.zeros(4, 21)
+    zeros_tgt = torch.zeros(4, 21)
+    ang = torch.tensor([0.0, 1.5, 3.0, 4.5], requires_grad=True)
+    lin = torch.tensor([0.0, 0.06, 0.12, 0.18], requires_grad=True)
+    pen = dex_regularization_penalty(
+        zeros_dist, zeros_vel, zeros_tgt, zeros_tgt, cfg.control_dt, cfg,
+        object_angular_speed=ang, object_linear_speed=lin,
+    )
+    expected = torch.tensor([0.0, 0.0, 2.5 * 1.0**2 + 2.0 * 1.0**2, 2.5 * 2.0**2 + 2.0 * 2.0**2])
+    torch.testing.assert_close(pen, expected, atol=1e-6, rtol=1e-6)
+    g_ang, g_lin = torch.autograd.grad(pen.sum(), (ang, lin))
+    assert float(g_ang[0]) == 0.0 and float(g_ang[1]) == 0.0
+    assert float(g_ang[2]) > 0.0 and float(g_ang[3]) > float(g_ang[2])
+    assert float(g_lin[0]) == 0.0 and float(g_lin[1]) == 0.0
+    assert float(g_lin[2]) > 0.0 and float(g_lin[3]) > float(g_lin[2])
+
+    # Exact parity between imagined_dex_regularization and direct dex_regularization_penalty.
+    state = torch.zeros(4, cfg.state_dim)
+    state[:, 48] = 1.0
+    state[:, 82] = 1.0
+    nxt = torch.zeros(4, 55)
+    nxt[:, 48] = 1.0
+    nxt[:, OMEGA] = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [3.0, 0.0, 0.0], [0.0, 4.0, 3.0]])
+    nxt[:, VEL] = torch.tensor([[0.0, 0.0, 0.0], [0.05, 0.0, 0.0], [0.12, 0.0, 0.0], [0.0, 0.16, 0.12]])
+    action = torch.zeros(4, 21)
+    limits = torch.tensor(cfg.network_joint_limits)
+    dist = torch.zeros(4)
+    im_pen = imagined_dex_regularization(state, nxt, action, dist, cfg, limits=limits)
+    from viserdex.supermimic.dex_reference import EMA, ZERO, unclipped_target
+    unclipped = unclipped_target(state, action, limits, cfg.ema_alpha, home=cfg.action_home, residual_rad=cfg.dex_action_residual_rad)
+    direct_pen = dex_regularization_penalty(
+        dist, nxt[:, 21:42], unclipped, state[:, EMA] - state[:, ZERO], cfg.control_dt, cfg,
+        object_angular_speed=nxt[:, OMEGA].norm(dim=-1), object_linear_speed=nxt[:, VEL].norm(dim=-1),
+    )
+    torch.testing.assert_close(im_pen, direct_pen, atol=1e-6, rtol=1e-6)
+    # Task reward remains strictly <= task_reward_bound even at zero orientation error.
+    r = reward_from_orientation_error(
+        state, nxt, action, torch.zeros(4), cfg.control_dt, cfg.success_bonus,
+        cfg.action_rate_weight, cfg.joint_vel_weight, cfg.action_l2_weight,
+        cfg.action_second_diff_weight, hold_cfg=cfg, limits=limits,
+    )
+    assert (r <= task_reward_bound(cfg) + 1e-6).all()
+    assert float(r[3]) < float(r[2]) < float(r[1])

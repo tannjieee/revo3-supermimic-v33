@@ -102,11 +102,16 @@ REF_JOINT_SPEED_RAD_S = math.radians(90.0)
 DEX_REG_CONFIG_FIELDS = (
     'ema_delta_penalty_weight', 'joint_speed_penalty_weight',
     'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m',
+    'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s', 'object_angular_speed_scale_rad_s',
+    'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s', 'object_linear_speed_scale_m_s',
 )
 
 
-def dex_regularization_penalty(distance, joint_velocity, unclipped_target, previous_target, dt, cfg):
-    """Differentiable all-phase smoothness, damping, and soft palm-cage penalties (per second).
+def dex_regularization_penalty(
+    distance, joint_velocity, unclipped_target, previous_target, dt, cfg,
+    *, object_angular_speed=None, object_linear_speed=None,
+):
+    """Differentiable all-phase smoothness, damping, object-speed, and soft palm-cage penalties (per second).
 
     Shared identically by real Newton reward callbacks and differentiable WM imagination.
     All terms are nonnegative penalties, preserving the exact task_reward_bound upper bound.
@@ -126,6 +131,18 @@ def dex_regularization_penalty(distance, joint_velocity, unclipped_target, previ
         scale = getattr(cfg, 'cage_scale_m', 0.025)
         excess = (distance - safe).clamp_min(0.0)
         total = total + w_cage * (excess / scale).square()
+    w_obj_ang = getattr(cfg, 'object_angular_speed_penalty_weight', 0.0)
+    if w_obj_ang and object_angular_speed is not None:
+        lim_ang = getattr(cfg, 'object_angular_speed_limit_rad_s', 1.5)
+        scale_ang = getattr(cfg, 'object_angular_speed_scale_rad_s', 1.5)
+        excess_ang = (object_angular_speed - lim_ang).clamp_min(0.0)
+        total = total + w_obj_ang * (excess_ang / scale_ang).square()
+    w_obj_lin = getattr(cfg, 'object_linear_speed_penalty_weight', 0.0)
+    if w_obj_lin and object_linear_speed is not None:
+        lim_lin = getattr(cfg, 'object_linear_speed_limit_m_s', 0.06)
+        scale_lin = getattr(cfg, 'object_linear_speed_scale_m_s', 0.06)
+        excess_lin = (object_linear_speed - lim_lin).clamp_min(0.0)
+        total = total + w_obj_lin * (excess_lin / scale_lin).square()
     return total
 
 
@@ -143,7 +160,12 @@ def imagined_dex_regularization(state, next_physical, action, distance, cfg, *, 
         from .state_layout import COMPACT
         unclipped = action_target(state, action, limits, cfg)
         previous = action_target(state, state[..., COMPACT.last_action], limits, cfg)
-    return dex_regularization_penalty(distance, next_physical[..., 21:42], unclipped, previous, cfg.control_dt, cfg)
+    obj_ang_speed = next_physical[..., 52:55].norm(dim=-1)
+    obj_lin_speed = next_physical[..., 49:52].norm(dim=-1)
+    return dex_regularization_penalty(
+        distance, next_physical[..., 21:42], unclipped, previous, cfg.control_dt, cfg,
+        object_angular_speed=obj_ang_speed, object_linear_speed=obj_lin_speed,
+    )
 
 
 def validate_episode_timing(dt, steps, *, compact):

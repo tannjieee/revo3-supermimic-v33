@@ -206,6 +206,12 @@ class Config:
     cage_penalty_weight: float = 0.0
     cage_safe_radius_m: float = 0.045
     cage_scale_m: float = 0.025
+    object_angular_speed_penalty_weight: float = 0.0
+    object_angular_speed_limit_rad_s: float = 1.5
+    object_angular_speed_scale_rad_s: float = 1.5
+    object_linear_speed_penalty_weight: float = 0.0
+    object_linear_speed_limit_m_s: float = 0.06
+    object_linear_speed_scale_m_s: float = 0.06
     # V35 Phase 3 fast-convergence optimization flags (all opt-in, legacy defaults preserved).
     orientation_progress_scale: float = 0.0
     orientation_progress_speed_rad_s: float = 2.0
@@ -259,6 +265,8 @@ class Config:
             or self.ema_delta_penalty_weight > 0.0
             or self.joint_speed_penalty_weight > 0.0
             or self.cage_penalty_weight > 0.0
+            or self.object_angular_speed_penalty_weight > 0.0
+            or self.object_linear_speed_penalty_weight > 0.0
             or self.orientation_progress_scale > 0.0
             or self.target_slew_ste
             or self.actor_updates != 1
@@ -324,6 +332,8 @@ class Config:
                 'dex_action_residual_rad', 'sequential_goals', 'compact_critic_costs',
                 'ema_delta_penalty_weight', 'joint_speed_penalty_weight',
                 'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m',
+                'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s', 'object_angular_speed_scale_rad_s',
+                'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s', 'object_linear_speed_scale_m_s',
                 'orientation_progress_scale', 'orientation_progress_speed_rad_s',
                 'target_slew_ste', 'actor_lr_scale', 'actor_ramp_iters', 'actor_updates',
                 'critic_epochs', 'actor_lambda_return', 'recent_sample_fraction',
@@ -485,11 +495,14 @@ class Config:
                 raise ValueError('dex_action_residual_rad must contain 21 finite positive radii')
         if self.compact_critic_costs and not self.object_hold_costs_enabled:
             raise ValueError('compact_critic_costs requires object_hold_costs_enabled')
-        for name in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight', 'cage_penalty_weight', 'cage_safe_radius_m'):
+        for name in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight', 'cage_penalty_weight', 'cage_safe_radius_m',
+                     'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s',
+                     'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s'):
             if not math.isfinite(getattr(self, name)) or getattr(self, name) < 0:
                 raise ValueError(f'{name} must be finite and nonnegative')
-        if not math.isfinite(self.cage_scale_m) or self.cage_scale_m <= 0:
-            raise ValueError('cage_scale_m must be finite and positive')
+        for name in ('cage_scale_m', 'object_angular_speed_scale_rad_s', 'object_linear_speed_scale_m_s'):
+            if not math.isfinite(getattr(self, name)) or getattr(self, name) <= 0:
+                raise ValueError(f'{name} must be finite and positive')
         if self.orientation_reward_mode not in ('gaussian', 'linear_fine'):
             raise ValueError(f'Unknown orientation_reward_mode: {self.orientation_reward_mode}')
         if self.network_revision not in ('legacy', 'urdf_little_v2', 'hardware_center25_v3'):
@@ -801,7 +814,9 @@ def reward_from_orientation_error(s, physical_next, action, error, dt=1 / 30, su
                 limits=limits, encoder_bias=encoder_bias, home=home, residual_rad=residual_rad)
         reg_penalty = 0.0
         if (hold_cfg.ema_delta_penalty_weight or hold_cfg.joint_speed_penalty_weight
-                or hold_cfg.cage_penalty_weight):
+                or hold_cfg.cage_penalty_weight
+                or hold_cfg.object_angular_speed_penalty_weight
+                or hold_cfg.object_linear_speed_penalty_weight):
             from .quiet_hold import imagined_dex_regularization
             reg_penalty = imagined_dex_regularization(
                 s, physical_next, action, distance, hold_cfg, limits=limits, home=home, residual_rad=residual_rad)

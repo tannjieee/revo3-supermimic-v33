@@ -151,11 +151,14 @@ def validate_profile(p):
                     raise ValueError(f'Invalid action_residual_deg[{k}]')
         else:
             raise ValueError('action_residual_deg must be a positive number or joint-name mapping')
-    for name in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight', 'cage_penalty_weight', 'cage_safe_radius_m'):
+    for name in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight', 'cage_penalty_weight', 'cage_safe_radius_m',
+                 'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s',
+                 'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s'):
         if name in p and (not math.isfinite(p[name]) or p[name] < 0):
             raise ValueError(f'Invalid {name}')
-    if 'cage_scale_m' in p and (not math.isfinite(p['cage_scale_m']) or p['cage_scale_m'] <= 0):
-        raise ValueError('Invalid cage_scale_m')
+    for name in ('cage_scale_m', 'object_angular_speed_scale_rad_s', 'object_linear_speed_scale_m_s'):
+        if name in p and (not math.isfinite(p[name]) or p[name] <= 0):
+            raise ValueError(f'Invalid {name}')
     return limits, asset
 
 
@@ -191,7 +194,10 @@ def reward_options(p):
     if 'orientation_tolerance_deg' in p:
         options['orientation_tolerance_rad'] = math.radians(p['orientation_tolerance_deg'])
     for key in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight',
-                'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m', 'sequential_goals',
+                'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m',
+                'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s', 'object_angular_speed_scale_rad_s',
+                'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s', 'object_linear_speed_scale_m_s',
+                'sequential_goals',
                 'orientation_progress_scale', 'orientation_progress_speed_rad_s'):
         if key in p:
             options[key] = p[key]
