@@ -31,9 +31,9 @@ exec bash "$launch_dir/run.sh" train \
     --object_variant die58 --quiet_hold --episode_length_s 20 --no-track_object_position \
     --hold_duration 0.40 \
     --gamma 0.98 --lam 0.9025 --horizon 8 \
-    --actor_cost_weight 1.2 \
-    --stability_reward_scale 5.0 --stability_angle_sigma_deg 10.0 \
-    --joint_speed_limit_deg_s 90 --target_rate_limit_deg_s 120 \
+    --actor_cost_weight 0.55 \
+    --stability_reward_scale 4.5 --stability_angle_sigma_deg 9.0 \
+    --joint_speed_limit_deg_s 90 --target_rate_limit_deg_s 160 \
     --joint_velocity_norm_floor_rad_s 1.5707963267948966 \
     --seed 42 --replay_storage cuda --wm_cuda_graph --amp bf16 \
     --wm_microbatch 2048 --actor_microbatch 4096 --critic_microbatch 8192 \

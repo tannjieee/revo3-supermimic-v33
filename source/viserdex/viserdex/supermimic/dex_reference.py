@@ -43,11 +43,13 @@ def validate_profile(p):
     if not 0 <= p['wrench_probability'] <= 1:
         raise ValueError('Invalid wrench probability')
     for name in ('target_slew_rate_deg_s', 'home_pose_weight', 'home_pose_deadband_deg', 'hold_target_motion_weight',
-                 'object_motion_angular_speed_rad_s', 'object_motion_linear_speed_m_s'):
+                 'object_motion_angular_speed_rad_s', 'object_motion_linear_speed_m_s',
+                 'home_pose_reward_scale', 'home_pose_reward_deadband_deg'):
         if name in p and (not math.isfinite(p[name]) or p[name] < 0):
             raise ValueError(f'Invalid {name}')
-    if 'home_pose_scale_deg' in p and (not math.isfinite(p['home_pose_scale_deg']) or p['home_pose_scale_deg'] <= 0):
-        raise ValueError('Invalid home_pose_scale_deg')
+    for name in ('home_pose_scale_deg', 'home_pose_reward_sigma_deg'):
+        if name in p and (not math.isfinite(p[name]) or p[name] <= 0):
+            raise ValueError(f'Invalid {name}')
     if bool(p.get('object_motion_angular_speed_rad_s', 0)) != bool(p.get('object_motion_linear_speed_m_s', 0)):
         raise ValueError('Global object speed costs require both thresholds')
     # Optional V34 optimization profile overrides (omitted in legacy V33 YAML profiles).
@@ -177,7 +179,10 @@ def action_residual_vector_rad(p):
 def home_pose_options(p):
     return dict(home_pose_weight=p.get('home_pose_weight', 0.),
                 home_pose_deadband_rad=math.radians(p.get('home_pose_deadband_deg', 15.)),
-                home_pose_scale_rad=math.radians(p.get('home_pose_scale_deg', 30.)))
+                home_pose_scale_rad=math.radians(p.get('home_pose_scale_deg', 30.)),
+                home_pose_reward_scale=p.get('home_pose_reward_scale', 0.),
+                home_pose_reward_deadband_rad=math.radians(p.get('home_pose_reward_deadband_deg', 5.)),
+                home_pose_reward_sigma_rad=math.radians(p.get('home_pose_reward_sigma_deg', 25.)))
 
 
 def reward_options(p):

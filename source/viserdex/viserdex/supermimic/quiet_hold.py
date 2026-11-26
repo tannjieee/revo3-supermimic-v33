@@ -78,6 +78,16 @@ def home_pose_penalty(joints, home, cfg):
     return cfg.home_pose_weight * (excess / cfg.home_pose_scale_rad).square().mean(-1)
 
 
+def home_pose_reward(joints, home, cfg):
+    """Bounded per-joint positive reward in [0, home_pose_reward_scale] for natural HOME posture.
+
+    Each joint earns independent Gaussian credit around HOME outside a small deadband,
+    preventing awkward/contorted idle fingers without blocking large-angle regripping.
+    """
+    excess = ((joints - home).abs() - cfg.home_pose_reward_deadband_rad).clamp_min(0.0)
+    return cfg.home_pose_reward_scale * torch.exp(-(excess / cfg.home_pose_reward_sigma_rad).square()).mean(-1)
+
+
 def imagined_motion_penalty(state, next_physical, action, angle, cfg, *, limits=None, encoder_bias=None, home=None, residual_rad=None):
     from .core import action_target
     from .state_layout import COMPACT
@@ -104,6 +114,7 @@ DEX_REG_CONFIG_FIELDS = (
     'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m',
     'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s', 'object_angular_speed_scale_rad_s',
     'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s', 'object_linear_speed_scale_m_s',
+    'home_pose_reward_scale', 'home_pose_reward_deadband_rad', 'home_pose_reward_sigma_rad',
 )
 
 

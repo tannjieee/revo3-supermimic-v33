@@ -174,6 +174,9 @@ class SingleGoalCommandCfg(HoldReorientCommandCfg):
     home_pose_weight: float = 0.0
     home_pose_deadband_rad: float = math.pi / 12
     home_pose_scale_rad: float = math.pi / 6
+    home_pose_reward_scale: float = 0.0
+    home_pose_reward_deadband_rad: float = math.radians(5.0)
+    home_pose_reward_sigma_rad: float = math.radians(25.0)
     ema_delta_penalty_weight: float = 0.0
     joint_speed_penalty_weight: float = 0.0
     cage_penalty_weight: float = 0.0
@@ -228,14 +231,18 @@ def dense_stability_reward(env, command_name='object_pose'):
         velocity = velocity if isinstance(velocity, torch.Tensor) else velocity.torch
         value = value - motion_penalty(command.last_angle, velocity[:, action._joint_ids],
             action.processed_actions, action.previous_processed_actions, env.step_dt, command.cfg)
-    if getattr(command.cfg, 'home_pose_weight', 0.):
-        from .quiet_hold import home_pose_penalty
+    if getattr(command.cfg, 'home_pose_weight', 0.) or getattr(command.cfg, 'home_pose_reward_scale', 0.):
+        from .quiet_hold import home_pose_penalty, home_pose_reward
         action = env.action_manager.get_term('joint_pos')
         data = action._asset.data
         joints, home = data.joint_pos, data.default_joint_pos
         joints = joints if isinstance(joints, torch.Tensor) else joints.torch
         home = home if isinstance(home, torch.Tensor) else home.torch
-        value = value - home_pose_penalty(joints[:, action._joint_ids], home[:, action._joint_ids], command.cfg)
+        j_sub, h_sub = joints[:, action._joint_ids], home[:, action._joint_ids]
+        if getattr(command.cfg, 'home_pose_weight', 0.):
+            value = value - home_pose_penalty(j_sub, h_sub, command.cfg)
+        if getattr(command.cfg, 'home_pose_reward_scale', 0.):
+            value = value + home_pose_reward(j_sub, h_sub, command.cfg)
     if (getattr(command.cfg, 'ema_delta_penalty_weight', 0.)
             or getattr(command.cfg, 'joint_speed_penalty_weight', 0.)
             or getattr(command.cfg, 'cage_penalty_weight', 0.)

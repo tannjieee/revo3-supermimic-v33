@@ -32,6 +32,8 @@ def task_reward_bound(cfg):
     """Per-control-step upper bound used to normalize the constrained objective."""
     position_scale = cfg.position_reward_scale if cfg.track_object_position else 0.
     progress_scale = getattr(cfg, 'orientation_progress_scale', 0.0)
+    home_reward_scale = getattr(cfg, 'home_pose_reward_scale', 0.0)
     return cfg.control_dt * (
-        cfg.orientation_reward_scale + position_scale + cfg.stability_reward_scale + progress_scale
+        cfg.orientation_reward_scale + position_scale + cfg.stability_reward_scale
+        + progress_scale + home_reward_scale
     )

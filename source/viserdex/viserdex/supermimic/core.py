@@ -75,6 +75,9 @@ class Config:
     home_pose_weight: float = 0.0
     home_pose_deadband_rad: float = math.pi / 12
     home_pose_scale_rad: float = math.pi / 6
+    home_pose_reward_scale: float = 0.0
+    home_pose_reward_deadband_rad: float = math.radians(5.0)
+    home_pose_reward_sigma_rad: float = math.radians(25.0)
     position_reward_scale: float = 2.0
     position_tolerance_m: float = 0.01
     position_sigma_m: float = 0.05
@@ -267,6 +270,7 @@ class Config:
             or self.cage_penalty_weight > 0.0
             or self.object_angular_speed_penalty_weight > 0.0
             or self.object_linear_speed_penalty_weight > 0.0
+            or self.home_pose_reward_scale > 0.0
             or self.orientation_progress_scale > 0.0
             or self.target_slew_ste
             or self.actor_updates != 1
@@ -315,7 +319,8 @@ class Config:
             raise ValueError('Global object speed costs require both thresholds')
         if self.object_motion_angular_speed_rad_s and not self.object_hold_costs_enabled:
             raise ValueError('Global object speed costs require object cost heads')
-        if self.home_pose_weight and (len(self.action_home) != 21 or not all(math.isfinite(x) for x in self.action_home)):
+        if (self.home_pose_weight or self.home_pose_reward_scale) and (
+                len(self.action_home) != 21 or not all(math.isfinite(x) for x in self.action_home)):
             raise ValueError('HOME posture preference requires 21 finite geometric joint angles')
         if self.dex_reference != (self.state_protocol == dex.STATE_PROTOCOL):
             raise ValueError('v33 state protocol and profile flag must agree')
@@ -334,6 +339,7 @@ class Config:
                 'cage_penalty_weight', 'cage_safe_radius_m', 'cage_scale_m',
                 'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s', 'object_angular_speed_scale_rad_s',
                 'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s', 'object_linear_speed_scale_m_s',
+                'home_pose_reward_scale', 'home_pose_reward_deadband_rad', 'home_pose_reward_sigma_rad',
                 'orientation_progress_scale', 'orientation_progress_speed_rad_s',
                 'target_slew_ste', 'actor_lr_scale', 'actor_ramp_iters', 'actor_updates',
                 'critic_epochs', 'actor_lambda_return', 'recent_sample_fraction',
@@ -497,10 +503,12 @@ class Config:
             raise ValueError('compact_critic_costs requires object_hold_costs_enabled')
         for name in ('ema_delta_penalty_weight', 'joint_speed_penalty_weight', 'cage_penalty_weight', 'cage_safe_radius_m',
                      'object_angular_speed_penalty_weight', 'object_angular_speed_limit_rad_s',
-                     'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s'):
+                     'object_linear_speed_penalty_weight', 'object_linear_speed_limit_m_s',
+                     'home_pose_reward_scale', 'home_pose_reward_deadband_rad'):
             if not math.isfinite(getattr(self, name)) or getattr(self, name) < 0:
                 raise ValueError(f'{name} must be finite and nonnegative')
-        for name in ('cage_scale_m', 'object_angular_speed_scale_rad_s', 'object_linear_speed_scale_m_s'):
+        for name in ('cage_scale_m', 'object_angular_speed_scale_rad_s', 'object_linear_speed_scale_m_s',
+                     'home_pose_reward_sigma_rad'):
             if not math.isfinite(getattr(self, name)) or getattr(self, name) <= 0:
                 raise ValueError(f'{name} must be finite and positive')
         if self.orientation_reward_mode not in ('gaussian', 'linear_fine'):
@@ -804,10 +812,14 @@ def reward_from_orientation_error(s, physical_next, action, error, dt=1 / 30, su
         distance = (physical_next[..., POS] - s[..., layout(s).goal_pos]).norm(dim=-1)
         quiet_penalty = 0.0
         pose_penalty = 0.0
-        if hold_cfg.home_pose_weight:
-            from .quiet_hold import home_pose_penalty
+        pose_reward = 0.0
+        if hold_cfg.home_pose_weight or hold_cfg.home_pose_reward_scale:
+            from .quiet_hold import home_pose_penalty, home_pose_reward
             home = physical_next.new_tensor(hold_cfg.action_home) if home is None else home
-            pose_penalty = home_pose_penalty(physical_next[..., Q], home, hold_cfg)
+            if hold_cfg.home_pose_weight:
+                pose_penalty = home_pose_penalty(physical_next[..., Q], home, hold_cfg)
+            if hold_cfg.home_pose_reward_scale:
+                pose_reward = home_pose_reward(physical_next[..., Q], home, hold_cfg)
         if hold_cfg.quiet_hold_enabled:
             from .quiet_hold import imagined_motion_penalty
             quiet_penalty = imagined_motion_penalty(s, physical_next, action, error, hold_cfg,
@@ -829,6 +841,7 @@ def reward_from_orientation_error(s, physical_next, action, error, dt=1 / 30, su
             orientation_reward(error, hold_cfg) + progress + position_reward(distance, hold_cfg)
             + stability_reward(error, distance, physical_next[..., OMEGA].norm(dim=-1),
                                physical_next[..., VEL].norm(dim=-1), hold_cfg)
+            + pose_reward
             - quiet_penalty
             - pose_penalty
             - reg_penalty
